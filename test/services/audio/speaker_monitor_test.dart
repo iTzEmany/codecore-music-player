@@ -190,4 +190,32 @@ void main() {
     await m2.start();
     expect(m2.pending, isEmpty);
   });
+
+  test('refresh racing dispose does not throw', () async {
+    final r = _Rig()..connect([_out('a', 0x0414)]);
+    final m = r.monitor();
+    await m.start();
+    final pending = m.refresh();
+    m.dispose();
+    await pending;
+  });
+
+  test('a dismissed question comes back at the next opening, not on each change', () async {
+    final r = _Rig()..connect([_out('a', 0x0414, 'JBL')]);
+    final m = r.monitor();
+    final asked = <SpeakerPrompt>[];
+    m.prompts.listen(asked.add);
+    await m.start();
+    await _settle();
+    expect(asked, hasLength(1));
+
+    m.dismissed('a');
+    r.changed.add(null); // a connection change while the app stays open
+    await _settle();
+    expect(asked, hasLength(1));
+
+    await m.refresh(); // the app is opened again
+    await _settle();
+    expect(asked, hasLength(2));
+  });
 }

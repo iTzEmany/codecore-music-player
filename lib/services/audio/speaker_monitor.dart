@@ -74,6 +74,8 @@ class SpeakerMonitor {
   final _pending = <SpeakerPrompt>[];
   var _enabled = true;
   var _asked = false;
+  var _disposed = false;
+  final _dismissed = <String>{};
   var _permissionPrompted = false;
   var _snapshot = BluetoothSnapshot.empty;
   var _connected = false;
@@ -126,12 +128,13 @@ class SpeakerMonitor {
       AppLog.w('speaker prefs unreadable', e, st);
     }
     _subs
-      ..add(_changed.listen((_) => refresh()))
+      ..add(_changed.listen((_) => _read()))
       ..add(_seen.listen((_) => _onSeen()));
-    await refresh();
+    await _read();
   }
 
   void dispose() {
+    _disposed = true;
     for (final s in _subs) {
       s.cancel();
     }
@@ -140,9 +143,23 @@ class SpeakerMonitor {
     _changesCtrl.close();
   }
 
-  /// Reads the connected outputs: at start, on every opening and on each change.
-  Future<void> refresh() async {
-    _snapshot = await _fetch();
+  /// An opening of the app (and start): reads the connected outputs and asks
+  /// again about the devices whose question was dismissed without an answer.
+  Future<void> refresh() {
+    _prompted.removeAll(_dismissed);
+    _dismissed.clear();
+    return _read();
+  }
+
+  /// The «È una cassa?» sheet for [address] closed with no answer.
+  void dismissed(String address) {
+    if (!_answers.containsKey(address)) _dismissed.add(address);
+  }
+
+  Future<void> _read() async {
+    final snap = await _fetch();
+    if (_disposed) return;
+    _snapshot = snap;
     final linked = {for (final o in _snapshot.outputs) o.address};
     _prompted.retainAll(linked); // gone and back: ask again if still unanswered
     final now = _snapshot.outputs.any(
@@ -158,12 +175,14 @@ class SpeakerMonitor {
       }
     }
     // The «seen» event can be lost at launch: an active output tells the same.
-    if (!_snapshot.permission && await _active()) _offerPermission();
+    if (!_snapshot.permission && await _active() && !_disposed) _offerPermission();
+    if (_disposed) return;
     _changesCtrl.add(null);
   }
 
   Future<void> _onSeen() async {
-    if (!(await _fetch()).permission) _offerPermission();
+    final snap = await _fetch();
+    if (!_disposed && !snap.permission) _offerPermission();
   }
 
   void _offerPermission() {
@@ -176,7 +195,7 @@ class SpeakerMonitor {
   Future<bool> askPermission() async {
     final granted = await _request();
     await _setAsked();
-    await refresh();
+    await _read();
     return granted;
   }
 
@@ -200,7 +219,7 @@ class SpeakerMonitor {
             for (final e in _answers.entries) e.key: {'n': e.value.name, 's': e.value.isSpeaker},
           }),
         ));
-    await refresh();
+    await _read();
   }
 
   String? _nameOf(String address) {

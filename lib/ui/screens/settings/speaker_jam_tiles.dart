@@ -33,12 +33,16 @@ class SpeakerJamTiles extends ConsumerWidget {
           ListTile(dense: true, title: Text(l.speakerNoDevices))
         else
           for (final e in m.answers.entries)
-            SwitchListTile(
-              secondary: const Icon(Icons.speaker_rounded),
-              title: Text(e.value.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-              subtitle: Text(e.value.isSpeaker ? l.speakerIsSpeaker : l.speakerNotSpeaker),
-              value: e.value.isSpeaker,
-              onChanged: (v) => m.answer(e.key, v),
+            Semantics(
+              label: l.speakerChange(e.value.name),
+              container: true,
+              child: SwitchListTile(
+                secondary: const Icon(Icons.speaker_rounded),
+                title: Text(e.value.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+                subtitle: Text(e.value.isSpeaker ? l.speakerIsSpeaker : l.speakerNotSpeaker),
+                value: e.value.isSpeaker,
+                onChanged: (v) => m.answer(e.key, v),
+              ),
             ),
       ],
     );

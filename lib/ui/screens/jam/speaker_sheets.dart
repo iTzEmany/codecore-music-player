@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,23 +10,46 @@ import '../../../services/audio/speaker_monitor.dart';
 import '../../widgets/cc_sheet.dart';
 import '../../theme/tokens.dart';
 
-bool _open = false;
+final _queue = <(BuildContext, SpeakerPrompt)>[];
+var _open = false;
+Timer? _retry;
 
-/// Opens the sheet for [prompt], never on top of another speaker sheet.
+/// Shows [prompt] in a sheet, one at a time: the others wait in a FIFO queue.
+/// While a dialog (a Jam request, say) is on top of the shell's route the
+/// queue waits too, polled once a second: a route has no "closed" callback
+/// for someone else's route, and the poll stops as soon as the queue is empty.
 Future<void> showSpeakerPrompt(BuildContext context, SpeakerPrompt prompt) async {
-  if (_open) return;
-  _open = true;
-  try {
-    await showCcSheet<void>(
-      context: context,
-      builder: (_) => switch (prompt) {
-        PermissionPrompt() => const SpeakerPermissionSheet(),
-        AskPrompt(:final output) => SpeakerAskSheet(output: output),
-      },
-    );
-  } finally {
-    _open = false;
+  _queue.add((context, prompt));
+  _next();
+}
+
+void _next() {
+  _retry?.cancel();
+  if (_open || _queue.isEmpty) return;
+  final (context, prompt) = _queue.first;
+  if (!context.mounted) {
+    _queue.removeAt(0);
+    return _next();
   }
+  if (ModalRoute.of(context)?.isCurrent == false) {
+    _retry = Timer(const Duration(seconds: 1), _next);
+    return;
+  }
+  _queue.removeAt(0);
+  _open = true;
+  final monitor = ProviderScope.containerOf(context).read(speakerMonitorProvider);
+  showCcSheet<void>(
+    context: context,
+    builder: (_) => switch (prompt) {
+      PermissionPrompt() => const SpeakerPermissionSheet(),
+      AskPrompt(:final output) => SpeakerAskSheet(output: output),
+    },
+  ).whenComplete(() {
+    _open = false;
+    // Swiped away without an answer: ask again at the next opening.
+    if (prompt case AskPrompt(:final output)) monitor.dismissed(output.address);
+    _next();
+  });
 }
 
 class _SheetBody extends StatelessWidget {

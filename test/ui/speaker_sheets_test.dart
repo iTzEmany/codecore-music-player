@@ -88,4 +88,60 @@ void main() {
     expect(m.answers['bb']!.isSpeaker, isFalse);
     await h.dispose(t);
   });
+
+  testWidgets('two questions at once: the second waits for the first sheet', (t) async {
+    final h = await Harness.create(t);
+    final m = await _pump(
+      t,
+      h,
+      const AskPrompt(BluetoothOutput(name: 'Uno', address: '1')),
+      () => true,
+    );
+    final ctx = t.element(find.byType(Scaffold));
+    showSpeakerPrompt(ctx, const AskPrompt(BluetoothOutput(name: 'Due', address: '2')));
+    await t.pumpAndSettle();
+    expect(find.text('Uno è una cassa?'), findsOneWidget);
+    expect(find.text('Due è una cassa?'), findsNothing);
+    await t.tap(find.text('Sì'));
+    await t.pumpAndSettle();
+    expect(find.text('Due è una cassa?'), findsOneWidget);
+    await t.tap(find.text('No'));
+    await t.pumpAndSettle();
+    expect(m.answers.keys, containsAll(['1', '2']));
+    await h.dispose(t);
+  });
+
+  testWidgets('a prompt waits while a dialog is on top, then shows', (t) async {
+    final h = await Harness.create(t);
+    await _pump(t, h, const PermissionPrompt(), () => true);
+    await t.tap(find.text('Non ora'));
+    await t.pumpAndSettle();
+    final ctx = t.element(find.byType(Scaffold));
+    showDialog<void>(context: ctx, builder: (_) => const AlertDialog(title: Text('Altro')));
+    await t.pumpAndSettle();
+    showSpeakerPrompt(ctx, const AskPrompt(BluetoothOutput(name: 'Tre', address: '3')));
+    await t.pump(const Duration(seconds: 2));
+    expect(find.text('Tre è una cassa?'), findsNothing);
+    Navigator.of(ctx).pop();
+    await t.pumpAndSettle();
+    await t.pump(const Duration(seconds: 2));
+    await t.pumpAndSettle();
+    expect(find.text('Tre è una cassa?'), findsOneWidget);
+    await h.dispose(t);
+  });
+
+  testWidgets('swiping the question away reports it as dismissed', (t) async {
+    final h = await Harness.create(t);
+    final m = await _pump(
+      t,
+      h,
+      const AskPrompt(BluetoothOutput(name: 'Uno', address: '1')),
+      () => true,
+    );
+    await t.tapAt(const Offset(5, 5)); // the barrier
+    await t.pumpAndSettle();
+    expect(find.text('Uno è una cassa?'), findsNothing);
+    expect(m.answers, isEmpty);
+    await h.dispose(t);
+  });
 }
