@@ -5803,7 +5803,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get jamSuspendedTitle => 'Pausiert';
 
   @override
-  String get jamUnblock => 'Entblocken';
+  String get jamUnblock => 'Entsperren';
 
   @override
   String jamSuspendedUntil(String time) {

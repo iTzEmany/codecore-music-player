@@ -8,7 +8,6 @@ import '../../theme/tokens.dart';
 import '../../widgets/cc_app_bar.dart';
 import '../../widgets/cc_sheet.dart';
 import '../../widgets/show_msg.dart';
-import 'jam_gate_tiles.dart';
 import 'settings_pages.dart';
 
 /// «Jam a distanza»: the list of brokers (add, remove, reorder, restore, test), R-122.
@@ -83,7 +82,6 @@ class _JamRemoteSettingsState extends ConsumerState<JamRemoteSettings> {
               ),
             ListTile(leading: const Icon(Icons.add), title: Text(l.jamBrokerAdd), onTap: _add),
           ]),
-          const JamGateGroups(),
         ],
       ),
     );

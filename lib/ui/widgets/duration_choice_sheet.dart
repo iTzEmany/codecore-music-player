@@ -4,11 +4,11 @@ import '../../l10n/l10n_ext.dart';
 import '../theme/tokens.dart';
 import 'cc_sheet.dart';
 
-/// Single-choice blocks: pops 15/30/45/60 (minutes), -1 ([endLabel]) or 0 ([cancelLabel], when given).
+/// Single-choice blocks: pops 15/30/45/60 (minutes), -1 ([endLabel], when given) or 0 ([cancelLabel], when given).
 Future<int?> showDurationChoiceSheet(
   BuildContext context, {
   required String title,
-  required String endLabel,
+  String? endLabel,
   bool endSelected = false,
   String? cancelLabel,
 }) {
@@ -41,12 +41,13 @@ Future<int?> showDurationChoiceSheet(
                     selected: false,
                     onSelected: (_) => Navigator.of(sheet).pop(m),
                   ),
-                ChoiceChip(
-                  key: const ValueKey<Object>(-1),
-                  label: Text(endLabel),
-                  selected: endSelected,
-                  onSelected: (_) => Navigator.of(sheet).pop(-1),
-                ),
+                if (endLabel != null)
+                  ChoiceChip(
+                    key: const ValueKey<Object>(-1),
+                    label: Text(endLabel),
+                    selected: endSelected,
+                    onSelected: (_) => Navigator.of(sheet).pop(-1),
+                  ),
                 if (cancelLabel != null)
                   ChoiceChip(
                     key: const ValueKey<Object>(0),

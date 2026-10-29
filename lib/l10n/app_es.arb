@@ -3121,7 +3121,7 @@
   "jamBlockedTitle": "Dispositivos bloqueados",
   "jamSuspendedTitle": "Suspendidos",
   "jamUnblock": "Desbloquear",
-  "jamSuspendedUntil": "Hasta las {time}",
+  "jamSuspendedUntil": "Hasta: {time}",
   "@jamSuspendedUntil": {
     "placeholders": {
       "time": {

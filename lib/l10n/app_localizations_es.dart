@@ -5800,7 +5800,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String jamSuspendedUntil(String time) {
-    return 'Hasta las $time';
+    return 'Hasta: $time';
   }
 
   @override

@@ -3120,7 +3120,7 @@
   "jamUntilJamEnds": "Bis die Jam endet",
   "jamBlockedTitle": "Blockierte Geräte",
   "jamSuspendedTitle": "Pausiert",
-  "jamUnblock": "Entblocken",
+  "jamUnblock": "Entsperren",
   "jamSuspendedUntil": "Bis {time}",
   "@jamSuspendedUntil": {
     "placeholders": {

@@ -31,10 +31,10 @@ class _JamRequestDialogState extends ConsumerState<JamRequestDialog> {
     // The requester may cancel (or the request expire) while the dialog is up.
     _watch = Timer.periodic(const Duration(seconds: 1), (_) {
       if (request.status == JamRequestStatus.pending || !mounted) return;
-      _watch?.cancel();
       // Only when the dialog itself is the top route: a pop() issued while it
       // is already closing would take away the screen below.
       if (ModalRoute.of(context)?.isCurrent ?? false) {
+        _watch?.cancel();
         Navigator.of(context).pop();
       }
     });
@@ -61,7 +61,10 @@ class _JamRequestDialogState extends ConsumerState<JamRequestDialog> {
 
   Future<void> _suspend() async {
     final l = context.l10n;
-    final v = await showDurationChoiceSheet(context, title: l.jamSuspendTitle, endLabel: l.jamUntilJamEnds);
+    final v = await showDurationChoiceSheet(context,
+        title: l.jamSuspendTitle,
+        // «Until the Jam ends» means nothing with no Jam running.
+        endLabel: ref.read(jamProvider).active ? l.jamUntilJamEnds : null);
     if (v == null || !mounted) return;
     _mute(block: false, minutes: v == -1 ? null : v);
   }

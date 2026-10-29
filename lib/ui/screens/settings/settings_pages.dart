@@ -38,6 +38,8 @@ import 'report_issue_tile.dart';
 import 'missing_tracks_screen.dart';
 import 'transition_settings_tiles.dart';
 import 'speaker_jam_tiles.dart';
+import '../../../providers/jam_remote_providers.dart';
+import 'jam_gate_tiles.dart';
 import 'jam_remote_settings.dart';
 import 'trusted_devices_tiles.dart';
 import 'translation_models_tiles.dart';
@@ -88,6 +90,17 @@ class SettingsPageView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // The gate lists change without a provider rebuild.
+    if (page == SettingsPage.network) {
+      return ListenableBuilder(
+        listenable: ref.watch(jamGateProvider),
+        builder: (context, _) => _body(context, ref),
+      );
+    }
+    return _body(context, ref);
+  }
+
+  Widget _body(BuildContext context, WidgetRef ref) {
     final groups = switch (page) {
       SettingsPage.appearance => _appearance(context, ref),
       SettingsPage.playback => _playback(context, ref),
@@ -399,6 +412,7 @@ List<SettingsGroup> _network(BuildContext context, WidgetRef ref) {
       ],
     ),
     ..._trustedGroup(context, ref),
+    ...jamGateGroups(context, ref.read(jamGateProvider)),
     ..._speakerGroup(context),
   ];
 }

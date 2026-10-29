@@ -203,10 +203,14 @@ Set<String> jamPinKeys(JamState? s, String ownId) => {
 
 class JamController extends Notifier<JamUiState> {
   JamGuestLink? _guest;
-  final _recentRequests = <DateTime>[];
+  /// When our requests left, per peer id (the host lets 2 per minute through).
+  final _recentRequests = <String, List<DateTime>>{};
 
   @visibleForTesting
   DateTime Function() now = DateTime.now;
+
+  @visibleForTesting
+  JamGuest Function(JamHost) guestFactory = (h) => JamGuest(local: h);
   JamOutput? _output;
   JamCache? _cache;
   JamClock? _clock;
@@ -285,16 +289,16 @@ class JamController extends Notifier<JamUiState> {
   Future<void> request(Peer peer) async {
     if (state.phase == JamPhase.requesting || state.active) return;
     // Third request within a minute: do not send it (the host would mute us anyway).
-    final cutoff = now().subtract(const Duration(minutes: 1));
-    _recentRequests.removeWhere((t) => !t.isAfter(cutoff));
-    if (_recentRequests.length >= 2) {
-      // The callers push the Jam screen right after: let it open to hear the outcome.
-      state = JamUiState(phase: JamPhase.requesting, peerName: peer.name, peerId: peer.id);
-      await Future<void>.delayed(const Duration(milliseconds: 300));
-      state = state.copyWith(phase: JamPhase.idle, outcome: JamJoinOutcome.tooSoon);
+    final sentAt = now(), cutoff = sentAt.subtract(const Duration(minutes: 1));
+    final recent = _recentRequests[peer.id] = [
+      for (final t in _recentRequests[peer.id] ?? const <DateTime>[])
+        if (t.isAfter(cutoff)) t,
+    ];
+    if (recent.length >= 2) {
+      // The Jam screen reads this outcome when it opens (see JamScreen.initState).
+      state = JamUiState(phase: JamPhase.idle, peerName: peer.name, peerId: peer.id, outcome: JamJoinOutcome.tooSoon);
       return;
     }
-    _recentRequests.add(now());
     if (_speakerPending) {
       // Joining another Jam: the waiting speaker Jam is given up.
       _speakerPending = false;
@@ -316,7 +320,7 @@ class JamController extends Notifier<JamUiState> {
       );
       return;
     }
-    final guest = JamGuest(local: host);
+    final guest = guestFactory(host);
     _guest = guest;
     final outcome = await guest.join(
       host: peer.host,
@@ -325,6 +329,8 @@ class JamController extends Notifier<JamUiState> {
       ownName: ref.read(deviceNameProvider),
       ownPort: port,
     );
+    // An unreachable device never saw the request: it does not count.
+    if (outcome != JamJoinOutcome.unreachable) recent.add(sentAt);
     if (outcome != JamJoinOutcome.accepted) {
       _guest = null;
       await guest.dispose();
@@ -1026,7 +1032,9 @@ class JamController extends Notifier<JamUiState> {
 
   /// Back to idle after the "ended" screen was shown.
   void reset() {
-    if (state.phase == JamPhase.ended) state = const JamUiState();
+    if (state.phase == JamPhase.ended || (state.phase == JamPhase.idle && state.outcome != null)) {
+      state = const JamUiState();
+    }
   }
 }
 

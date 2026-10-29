@@ -5,6 +5,7 @@ import 'package:codecore/ui/screens/online/online_song_row.dart';
 import 'package:codecore/ui/widgets/track_row.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:codecore/providers/jam_providers.dart';
+import 'package:codecore/services/jam/jam_guest.dart' show JamJoinOutcome;
 import 'package:codecore/services/jam/jam_host.dart';
 import 'package:codecore/services/jam/jam_models.dart';
 import 'package:codecore/ui/screens/jam/jam_request_dialog.dart';
@@ -120,6 +121,27 @@ void main() {
       await h.dispose(tester);
     });
   }
+
+  testWidgets('a screen opened after «wait a moment» shows it and closes (R-147)', (tester) async {
+    final h = await Harness.create(tester);
+    await h.pump(
+        tester,
+        Builder(
+            builder: (c) => Scaffold(
+                body: TextButton(
+                    onPressed: () => Navigator.of(c).push(MaterialPageRoute<void>(builder: (_) => const JamScreen())),
+                    child: const Text('apri')))),
+        extraOverrides: [
+          jamProvider.overrideWith(() => _FakeJam(const JamUiState(
+              peerName: 'Telefono', outcome: JamJoinOutcome.tooSoon)))
+        ]);
+    await tester.tap(find.text('apri'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('Aspetta un momento prima di riprovare'), findsOneWidget);
+    expect(find.byType(JamScreen), findsNothing);
+    await h.dispose(tester);
+  });
 
   testWidgets(
       'request dialog offers accept and decline, and closes by itself when '

@@ -25,6 +25,20 @@ class JamScreen extends ConsumerStatefulWidget {
 class _JamScreenState extends ConsumerState<JamScreen> {
   bool _popped = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // An outcome set before this screen existed (e.g. «wait a moment»): ref.listen misses it.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final s = ref.read(jamProvider);
+      if (s.phase == JamPhase.idle && s.outcome != null) {
+        final t = _outcomeText(context.l10n, s);
+        _leave(t.isEmpty ? null : t);
+      }
+    });
+  }
+
   void _leave(String? message) {
     if (_popped || !mounted) return;
     _popped = true;

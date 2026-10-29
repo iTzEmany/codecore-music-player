@@ -16,7 +16,7 @@ import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/play_queue.dart';
 import 'package:codecore/services/audio/playback_persistence.dart';
 import 'package:codecore/services/jam/jam_host.dart';
-import 'package:codecore/services/jam/jam_guest.dart' show JamJoinOutcome;
+import 'package:codecore/services/jam/jam_guest.dart' show JamGuest, JamJoinOutcome;
 import 'package:codecore/services/jam/speaker_jam.dart';
 import 'package:codecore/services/share/discovery.dart' show Peer;
 import 'package:drift/native.dart';
@@ -35,6 +35,8 @@ class _Hub extends ShareHubNotifier {
   JamHost? get jamHost => _host;
   @override
   String? get deviceId => 'me';
+  @override
+  int? get port => 4000;
   @override
   Future<void> holdJam() async {}
   @override
@@ -259,18 +261,45 @@ void main() {
     await jam.end(); // stops the feeder before the container goes
   });
 
-  test('the third request within a minute is not sent', () async {
+  test('the third request within a minute is not sent; unreachable ones do not count', () async {
     final jam = c.read(jamProvider.notifier);
     var t = DateTime(2026, 1, 1, 12);
     jam.now = () => t;
+    jam.guestFactory = _DecliningGuest.new;
     const peer = Peer(id: 'x', name: 'X', host: '10.0.0.9', port: 1, platform: 'linux');
     await jam.request(peer);
     await jam.request(peer);
-    expect(c.read(jamProvider).outcome, JamJoinOutcome.unreachable);
+    expect(c.read(jamProvider).outcome, JamJoinOutcome.declined);
     await jam.request(peer);
     expect(c.read(jamProvider).outcome, JamJoinOutcome.tooSoon);
+    // another peer is not affected
+    await jam.request(const Peer(id: 'y', name: 'Y', host: '10.0.0.8', port: 1, platform: 'linux'));
+    expect(c.read(jamProvider).outcome, JamJoinOutcome.declined);
     t = t.add(const Duration(seconds: 61));
     await jam.request(peer);
-    expect(c.read(jamProvider).outcome, JamJoinOutcome.unreachable);
+    expect(c.read(jamProvider).outcome, JamJoinOutcome.declined);
   });
+
+  test('requests to an unreachable device are not counted', () async {
+    final jam = c.read(jamProvider.notifier);
+    const peer = Peer(id: 'x', name: 'X', host: '10.0.0.9', port: 1, platform: 'linux');
+    for (var i = 0; i < 4; i++) {
+      await jam.request(peer);
+      expect(c.read(jamProvider).outcome, JamJoinOutcome.unreachable);
+    }
+  });
+}
+
+class _DecliningGuest extends JamGuest {
+  _DecliningGuest(JamHost h) : super(local: h);
+  @override
+  Future<JamJoinOutcome> join({
+    required String host,
+    required int port,
+    required String ownDeviceId,
+    required String ownName,
+    required int ownPort,
+    Duration timeout = const Duration(seconds: 1),
+  }) async =>
+      JamJoinOutcome.declined;
 }
