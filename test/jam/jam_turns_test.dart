@@ -36,10 +36,24 @@ void main() {
       'h0 a1 b1 b2 b3',
     ),
     (
-      'owner not in the list goes last',
+      'owner not in the list keeps its index',
       [it('h', 'h0'), it('x', 'x1'), it('a', 'a1'), it('h', 'h1')],
       0,
-      'h0 a1 h1 x1',
+      'h0 x1 a1 h1',
+    ),
+    (
+      'G1 left: its online tracks stay in place (D-210)',
+      [
+        it('h', 'H0'),
+        it('g1', 'G1a'),
+        it('g2', 'G2a'),
+        it('h', 'H1'),
+        it('g1', 'G1b'),
+        it('g2', 'G2b'),
+        it('h', 'H2'),
+      ],
+      0,
+      'H0 G1a G2a H1 G1b G2b H2',
     ),
     (
       'no current: first participant first',
@@ -56,6 +70,6 @@ void main() {
     ),
   ];
   for (final (name, l, cur, want) in cases) {
-    test(name, () => expect(run(l, cur, order), want));
+    test(name, () => expect(run(l, cur, name.startsWith('G1 left') ? ['h', 'g2'] : order), want));
   }
 }
