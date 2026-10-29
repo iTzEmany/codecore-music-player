@@ -36,6 +36,33 @@ Motorola host con le JBL, Mi A3 ospite, hotspot del Motorola. Da provare:
 
 Esiti qui sotto, uno per riga; KO nuovi → righe in `docs/action-plan.md`.
 
+**Esiti (29/10, in autonomia per D-274: Motorola host sul suo hotspot, Mi A3 ospite, cuffie JBL Tune 720BT come cassa)**
+- **69.1 OK**: con le cuffie già collegate al Motorola prima dell'avvio, la Jam della cassa si apre da sola, l'ospite la vede e ci entra, e suona sulle cuffie.
+- **69.2 OK**: a ruoli scambiati, le cuffie staccate dal Mi A3 e passate al Motorola fanno comparire «Suonare la Jam sulla tua cassa?» sopra la schermata Jam. Con «Sì», «Collega una cassa» sparisce su entrambi. Non provato: il collegamento nell'istante in cui l'app è in primo piano.
+- **69.3 Jam piena OK**: Jam di 200 brani in «Coda insieme».
+  - L'aggiunta dell'ospite dice «La Jam è piena», mai un «Aggiunto in coda» falso.
+  - Con 5 posti liberati dall'host, 2 aggiunte entrano e poi torna «piena».
+- **69.3 «Continua sul telefono» OK**:
+  - a cuffie scollegate l'host vede il pulsante, l'ospite solo «Collega una cassa»;
+  - toccato il pulsante, la Jam riparte senza altre uscite collegate.
+- **R-88 OK**: le aggiunte dell'ospite vanno in fila dopo il corrente e dopo le aggiunte precedenti.
+- **R-95 OK**: «Precedente» subito dopo «Successivo» torna al brano di prima.
+- **R-90 OK**: l'ospite che esce ritrova la sua coda, in pausa.
+- **KO D-266**: l'ospite che esce non vede «Sei uscito dalla Jam», nemmeno in due uscite.
+  - Causa: l'host lo toglie su `/leave` e il long poll riceve 401 prima della fine di `leave()`, così vince «Jam persa».
+  - Corretto in 8360dc2 (`end()` smette di ascoltare `lost` prima di `leave()`), con un test di regressione.
+  - Riprovato sul Mi A3 con l'host Linux: «Sei uscito dalla Jam» in due uscite su due, e la Jam dell'host resta aperta.
+- Il multipunto delle cuffie le fa passare da un telefono all'altro da sole. Al primo avvio il Mi A3 apriva anche una sua Jam della cassa.
+- La scoperta sull'hotspot è lenta: da 20 a 100 s. Il foglio «Dispositivi» non si aggiorna da solo, va chiuso e riaperto.
+- **Non provati, restano a mano**:
+  - R-89 (swipe di un brano online);
+  - R-91;
+  - R-92 (copertine);
+  - R-93 («Scarica»);
+  - lo scarto;
+  - il brano suggerito di «Coda insieme»;
+  - l'aggiunta che entra nei 20 posti di una Jam nata corta.
+
 **Fatto quando:** esiti scritti; 67.1, 67.2 e 68.3 in `docs/PROGRESS.md` da `[~]` a `[x]` se non ci sono KO.
 
 ### 69.5 — `JamGuestLink` senza spostare codice (RNF-17, K-JD-01)
