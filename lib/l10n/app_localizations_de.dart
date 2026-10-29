@@ -5701,4 +5701,22 @@ class AppLocalizationsDe extends AppLocalizations {
   String speakerChange(String name) {
     return '$name ändern';
   }
+
+  @override
+  String jamInviteBanner(String name) {
+    return 'Der Jam von $name beitreten';
+  }
+
+  @override
+  String get jamInviteDismiss => 'Ausblenden';
+
+  @override
+  String get speakerAwayNotice => 'Lautsprecher verbinden';
+
+  @override
+  String get speakerOfferTitle => 'Den Jam auf deinem Lautsprecher abspielen?';
+
+  @override
+  String get speakerOfferBody =>
+      'Dein Lautsprecher ist verbunden und der Jam pausiert. Wenn du möchtest, startet die Musik von hier.';
 }

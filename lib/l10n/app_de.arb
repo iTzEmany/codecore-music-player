@@ -3068,5 +3068,17 @@
         "type": "String"
       }
     }
-  }
+  },
+  "jamInviteBanner": "Der Jam von {name} beitreten",
+  "@jamInviteBanner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamInviteDismiss": "Ausblenden",
+  "speakerAwayNotice": "Lautsprecher verbinden",
+  "speakerOfferTitle": "Den Jam auf deinem Lautsprecher abspielen?",
+  "speakerOfferBody": "Dein Lautsprecher ist verbunden und der Jam pausiert. Wenn du möchtest, startet die Musik von hier."
 }

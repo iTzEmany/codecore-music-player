@@ -3631,5 +3631,17 @@
         "type": "String"
       }
     }
-  }
+  },
+  "jamInviteBanner": "Unisciti alla Jam di {name}",
+  "@jamInviteBanner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamInviteDismiss": "Nascondi",
+  "speakerAwayNotice": "Collega una cassa",
+  "speakerOfferTitle": "Suonare la Jam sulla tua cassa?",
+  "speakerOfferBody": "La tua cassa è collegata e la Jam è ferma. Se vuoi, la musica riparte da qui."
 }

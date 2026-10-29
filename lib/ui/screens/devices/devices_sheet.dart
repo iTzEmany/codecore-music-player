@@ -11,6 +11,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/jam_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/share_hub.dart';
+import '../../../providers/speaker_providers.dart';
 import '../../../services/share/discovery.dart';
 import '../../theme/tokens.dart';
 import '../jam/jam_screen.dart';
@@ -109,6 +110,7 @@ class _DevicesSheetState extends ConsumerState<DevicesSheet> {
     final theme = Theme.of(context).textTheme;
     final hub = ref.watch(shareHubProvider);
     final jam = ref.watch(jamProvider);
+    final announced = ref.watch(announcedJamProvider);
     final visible = ref.watch(settingsProvider.select((s) => s.receiveFromLan));
     final ownId = _hub.deviceId ?? '';
     final others = <String>[
@@ -138,6 +140,15 @@ class _DevicesSheetState extends ConsumerState<DevicesSheet> {
               },
             ),
             const SizedBox(height: 16),
+          ],
+          if (announced != null && !jam.active) ...[
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(Icons.queue_music_rounded, color: cc.accent),
+              title: Text(l.jamInviteBanner(announced.jamName!)),
+              onTap: () => _startJam(announced),
+            ),
+            const SizedBox(height: 8),
           ],
           Text(
             l.nearbyDevices,

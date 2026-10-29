@@ -3068,5 +3068,17 @@
         "type": "String"
       }
     }
-  }
+  },
+  "jamInviteBanner": "Join {name}'s Jam",
+  "@jamInviteBanner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamInviteDismiss": "Hide",
+  "speakerAwayNotice": "Connect a speaker",
+  "speakerOfferTitle": "Play the Jam on your speaker?",
+  "speakerOfferBody": "Your speaker is connected and the Jam is paused. If you like, the music restarts from here."
 }

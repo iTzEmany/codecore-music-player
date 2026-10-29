@@ -13,6 +13,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/ring_progress.dart';
 import '../../widgets/seek_bar.dart';
 import '../../widgets/show_msg.dart';
+import 'speaker_notices.dart';
 import '../../widgets/smooth_position.dart';
 import '../now_playing/now_playing_controls.dart';
 import 'jam_cards.dart';
@@ -99,7 +100,12 @@ class _JamPlayerViewState extends ConsumerState<JamPlayerView> {
     } finally {
       _seeking = false;
     }
-    if (err != JamError.invalid || !mounted) return;
+    if (!mounted) return;
+    if (err == JamError.noSpeaker) {
+      _feed();
+      showMsg(context, context.l10n.speakerAwayNotice);
+    }
+    if (err != JamError.invalid) return;
     _feed(); // back to the Jam's position
     showMsg(context, context.l10n.jamSeekInvalid);
   }
@@ -301,14 +307,20 @@ class _JamPlayer extends ConsumerWidget {
                   // Nothing playing: the three buttons are disabled.
                   onPrevious: hasCurrent ? () => ctrl.previous() : null,
                   onPlayPause: hasCurrent
-                      ? () => ctrl.send(
+                      ? () => sendJamCommand(
+                          context,
+                          ctrl,
                           jam.playing
                               ? const JamCommand.pause()
                               : const JamCommand.play(),
                         )
                       : null,
                   onNext: hasCurrent
-                      ? () => ctrl.send(const JamCommand.next())
+                      ? () => sendJamCommand(
+                          context,
+                          ctrl,
+                          const JamCommand.next(),
+                        )
                       : null,
                 ),
                 NpBottomRow(

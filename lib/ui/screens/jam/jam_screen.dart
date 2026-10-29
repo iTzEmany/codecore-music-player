@@ -11,6 +11,7 @@ import '../../widgets/ring_progress.dart';
 import 'jam_parts.dart' show JamAvatar;
 import 'jam_player.dart';
 import '../../widgets/show_msg.dart';
+import 'speaker_notices.dart';
 import '../../widgets/cc_app_bar.dart';
 
 /// The Jam: waiting for the answer, then the shared queue and controls.
@@ -73,7 +74,12 @@ class _JamScreenState extends ConsumerState<JamScreen> {
     }
     return Scaffold(
       body: SafeArea(
-        child: JamPlayerView(state: s),
+        child: Column(
+          children: [
+            const SpeakerAwayNotice(),
+            Expanded(child: JamPlayerView(state: s)),
+          ],
+        ),
       ),
     );
   }

@@ -5677,4 +5677,22 @@ class AppLocalizationsIt extends AppLocalizations {
   String speakerChange(String name) {
     return 'Cambia $name';
   }
+
+  @override
+  String jamInviteBanner(String name) {
+    return 'Unisciti alla Jam di $name';
+  }
+
+  @override
+  String get jamInviteDismiss => 'Nascondi';
+
+  @override
+  String get speakerAwayNotice => 'Collega una cassa';
+
+  @override
+  String get speakerOfferTitle => 'Suonare la Jam sulla tua cassa?';
+
+  @override
+  String get speakerOfferBody =>
+      'La tua cassa è collegata e la Jam è ferma. Se vuoi, la musica riparte da qui.';
 }

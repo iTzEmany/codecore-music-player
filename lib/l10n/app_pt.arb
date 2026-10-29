@@ -3312,5 +3312,17 @@
         "type": "String"
       }
     }
-  }
+  },
+  "jamInviteBanner": "Entrar na Jam de {name}",
+  "@jamInviteBanner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamInviteDismiss": "Ocultar",
+  "speakerAwayNotice": "Liga uma coluna",
+  "speakerOfferTitle": "Tocar a Jam na tua coluna?",
+  "speakerOfferBody": "A tua coluna está ligada e a Jam está parada. Se quiseres, a música continua a partir daqui."
 }

@@ -3068,5 +3068,17 @@
         "type": "String"
       }
     }
-  }
+  },
+  "jamInviteBanner": "Unirte a la Jam de {name}",
+  "@jamInviteBanner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamInviteDismiss": "Ocultar",
+  "speakerAwayNotice": "Conecta un altavoz",
+  "speakerOfferTitle": "¿Reproducir la Jam en tu altavoz?",
+  "speakerOfferBody": "Tu altavoz está conectado y la Jam está en pausa. Si quieres, la música sigue desde aquí."
 }

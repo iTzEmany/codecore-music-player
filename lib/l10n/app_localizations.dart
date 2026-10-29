@@ -8988,6 +8988,36 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Cambia {name}'**
   String speakerChange(String name);
+
+  /// No description provided for @jamInviteBanner.
+  ///
+  /// In it, this message translates to:
+  /// **'Unisciti alla Jam di {name}'**
+  String jamInviteBanner(String name);
+
+  /// No description provided for @jamInviteDismiss.
+  ///
+  /// In it, this message translates to:
+  /// **'Nascondi'**
+  String get jamInviteDismiss;
+
+  /// No description provided for @speakerAwayNotice.
+  ///
+  /// In it, this message translates to:
+  /// **'Collega una cassa'**
+  String get speakerAwayNotice;
+
+  /// No description provided for @speakerOfferTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Suonare la Jam sulla tua cassa?'**
+  String get speakerOfferTitle;
+
+  /// No description provided for @speakerOfferBody.
+  ///
+  /// In it, this message translates to:
+  /// **'La tua cassa è collegata e la Jam è ferma. Se vuoi, la musica riparte da qui.'**
+  String get speakerOfferBody;
 }
 
 class _AppLocalizationsDelegate

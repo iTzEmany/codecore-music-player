@@ -3312,5 +3312,17 @@
         "type": "String"
       }
     }
-  }
+  },
+  "jamInviteBanner": "Rejoindre la Jam de {name}",
+  "@jamInviteBanner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamInviteDismiss": "Masquer",
+  "speakerAwayNotice": "Connecte une enceinte",
+  "speakerOfferTitle": "Jouer la Jam sur ton enceinte ?",
+  "speakerOfferBody": "Ton enceinte est connectée et la Jam est en pause. Si tu veux, la musique repart d'ici."
 }
