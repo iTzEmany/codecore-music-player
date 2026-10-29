@@ -111,7 +111,10 @@ class _SpeakerPort implements SpeakerJamPort {
   @override
   Future<void> closeSilently() => _c.closeSpeakerJamSilently();
   @override
-  Future<void> send(JamCommand cmd) => _c.send(cmd);
+  Future<void> send(JamCommand cmd) async {
+    final e = await _c.send(cmd);
+    if (e != null) throw StateError('jam $e'); // so SpeakerJam retries
+  }
   @override
   Future<void> end() => _c.end();
 }
@@ -268,6 +271,12 @@ class JamController extends Notifier<JamUiState> {
   /// Asks [peer] to start a Jam with this device (this device is the guest).
   Future<void> request(Peer peer) async {
     if (state.phase == JamPhase.requesting || state.active) return;
+    if (_speakerPending) {
+      // Joining another Jam: the waiting speaker Jam is given up.
+      _speakerPending = false;
+      _hub.speakerJamName = null;
+      _speakerChanges.add(null);
+    }
     state = JamUiState(
       phase: JamPhase.requesting,
       peerName: peer.name,
@@ -395,7 +404,7 @@ class JamController extends Notifier<JamUiState> {
 
   SpeakerJamView get _speakerView {
     final j = state.jam;
-    if (_speakerPending) {
+    if (_speakerPending && state.phase == JamPhase.idle) {
       return const SpeakerJamView(role: SpeakerRole.host, speaker: true, iAmOutput: true);
     }
     final role = switch (state.phase) {

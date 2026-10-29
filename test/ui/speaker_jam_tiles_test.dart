@@ -3,6 +3,7 @@ import 'package:codecore/services/audio/bluetooth_outputs.dart';
 import 'package:codecore/services/audio/speaker_monitor.dart';
 import 'package:codecore/ui/screens/settings/speaker_jam_tiles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -36,6 +37,23 @@ void main() {
     await t.tap(find.byType(Switch).first);
     await t.pumpAndSettle();
     expect(m.enabled, isFalse);
+    await h.dispose(t);
+  });
+
+  testWidgets('switch follows every tap and each change is notified', (t) async {
+    final h = await Harness.create(t);
+    final m = await pump(t, h);
+    var ticks = 0;
+    ProviderScope.containerOf(t.element(find.byType(SpeakerJamTiles)))
+        .listen(speakerChangesProvider, (_, _) => ticks++);
+    final sw = find.byType(Switch).first;
+    for (final want in [false, true]) {
+      await t.tap(sw);
+      await t.pumpAndSettle();
+      expect(t.widget<Switch>(sw).value, want);
+      expect(m.enabled, want);
+    }
+    expect(ticks, 2);
     await h.dispose(t);
   });
 

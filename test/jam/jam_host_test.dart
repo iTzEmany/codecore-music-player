@@ -296,7 +296,8 @@ void main() {
   });
 
   test('the guest that plays for the speaker leaves: speakerAway, the host takes over (D-220)', () {
-    host.open(speaker: true);
+    host.open();
+    host.makeSpeaker();
     host.addMember(id: 'g', name: 'Phone', host: '192.168.1.50', port: 4000);
     host.apply(const JamCommand.speakerAway());
     expect(host.apply(const JamCommand.offerSpeaker(), from: 'g').isOk, isTrue);

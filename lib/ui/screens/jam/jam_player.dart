@@ -305,7 +305,9 @@ class _JamPlayer extends ConsumerWidget {
                   live: true,
                   playing: jam.playing,
                   // Nothing playing: the three buttons are disabled.
-                  onPrevious: hasCurrent ? () => ctrl.previous() : null,
+                  onPrevious: hasCurrent
+                      ? () => _jamPrevious(context, ctrl)
+                      : null,
                   onPlayPause: hasCurrent
                       ? () => sendJamCommand(
                           context,
@@ -337,4 +339,11 @@ class _JamPlayer extends ConsumerWidget {
       ],
     );
   }
+}
+
+/// «Indietro»: like the other commands, tells when the speaker is away.
+Future<void> _jamPrevious(BuildContext context, JamController ctrl) async {
+  final msg = context.l10n.speakerAwayNotice;
+  final err = await ctrl.previous();
+  if (err == JamError.noSpeaker && context.mounted) showMsg(context, msg);
 }

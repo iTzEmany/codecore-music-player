@@ -23,10 +23,12 @@ final speakerMonitorProvider = Provider<SpeakerMonitor>((ref) {
   return m;
 });
 
-/// Ticks whenever what the settings show may have changed.
-final speakerChangesProvider = StreamProvider<void>(
-  (ref) => ref.watch(speakerMonitorProvider).changes,
-);
+/// Ticks whenever what the settings show may have changed. A counter, not
+/// `void`: equal values would not notify the listeners.
+final speakerChangesProvider = StreamProvider<int>((ref) {
+  var n = 0;
+  return ref.watch(speakerMonitorProvider).changes.map((_) => ++n);
+});
 
 /// A speaker is connected now (answer «yes», or guessed from its class).
 final speakerConnectedProvider = StreamProvider<bool>(
@@ -74,10 +76,6 @@ final announcedJamProvider = Provider<Peer?>((ref) {
     return null;
   }
   final peers = ref.watch(shareHubProvider.select((h) => h.peers));
-  // A device that stops announcing is forgotten, so its next Jam shows again.
-  Future.microtask(() {
-    if (ref.mounted) ref.read(jamInviteDismissedProvider.notifier).keepOnly(peers);
-  });
   final hidden = ref.watch(jamInviteDismissedProvider);
   return peers
       .where((p) => p.jamName != null && !hidden.contains(jamInviteKey(p)))
@@ -89,7 +87,11 @@ String jamInviteKey(Peer p) => '${p.id}|${p.jamName}';
 /// Invitations the user closed (kept in memory: a Jam is announced once).
 class JamInviteDismissed extends Notifier<Set<String>> {
   @override
-  Set<String> build() => const {};
+  Set<String> build() {
+    // A device that stops announcing is forgotten, so its next Jam shows again.
+    ref.listen(shareHubProvider.select((h) => h.peers), (_, p) => keepOnly(p));
+    return const {};
+  }
 
   void hide(Peer p) => state = {...state, jamInviteKey(p)};
 

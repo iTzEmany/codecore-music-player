@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/app_log.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/speaker_providers.dart';
 import '../../../services/audio/bluetooth_outputs.dart';
@@ -208,7 +209,13 @@ class _OfferSheet extends StatelessWidget {
     void reply(bool yes) {
       onAnswer();
       nav.pop();
-      yes ? unawaited(jam.acceptOffer()) : jam.declineOffer();
+      if (yes) {
+        unawaited(jam.acceptOffer().catchError((Object e, StackTrace st) {
+          AppLog.w('speaker jam: offer failed', e, st);
+        }));
+      } else {
+        jam.declineOffer();
+      }
     }
 
     return _SheetBody(

@@ -17,6 +17,7 @@ import 'package:codecore/services/audio/play_queue.dart';
 import 'package:codecore/services/audio/playback_persistence.dart';
 import 'package:codecore/services/jam/jam_host.dart';
 import 'package:codecore/services/jam/speaker_jam.dart';
+import 'package:codecore/services/share/discovery.dart' show Peer;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -114,6 +115,19 @@ void main() {
     await jam.openSpeakerJam();
     expect(_host.state!.speaker, isTrue);
     expect(c.read(shareHubProvider.notifier).speakerJamName, 'Salotto');
+  });
+
+  test('joining another Jam gives up the waiting speaker Jam', () async {
+    final jam = c.read(jamProvider.notifier);
+    await jam.openSpeakerJam();
+    await jam.request(const Peer(id: 'x', name: 'X', host: '10.0.0.9', port: 1, platform: 'linux'));
+    expect(c.read(shareHubProvider.notifier).speakerJamName, isNull);
+    expect(jam.speakerPort.view.role, isNot(SpeakerRole.host));
+  });
+
+  test('the speaker port throws when the command is refused', () async {
+    final jam = c.read(jamProvider.notifier);
+    await expectLater(jam.speakerPort.send(const JamCommand.speakerAway()), throwsStateError);
   });
 
   test('a guest does nothing', () async {

@@ -160,14 +160,13 @@ class JamHost {
   }
 
   /// Starts the session if it is not open yet (idempotent); no guest needed.
-  void open({bool speaker = false}) {
+  void open() {
     if (_state != null) return;
     _sid = newToken();
     _fileToken = newToken();
     _state = JamState(
       hostDeviceId: deviceId,
       outputDeviceId: deviceId,
-      speaker: speaker,
       positionAt: _now().millisecondsSinceEpoch,
       participants: [JamParticipant(id: deviceId, name: deviceName)],
     );
