@@ -1007,6 +1007,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get jamQueue => 'File d’attente partagée';
 
   @override
+  String get jamModeHost => 'File de l’hôte';
+
+  @override
+  String get jamModeTogether => 'File commune';
+
+  @override
+  String get jamModeGuestHint => 'L’hôte choisit le mode de la file';
+
+  @override
+  String get jamSuggested => 'Suggéré';
+
+  @override
   String get jamEmpty =>
       'Ajoutez des titres à la file depuis la bibliothèque ou la recherche';
 
@@ -1163,7 +1175,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String jamPeople(int n) {
-    return 'Jam, $n personnes';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Jam, $n personnes',
+      one: 'Jam, 1 personne',
+    );
+    return '$_temp0';
   }
 
   @override

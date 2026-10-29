@@ -310,10 +310,10 @@ void leaveTests() {
     expect(h.state!.outputDeviceId, 'host');
     expect(h.state!.ended, false);
 
-    // b goes silent: dropped, and with nobody left the session ends
+    // b goes silent: dropped, the host stays on its own (D-221)
     now = now.add(const Duration(seconds: 80));
     expect(h.dropStale(const Duration(seconds: 75)), ['b']);
-    expect(h.state!.ended, true);
+    expect(h.state!.ended, false);
   });
 
   test('session is capped and invites come only from members', () async {

@@ -111,6 +111,9 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
   cambia brano; l'host fa tutto.
 - Fase 9: più ospiti. `JamState.participants` (elenco con indirizzi), token d'identità per membro + `fileToken` di sessione (intestazione `x-jam-file`), invito inoltrato da un ospite all'host (`/<sid>/invite`), uscita di un membro (`/<sid>/leave`) che toglie i suoi brani. Sincronia di più uscite prevista in Fase 10 (vedi `docs/fase-9-jam-multi.md`).
 - Fase 10: uscite multiple sincronizzate. `JamClock` (offset verso l'orologio dell'host, rotta `/time`, filtro sui giri lenti), `JamSyncController` (decisioni pure: avvio programmato, velocità ±2 %, seek), `JamOutput` in modalità sincrona (cache obbligatoria, anticipo di `jamStartLeadMs`), compensazione manuale della latenza in `AppSettings.jamLatencyMs`.
+- Fase 66: coda insieme. `JamMode` (`host`/`together`) in `JamState`; in `together` il riduttore ordina con `togetherOrder` (`jam_turns.dart`, turni tra i partecipanti).
+  `JamPartFeeder` (`jam_part_feeder.dart`) manda i brani della parte di ognuno con `partKey`, i suggeriti locali vengono da `pickSuggestion` (`jam_suggestion.dart`).
+  D-221: l'host resta in Jam anche da solo (niente chiusura quando gli ospiti escono).
 
 ## Interfaccia (fase 11)
 - **Navigazione:** quattro schede (`NavTab.home|search|library|memory`), ciascuna con un `Navigator` annidato (chiavi in

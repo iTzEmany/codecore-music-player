@@ -366,6 +366,10 @@
   "jamIncomingBody": "Gemeinsam aus einer geteilten Warteschlange hören.",
   "jamIncomingDialog": "Die Musik läuft auf diesem Gerät und ihr könnt beide Titel hinzufügen.",
   "jamQueue": "Gemeinsame Warteschlange",
+  "jamModeHost": "Warteschlange des Hosts",
+  "jamModeTogether": "Gemeinsam",
+  "jamModeGuestHint": "Der Host wählt den Warteschlangenmodus",
+  "jamSuggested": "Vorgeschlagen",
   "jamEmpty": "Reihe Titel aus der Bibliothek oder der Suche ein",
   "jamOnlineFailed": "„{title}“ konnte nicht zur Jam hinzugefügt werden",
   "@jamOnlineFailed": {
@@ -466,7 +470,7 @@
   "navSearch": "Suche",
   "devicesTitle": "Geräte",
   "devicesJamActive": "Aktive Jam",
-  "jamPeople": "Jam, {n} Personen",
+  "jamPeople": "{n, plural, one{Jam, 1 Person} other{Jam, {n} Personen}}",
   "@jamPeople": {
     "placeholders": {
       "n": {

@@ -1004,6 +1004,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get jamQueue => 'Gemeinsame Warteschlange';
 
   @override
+  String get jamModeHost => 'Warteschlange des Hosts';
+
+  @override
+  String get jamModeTogether => 'Gemeinsam';
+
+  @override
+  String get jamModeGuestHint => 'Der Host wählt den Warteschlangenmodus';
+
+  @override
+  String get jamSuggested => 'Vorgeschlagen';
+
+  @override
   String get jamEmpty => 'Reihe Titel aus der Bibliothek oder der Suche ein';
 
   @override
@@ -1157,7 +1169,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String jamPeople(int n) {
-    return 'Jam, $n Personen';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Jam, $n Personen',
+      one: 'Jam, 1 Person',
+    );
+    return '$_temp0';
   }
 
   @override

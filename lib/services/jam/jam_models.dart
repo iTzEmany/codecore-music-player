@@ -12,6 +12,9 @@ const jamExts = {
   'wma', 'webm',
 };
 
+/// How the shared queue is ordered: the host's way (R-88) or turn by turn.
+enum JamMode { host, together }
+
 /// A track in the shared queue. The file stays on [ownerDeviceId].
 class JamItem {
   const JamItem({
@@ -27,6 +30,8 @@ class JamItem {
     this.ref,
     this.videoId,
     this.inherited = false,
+    this.suggested = false,
+    this.partKey,
   });
 
   /// Assigned by the host; unique within a session.
@@ -50,6 +55,14 @@ class JamItem {
   /// Part of the host's seed queue: tracks added later are placed before it.
   final bool inherited;
 
+  /// Picked by the owner's device because its part was empty (R-102).
+  final bool suggested;
+
+  /// Key of the item in its owner's part, set by the feeder; the reducer drops
+  /// a duplicate add (same owner + key) and puts feeder items last in the
+  /// sender's part. At most 64 characters.
+  final String? partKey;
+
   /// A YouTube track any output can download again by its video id.
   bool get selfFetchable => videoId != null && ref?.startsWith('yt:youtube:') == true;
 
@@ -66,6 +79,8 @@ class JamItem {
         ref: ref,
         videoId: videoId,
         inherited: inherited ?? this.inherited,
+        suggested: suggested,
+        partKey: partKey,
       );
 
   Map<String, Object?> toJson() => {
@@ -81,6 +96,8 @@ class JamItem {
         if (ref != null) 'ref': ref,
         if (videoId != null) 'vid': videoId,
         if (inherited) 'inh': true,
+        if (suggested) 'sug': true,
+        if (partKey != null) 'pk': partKey,
       };
 
   // A guest's ref/vid become a cache key and a yt-dlp URL: only plain ids pass.
@@ -114,6 +131,10 @@ class JamItem {
       ref: _valid(opt(j['ref']), _refRe),
       videoId: _valid(opt(j['vid']), _vidRe),
       inherited: j['inh'] == true,
+      suggested: j['sug'] == true,
+      partKey: opt(j['pk']) != null && (j['pk'] as String).length <= 64
+          ? j['pk'] as String
+          : null,
     );
   }
 }
@@ -160,6 +181,7 @@ class JamState {
     this.outputDeviceIds = const [],
     this.nextItemId = 1,
     this.ended = false,
+    this.mode = JamMode.host,
   });
 
   final int version;
@@ -178,6 +200,9 @@ class JamState {
   final List<String> outputDeviceIds;
   final int nextItemId;
   final bool ended;
+
+  /// Absent or unknown in JSON means [JamMode.host] (old peers, R-106).
+  final JamMode mode;
 
   JamParticipant? participant(String id) =>
       participants.where((p) => p.id == id).firstOrNull;
@@ -213,6 +238,7 @@ class JamState {
     List<String>? outputDeviceIds,
     int? nextItemId,
     bool? ended,
+    JamMode? mode,
   }) =>
       JamState(
         version: version ?? this.version,
@@ -228,6 +254,7 @@ class JamState {
         outputDeviceIds: outputDeviceIds ?? this.outputDeviceIds,
         nextItemId: nextItemId ?? this.nextItemId,
         ended: ended ?? this.ended,
+        mode: mode ?? this.mode,
       );
 
   Map<String, Object?> toJson() => {
@@ -244,6 +271,7 @@ class JamState {
         if (outputDeviceIds.isNotEmpty) 'outputs': outputDeviceIds,
         'next': nextItemId,
         'ended': ended,
+        if (mode != JamMode.host) 'mode': mode.name,
       };
 
   static JamState? tryParse(Object? j) {
@@ -294,6 +322,7 @@ class JamState {
       outputDeviceIds: outputs,
       nextItemId: j['next'] is int ? j['next'] as int : items.length + 1,
       ended: j['ended'] == true,
+      mode: j['mode'] == JamMode.together.name ? JamMode.together : JamMode.host,
     );
   }
 }
@@ -314,6 +343,8 @@ enum JamCommandType {
   end,
   // Last: an older host does not know it and answers `invalid` (R-95).
   previous,
+  // After `previous` for the same reason: an older host answers `invalid`.
+  setMode,
 }
 
 class JamCommand {
@@ -324,7 +355,8 @@ class JamCommand {
       this.positionMs,
       this.volume,
       this.deviceId,
-      this.deviceIds});
+      this.deviceIds,
+      this.mode});
 
   const JamCommand.add(JamItem item) : this._(JamCommandType.add, item: item);
   const JamCommand.remove(int itemId)
@@ -351,7 +383,12 @@ class JamCommand {
   /// «Previous» decided by the host on its own state (D-215).
   const JamCommand.previous() : this._(JamCommandType.previous);
 
+  /// Host only (D-184): switches the queue between host and together mode.
+  const JamCommand.setMode(JamMode mode)
+      : this._(JamCommandType.setMode, mode: mode);
+
   final JamCommandType type;
+  final JamMode? mode;
   final JamItem? item;
   final int? itemId, toIndex, positionMs;
   final double? volume;
@@ -367,6 +404,7 @@ class JamCommand {
         if (volume != null) 'volume': volume,
         if (deviceId != null) 'device': deviceId,
         if (deviceIds != null) 'devices': deviceIds,
+        if (mode != null) 'mode': mode!.name,
       };
 
   static JamCommand? tryParse(Object? j) {
@@ -422,6 +460,9 @@ class JamCommand {
         return const JamCommand.end();
       case JamCommandType.previous:
         return const JamCommand.previous();
+      case JamCommandType.setMode:
+        final m = JamMode.values.where((e) => e.name == j['mode']).firstOrNull;
+        return m == null ? null : JamCommand.setMode(m);
     }
   }
 }

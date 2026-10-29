@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:codecore/services/jam/jam_models.dart';
 import 'package:codecore/services/jam/jam_state.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -36,6 +38,7 @@ JamError? err(JamState s, JamCommand c, String from) =>
 
 void main() {
   videoIdTests();
+  togetherTests();
   unsafeIdsTests();
   test('add assigns ids, selects first, bumps version', () {
     var s = ok(start(), JamCommand.add(item(host)), host);
@@ -397,4 +400,293 @@ void unsafeIdsTests() {
 
 extension<T> on T {
   R let<R>(R Function(T) f) => f(this);
+}
+
+const g2 = 'g2';
+
+JamState startTogether() => const JamState(
+  hostDeviceId: host,
+  outputDeviceId: host,
+  participants: [
+    JamParticipant(id: host, name: 'H'),
+    JamParticipant(id: guest, name: 'G'),
+    JamParticipant(id: g2, name: 'G2'),
+  ],
+);
+
+/// Owners after the current item, as a compact string.
+String after(JamState s) =>
+    s.items.skip(s.currentIndex + 1).map((i) => i.title).join(' ');
+
+JamState addAll(JamState s, List<(String, String)> l) {
+  for (final (o, t) in l) {
+    s = ok(s, JamCommand.add(item(o, title: t)), o);
+  }
+  return s;
+}
+
+void togetherTests() {
+  group('together mode', () {
+    test(
+      'JSON: mode, sug and pk round-trip; absent or unknown = host (R-106)',
+      () {
+        final s = startTogether().copyWith(mode: JamMode.together);
+        expect(JamState.tryParse(s.toJson())!.mode, JamMode.together);
+        expect(
+          s.copyWith(mode: JamMode.host).toJson().containsKey('mode'),
+          false,
+        );
+        expect(JamState.tryParse(startTogether().toJson())!.mode, JamMode.host);
+        expect(
+          (JamState.tryParse({...s.toJson(), 'mode': 'zzz', 'extra': 1}))!.mode,
+          JamMode.host,
+        );
+        final it = JamItem.tryParse({
+          ...const JamItem(
+            id: 1,
+            ownerDeviceId: 'a',
+            title: 't',
+            ext: 'mp3',
+          ).toJson(),
+          'sug': true,
+          'pk': 'k1',
+          'zzz': 1,
+        })!;
+        expect((it.suggested, it.partKey), (true, 'k1'));
+        expect(
+          JamItem.tryParse({...it.toJson(), 'pk': 'x' * 65})!.partKey,
+          isNull,
+        );
+        final plain = JamItem.tryParse(
+          const JamItem(
+            id: 1,
+            ownerDeviceId: 'a',
+            title: 't',
+            ext: 'mp3',
+          ).toJson(),
+        )!;
+        expect((plain.suggested, plain.partKey), (false, null));
+        final c = JamCommand.tryParse(
+          const JamCommand.setMode(JamMode.together).toJson(),
+        );
+        expect(c!.mode, JamMode.together);
+        expect(JamCommand.tryParse({'cmd': 'setMode', 'mode': 'zzz'}), isNull);
+      },
+    );
+
+    test('setMode: host only, version + 1, same mode is a no-op', () {
+      final s = addAll(startTogether(), [(host, 'cur')]);
+      expect(
+        err(s, const JamCommand.setMode(JamMode.together), guest),
+        JamError.forbidden,
+      );
+      final t = ok(s, const JamCommand.setMode(JamMode.together), host);
+      expect((t.mode, t.version), (JamMode.together, s.version + 1));
+      expect(
+        ok(t, const JamCommand.setMode(JamMode.together), host).version,
+        t.version,
+      );
+    });
+
+    test(
+      'setMode(together) alternates; back to host keeps the order (R-104)',
+      () {
+        var s = addAll(startTogether(), [
+          (host, 'h0'),
+          (host, 'h1'),
+          (host, 'h2'),
+          (guest, 'g1'),
+          (guest, 'g2'),
+        ]);
+        s = ok(s, const JamCommand.setMode(JamMode.together), host);
+        expect(after(s), 'g1 h1 g2 h2');
+        final back = ok(s, const JamCommand.setMode(JamMode.host), host);
+        expect(back.items.map((i) => i.id), s.items.map((i) => i.id));
+      },
+    );
+
+    test('add goes to the head of the sender part (D-179 examples)', () {
+      // Host track playing, host has h1 queued, guest has g1.
+      var s = ok(
+        startTogether(),
+        JamCommand.add(item(host, title: 'cur')),
+        host,
+      );
+      s = addAll(s, [(host, 'h1'), (guest, 'g1')]);
+      s = ok(s, const JamCommand.setMode(JamMode.together), host);
+      expect(after(s), 'g1 h1');
+      // Guest adds while the host's track plays: right after the current one.
+      s = ok(s, JamCommand.add(item(guest, title: 'g0')), guest);
+      expect(after(s), 'g0 h1 g1');
+      // A track of the guest plays: the host's next one goes first.
+      s = ok(s, const JamCommand.next(), host);
+      s = ok(s, JamCommand.add(item(guest, title: 'gx')), guest);
+      expect(after(s), 'h1 gx g1');
+    });
+
+    test('add with an empty part and with a third participant', () {
+      var s = ok(
+        startTogether(),
+        JamCommand.add(item(host, title: 'cur')),
+        host,
+      );
+      s = ok(s, const JamCommand.setMode(JamMode.together), host);
+      s = addAll(s, [(g2, 'a'), (guest, 'b'), (g2, 'c')]);
+      // After the host: guest, then g2.
+      expect(after(s), 'b c a'); // c was added later: head of g2's part
+    });
+
+    test('move is refused in together mode (R-103), allowed in host mode', () {
+      var s = addAll(startTogether(), [(host, 'a'), (host, 'b'), (host, 'c')]);
+      expect(ok(s, const JamCommand.move(3, 1), host).items[1].id, 3);
+      s = ok(s, const JamCommand.setMode(JamMode.together), host);
+      expect(err(s, const JamCommand.move(3, 1), host), JamError.forbidden);
+    });
+
+    test('remove redoes the turns; inherited counts as the host part', () {
+      var s = ok(
+        startTogether(),
+        JamCommand.add(item(host, title: 'cur')),
+        host,
+      );
+      s = ok(s, JamCommand.add(item(host, title: 'i0', inherited: true)), host);
+      s = addAll(s, [(guest, 'g1'), (guest, 'g2'), (host, 'h1')]);
+      s = ok(s, const JamCommand.setMode(JamMode.together), host);
+      expect(after(s), 'g1 h1 g2 i0');
+      s = ok(
+        s,
+        JamCommand.remove(s.items.firstWhere((i) => i.title == 'g1').id),
+        host,
+      );
+      expect(after(s), 'g2 h1 i0');
+    });
+
+    test('host inherited seed alternates with the guest adds (D-192)', () {
+      var s = ok(startTogether(), JamCommand.add(item(host, title: 'cur')), host);
+      for (final t in ['H1', 'H2', 'H3']) {
+        s = ok(s, JamCommand.add(item(host, title: t, inherited: true)), host);
+      }
+      s = ok(s, const JamCommand.setMode(JamMode.together), host);
+      s = addAll(s, [(guest, 'Y'), (guest, 'X')]);
+      expect(after(s), 'X H1 Y H2 H3');
+      expect(s.items.where((i) => i.inherited).length, 3);
+    });
+
+    test('jump redoes the turns after the new current', () {
+      var s = addAll(startTogether(), [(host, 'a'), (host, 'b'), (host, 'c'), (guest, 'd'), (guest, 'e')]);
+      s = ok(s, const JamCommand.setMode(JamMode.together), host);
+      expect(s.items.map((i) => i.title).join(' '), 'a d b e c');
+      s = ok(s, JamCommand.jump(s.items[3].id), host); // e, a guest track
+      expect(s.items.map((i) => i.title).join(' '), 'a d b e c');
+      s = ok(s, JamCommand.jump(s.items[1].id), host); // d
+      expect(s.items.map((i) => i.title).join(' '), 'a d b e c');
+      s = addAll(startTogether(), [(host, 'a'), (host, 'b'), (guest, 'c'), (guest, 'd'), (g2, 'e')]);
+      s = ok(s, const JamCommand.setMode(JamMode.together), host);
+      expect(s.items.map((i) => i.title).join(' '), 'a c e b d');
+      // Jump to e (g2): after it the host goes first, then the guest.
+      s = ok(s, JamCommand.jump(s.items[2].id), host);
+      expect(after(s), 'b d');
+    });
+
+    test('invariant 2 on 200 random sequences', () {
+      final rnd = Random(66);
+      const who = [host, guest, g2];
+      for (var n = 0; n < 200; n++) {
+        var s = ok(
+          startTogether(),
+          JamCommand.add(item(host, title: 'cur')),
+          host,
+        );
+        s = ok(s, const JamCommand.setMode(JamMode.together), host);
+        for (var k = 0; k < 25; k++) {
+          final o = who[rnd.nextInt(3)];
+          final r = rnd.nextInt(10);
+          if (r < 6) {
+            s = ok(
+              s,
+              JamCommand.add(item(o, title: '$o$k', inherited: o == host && k.isOdd)),
+              o,
+            );
+          } else if (r < 8 && s.items.length > s.currentIndex + 1) {
+            s = ok(s, JamCommand.remove(s.items[s.currentIndex + 1].id), host);
+          } else if (s.currentIndex + 1 < s.items.length) {
+            s = ok(s, const JamCommand.next(), host);
+          }
+          // Two in a row of the same owner only if nobody else has any left.
+          final tail = s.items.skip(s.currentIndex + 1).toList();
+          for (var i = 1; i < tail.length; i++) {
+            if (tail[i].ownerDeviceId != tail[i - 1].ownerDeviceId) continue;
+            final o2 = tail[i].ownerDeviceId;
+            expect(
+              tail.skip(i).every((x) => x.ownerDeviceId == o2),
+              true,
+              reason: tail.map((x) => x.title).join(' '),
+            );
+          }
+        }
+      }
+    });
+
+    test('a full Jam slides in together mode: the oldest played track makes room (D-194)', () {
+      JamState full(JamMode m, int cur) => startTogether().copyWith(
+            mode: m,
+            nextItemId: maxJamItems,
+            currentIndex: cur,
+            items: [
+              for (var i = 0; i < maxJamItems; i++)
+                JamItem(id: i, ownerDeviceId: i.isEven ? host : guest, title: 'p$i', ext: 'mp3'),
+            ],
+          );
+      var s = ok(full(JamMode.together, 5), JamCommand.add(item(guest, title: 'new')), guest);
+      expect(s.items.length, maxJamItems);
+      expect((s.items.first.title, s.currentIndex, s.current!.title), ('p1', 4, 'p5'));
+      expect(s.items.any((i) => i.title == 'new'), true);
+      // Nothing played yet: refused, and together never drops an unplayed track.
+      expect(err(full(JamMode.together, 0), JamCommand.add(item(guest)), guest), JamError.full);
+      expect(err(full(JamMode.together, 0), JamCommand.add(item(host, inherited: true)), host), JamError.full);
+      // «Coda dell'host»: no sliding.
+      expect(err(full(JamMode.host, 5), JamCommand.add(item(guest)), guest), JamError.full);
+    });
+
+    test('a fed track (partKey) goes to the back of its owner part, an add to the head', () {
+      JamItem fed(String o, String t) => JamItem(
+          id: 0, ownerDeviceId: o, title: t, ext: 'mp3', partKey: t);
+      var s = ok(startTogether(), JamCommand.add(item(host, title: 'cur')), host);
+      s = ok(s, const JamCommand.setMode(JamMode.together), host);
+      for (final t in ['a', 'b', 'c']) {
+        s = ok(s, JamCommand.add(fed(guest, t)), guest);
+      }
+      expect(after(s), 'a b c');
+      s = ok(s, JamCommand.add(item(guest, title: 'now')), guest);
+      expect(after(s), 'now a b c');
+    });
+  });
+
+    test('an add with a (owner, partKey) already in the Jam is a no-op, in both modes', () {
+      JamItem fed(String o, String k) =>
+          JamItem(id: 0, ownerDeviceId: o, title: k, ext: 'mp3', partKey: k);
+      for (final m in [JamMode.host, JamMode.together]) {
+        var s = ok(startTogether(), JamCommand.add(item(host, title: 'cur')), host);
+        if (m == JamMode.together) s = ok(s, const JamCommand.setMode(JamMode.together), host);
+        s = ok(s, JamCommand.add(fed(guest, 'k')), guest);
+        final again = ok(s, JamCommand.add(fed(guest, 'k')), guest);
+        expect((again.version, again.items.length), (s.version, s.items.length), reason: '$m');
+        // Same key from someone else, or no key: a different track.
+        expect(ok(s, JamCommand.add(fed(g2, 'k')), g2).items.length, s.items.length + 1);
+      }
+    });
+
+    test('jump in together mode redoes the turns after the new current', () {
+      var s = startTogether().copyWith(
+        mode: JamMode.together,
+        nextItemId: 4,
+        items: [
+          for (final (n, o) in [host, host, host, guest].indexed)
+            JamItem(id: n, ownerDeviceId: o, title: '$o$n', ext: 'mp3'),
+        ],
+        currentIndex: 3,
+      );
+      s = ok(s, const JamCommand.jump(0), host);
+      expect(after(s), 'guest3 host1 host2');
+    });
 }

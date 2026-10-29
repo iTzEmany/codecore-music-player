@@ -1004,6 +1004,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get jamQueue => 'Fila partilhada';
 
   @override
+  String get jamModeHost => 'Fila do anfitrião';
+
+  @override
+  String get jamModeTogether => 'Fila conjunta';
+
+  @override
+  String get jamModeGuestHint => 'O anfitrião escolhe o modo da fila';
+
+  @override
+  String get jamSuggested => 'Sugerido';
+
+  @override
   String get jamEmpty =>
       'Ponha faixas na fila a partir da biblioteca ou da pesquisa';
 
@@ -1158,7 +1170,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String jamPeople(int n) {
-    return 'Jam, $n pessoas';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Jam, $n pessoas',
+      one: 'Jam, 1 pessoa',
+    );
+    return '$_temp0';
   }
 
   @override

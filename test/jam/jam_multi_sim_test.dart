@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:codecore/services/jam/jam_guest.dart';
 import 'package:codecore/services/jam/jam_host.dart';
 import 'package:codecore/services/jam/jam_models.dart';
+import 'package:codecore/services/jam/jam_part_feeder.dart';
+import 'package:codecore/services/jam/jam_state.dart';
 import 'package:codecore/services/share/offers.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -76,6 +78,7 @@ Future<JamState> reach(JamGuest g, bool Function(JamState) test) {
 }
 
 void main() {
+  feederTests();
   late List<Dev> devs;
   late Directory dir;
 
@@ -225,5 +228,142 @@ void main() {
     host.jam.endSession();
     await Future.wait(ended);
     expect(host.jam.state!.ended, true);
+  });
+}
+
+/// Host and guests in memory: the reducer plus one feeder per device (66.4, 66.5).
+class _Sim {
+  _Sim(List<String> ids, {Map<String, int> parts = const {}, this.suggested = const {}}) {
+    s = JamState(
+      hostDeviceId: ids.first,
+      outputDeviceId: ids.first,
+      mode: JamMode.together,
+      participants: [for (final i in ids) JamParticipant(id: i, name: i)],
+    );
+    for (final id in ids) {
+      feeders[id] = JamPartFeeder(
+        ownId: id,
+        part: [for (var n = 0; n < (parts[id] ?? 0); n++) '$id$n'],
+        send: (c) async => send(id, c),
+        itemOf: (k) async =>
+            JamItem(id: 0, ownerDeviceId: id, title: k, ext: 'mp3', partKey: k),
+        suggest: (_) async => suggested.contains(id)
+            ? JamItem(
+                id: 0,
+                ownerDeviceId: id,
+                title: 'sug${++_n}',
+                ext: 'mp3',
+                suggested: true)
+            : null,
+      );
+    }
+  }
+
+  late JamState s;
+  final Set<String> suggested;
+  final feeders = <String, JamPartFeeder>{};
+  var _n = 0;
+
+  JamResult send(String from, JamCommand c) {
+    final r = applyCommand(s, c, from: from, nowMs: 0);
+    if (r.isOk) {
+      s = r.state!;
+      for (final f in feeders.values) {
+        unawaited(f.update(s));
+      }
+    }
+    return r;
+  }
+
+  /// Until no feeder has anything left to send.
+  Future<void> settle() async {
+    for (var v = -1; v != s.version;) {
+      v = s.version;
+      await Future.wait([for (final f in feeders.values) f.update(s)]);
+    }
+  }
+}
+
+void feederTests() {
+  group('part feeder', () {
+    test('host and two guests with 300 tracks each: 500 played, none lost, none twice, at most 200', () async {
+      final sim = _Sim(['h', 'a', 'b'], parts: {'h': 300, 'a': 300, 'b': 300});
+      await sim.settle();
+      expect(sim.s.items.length, lessThanOrEqualTo(maxJamItems));
+      final played = <String>[];
+      for (var n = 0; n < 500; n++) {
+        played.add(sim.s.current!.partKey!);
+        sim.send('h', JamCommand.trackEnded(sim.s.current!.id));
+        await sim.settle();
+        expect(sim.s.items.length, lessThanOrEqualTo(maxJamItems), reason: 'step $n');
+      }
+      expect(played.toSet().length, 500);
+      for (final id in ['h', 'a', 'b']) {
+        // Each part plays in its own order.
+        final mine = [for (final k in played) if (k.startsWith(id)) int.parse(k.substring(1))];
+        expect(mine, [...mine]..sort(), reason: id);
+      }
+      final inJam = [for (final i in sim.s.items) i.partKey!];
+      final left = [for (final f in sim.feeders.values) ...f.unsent];
+      final all = [...played, sim.s.current!.partKey!, ...inJam, ...left];
+      // current is also in inJam: every key of the 900 appears, and only the ones in the Jam twice.
+      expect(all.toSet().length, 900);
+      expect(inJam.toSet().length, inJam.length);
+      expect(left.toSet().intersection({...played, ...inJam}), isEmpty);
+    });
+
+    test('a full Jam with nothing played refuses; the key stays in the part and enters after the first played track', () async {
+      final sim = _Sim(['h', 'a', 'b'], parts: {'h': 100, 'a': 100, 'b': 100});
+      await sim.settle();
+      int total() => sim.s.items.length + [for (final f in sim.feeders.values) ...f.unsent].length;
+      expect(sim.s.items.length, maxJamItems);
+      expect(total(), 300);
+      sim.send('h', JamCommand.trackEnded(sim.s.current!.id));
+      await sim.settle();
+      expect(sim.s.items.length, maxJamItems);
+      expect(total(), 299); // the first one played slid out, nothing else lost
+      expect([for (final f in sim.feeders.values) ...f.unsent], hasLength(99));
+    });
+
+    test('a track removed from the Jam unplayed stays removed, by the host or by its owner', () async {
+      final sim = _Sim(['h', 'a'], parts: {'h': 3, 'a': 5});
+      await sim.settle();
+      final gone = sim.s.items.lastWhere((i) => i.partKey == 'a3');
+      sim.send('h', JamCommand.remove(gone.id)); // the host removes a guest track
+      await sim.settle();
+      expect(sim.s.items.where((i) => i.partKey == 'a3'), isEmpty);
+      final mine = sim.s.items.lastWhere((i) => i.partKey == 'a2');
+      sim.feeders['a']!.forget('a2'); // before the state change reaches the feeder
+      sim.send('a', JamCommand.remove(mine.id));
+      await sim.settle();
+      expect(sim.s.items.where((i) => i.partKey == 'a2'), isEmpty);
+    });
+
+    test('an empty part gets one suggestion at its turn, never two while waiting', () async {
+      final sim = _Sim(['h', 'a'], parts: {'h': 4}, suggested: {'a'});
+      await sim.settle();
+      List<JamItem> mineA() => [
+            for (final (n, i) in sim.s.items.indexed)
+              if (n > sim.s.currentIndex && i.ownerDeviceId == 'a') i,
+          ];
+      expect(mineA().length, 1);
+      expect(mineA().single.suggested, true);
+      for (var n = 0; n < 3; n++) {
+        sim.send('h', JamCommand.trackEnded(sim.s.current!.id));
+        await sim.settle();
+        expect(mineA().length, lessThanOrEqualTo(1));
+      }
+      expect(sim.s.items.where((i) => i.suggested).length, greaterThan(1));
+    });
+
+    test('stops in host mode and resumes in together mode', () async {
+      final sim = _Sim(['h', 'a'], parts: {'a': 3});
+      sim.s = sim.s.copyWith(mode: JamMode.host);
+      await sim.settle();
+      expect(sim.s.items, isEmpty);
+      sim.send('h', const JamCommand.setMode(JamMode.together));
+      await sim.settle();
+      expect(sim.s.items.length, 3);
+    });
   });
 }

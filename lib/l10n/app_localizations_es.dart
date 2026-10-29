@@ -1003,6 +1003,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get jamQueue => 'Cola compartida';
 
   @override
+  String get jamModeHost => 'Cola del anfitrión';
+
+  @override
+  String get jamModeTogether => 'Cola conjunta';
+
+  @override
+  String get jamModeGuestHint => 'El anfitrión elige el modo de la cola';
+
+  @override
+  String get jamSuggested => 'Sugerido';
+
+  @override
   String get jamEmpty =>
       'Pon canciones en cola desde la biblioteca o la búsqueda';
 
@@ -1158,7 +1170,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String jamPeople(int n) {
-    return 'Jam, $n personas';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Jam, $n personas',
+      one: 'Jam, 1 persona',
+    );
+    return '$_temp0';
   }
 
   @override

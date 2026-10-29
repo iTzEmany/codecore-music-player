@@ -558,6 +558,10 @@
   "jamIncomingBody": "Ascoltate insieme da una coda condivisa.",
   "jamIncomingDialog": "La musica parte da questo dispositivo e potete aggiungere brani entrambi.",
   "jamQueue": "Coda condivisa",
+  "jamModeHost": "Coda dell'host",
+  "jamModeTogether": "Coda insieme",
+  "jamModeGuestHint": "La modalità della coda la sceglie l'host",
+  "jamSuggested": "Suggerito",
   "jamEmpty": "Metti in coda dalla libreria o dalla ricerca",
   "jamOnlineFailed": "Impossibile aggiungere «{title}» alla Jam",
   "@jamOnlineFailed": {
@@ -658,7 +662,7 @@
   "navSearch": "Cerca",
   "devicesTitle": "Dispositivi",
   "devicesJamActive": "Jam attiva",
-  "jamPeople": "Jam, {n} persone",
+  "jamPeople": "{n, plural, one{Jam, 1 persona} other{Jam, {n} persone}}",
   "@jamPeople": {
     "placeholders": {
       "n": {

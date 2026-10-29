@@ -534,6 +534,10 @@
   "jamIncomingBody": "Écoutez ensemble depuis une file d’attente partagée.",
   "jamIncomingDialog": "La musique est diffusée depuis cet appareil et vous pouvez tous les deux ajouter des titres.",
   "jamQueue": "File d’attente partagée",
+  "jamModeHost": "File de l’hôte",
+  "jamModeTogether": "File commune",
+  "jamModeGuestHint": "L’hôte choisit le mode de la file",
+  "jamSuggested": "Suggéré",
   "jamEmpty": "Ajoutez des titres à la file depuis la bibliothèque ou la recherche",
   "jamOnlineFailed": "Impossible d’ajouter « {title} » à la Jam",
   "@jamOnlineFailed": {
@@ -634,7 +638,7 @@
   "navSearch": "Rechercher",
   "devicesTitle": "Appareils",
   "devicesJamActive": "Jam active",
-  "jamPeople": "Jam, {n} personnes",
+  "jamPeople": "{n, plural, one{Jam, 1 personne} other{Jam, {n} personnes}}",
   "@jamPeople": {
     "placeholders": {
       "n": {
