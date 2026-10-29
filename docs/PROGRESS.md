@@ -1129,7 +1129,7 @@ mobile_scanner — fase 24 — 2026-10-19
 - [x] 66.4 Parte di ognuno e feeder
 - [x] 66.5 Suggeriti locali
 - [x] 66.6 Ritorno, ingresso e uscita (reducer, removeMember e controller; D-221)
-- [ ] 66.7 Controlli di fase
+- [x] 66.7 Controlli di fase
 
 ## Fase 67 — Jam della cassa (`fase-67-jam-della-cassa.md`)
 - [ ] 67.1 Uscite Bluetooth dal lato nativo
