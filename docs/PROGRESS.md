@@ -1144,16 +1144,20 @@ mobile_scanner — fase 24 — 2026-10-19
 ## Fase 68 — Scoperta e chiusura (`fase-68-scoperta-e-chiusura-jam.md`)
 - [x] 68.1 Maschera di rete vera
 - [x] 68.2 Misure di fluidità
-- [~] 68.3 Prova a mano con due telefoni (utente, D-224): cassa e R-119 provati, KO 1, 3, 4 e D-263 alla fase di rilievi; mancano R-88 … R-95 e il suggerito
+- [~] 68.3 Prova a mano con due telefoni (utente, D-224): cassa e R-119 provati, KO 1, 3, 4 e D-263 in 69.1 … 69.3; R-88 … R-95 e il suggerito nella 69.4
 - [x] 68.4 Chiusura (il §2 di `docs/prossimi-lavori.md`, non tracciato, lo segna l'utente)
 
 ## Fase 69 — Fondamenta della Jam a distanza (`fase-69-fondamenta-jam-distanza.md`)
-- [ ] 69.1 `JamGuestLink` senza spostare codice
-- [ ] 69.2 `admitRequest` e `JamGate`
-- [ ] 69.3 Sospendi, Blocca e l'avviso dell'ospite
-- [ ] 69.4 `sodium` nella build e vettori noti
-- [ ] 69.5 Broker e «Prova connessione»
-- [ ] 69.6 Controlli di fase
+- [ ] 69.1 La Jam della cassa con la cassa già collegata all'avvio (KO 3 della 68.3)
+- [ ] 69.2 L'offerta della cassa sopra la schermata della Jam (KO 4)
+- [ ] 69.3 Jam piena non muta e «Continua sul telefono» (KO 1, D-263)
+- [ ] 69.4 Prova a mano dei rilievi e resti della 68.3 (utente)
+- [ ] 69.5 `JamGuestLink` senza spostare codice
+- [ ] 69.6 `admitRequest` e `JamGate`
+- [ ] 69.7 Sospendi, Blocca e l'avviso dell'ospite
+- [ ] 69.8 `sodium` nella build e vettori noti
+- [ ] 69.9 Broker e «Prova connessione»
+- [ ] 69.10 Controlli di fase
 
 ## Fase 70 — Ponte e protocollo (`fase-70-ponte-jam-distanza.md`)
 - [ ] 70.1 `JamProtocol`
