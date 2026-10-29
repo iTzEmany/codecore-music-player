@@ -3038,5 +3038,47 @@
         "type": "int"
       }
     }
-  }
+  },
+  "speakerPermTitle": "Bluetooth-Berechtigung",
+  "speakerPermBody": "Um deinen Lautsprecher zu erkennen, muss Codecore sehen, welche Bluetooth-Geräte verbunden sind. Sonst wird nichts gelesen.",
+  "speakerPermAllow": "Erlauben",
+  "speakerNotNow": "Nicht jetzt",
+  "speakerAskTitle": "Ist {name} ein Lautsprecher?",
+  "@speakerAskTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "speakerAskBody": "Wenn ja, öffnet Codecore beim Verbinden von selbst eine Jam, der andere beitreten können.",
+  "speakerYes": "Ja",
+  "speakerNo": "Nein",
+  "speakerJamSection": "Jam auf dem Lautsprecher",
+  "speakerJamHint": "Verbindet sich ein Bluetooth-Lautsprecher, öffnet Codecore von selbst eine Jam, der andere beitreten können.",
+  "speakerNoDevices": "Noch kein Gerät markiert",
+  "speakerIsSpeaker": "Lautsprecher",
+  "speakerNotSpeaker": "Kein Lautsprecher",
+  "speakerPermDenied": "Bluetooth-Berechtigung verweigert",
+  "speakerPermRetry": "Tippen, um erneut zu fragen",
+  "speakerChange": "{name} ändern",
+  "@speakerChange": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamInviteBanner": "Der Jam von {name} beitreten",
+  "@jamInviteBanner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamInviteDismiss": "Ausblenden",
+  "speakerAwayNotice": "Lautsprecher verbinden",
+  "speakerOfferTitle": "Den Jam auf deinem Lautsprecher abspielen?",
+  "speakerOfferBody": "Dein Lautsprecher ist verbunden und der Jam pausiert. Wenn du möchtest, startet die Musik von hier."
 }

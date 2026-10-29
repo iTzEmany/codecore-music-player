@@ -13,6 +13,7 @@ import 'package:path/path.dart' as p;
 import 'package:codecore/services/share/offers.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shelf/shelf.dart' as shelf;
 
 /// The first state of [g] that passes [test], the one it already has included:
 /// a state that arrived before the wait would otherwise cost a whole long poll.
@@ -28,6 +29,7 @@ void main() {
   late int hostPort, guestPort;
   late JamGuest guest;
   late Directory dir;
+  var noSpeaker = false;
 
   setUp(() async {
     dir = Directory.systemTemp.createTempSync('jam_int');
@@ -40,7 +42,15 @@ void main() {
     hostNode = OfferNode(
         OfferService(deviceId: 'host', deviceName: 'PC', allowLoopback: true),
         allowLoopback: true,
-        extraRoutes: {'/jam': hostJam.buildRouter().call});
+        extraRoutes: {
+          '/jam': (r) async {
+            // Stands in for a host whose speaker is away (JamHost answers so).
+            if (noSpeaker && r.method == 'POST' && r.url.path.endsWith('/cmd')) {
+              return shelf.Response(409, body: 'no speaker');
+            }
+            return hostJam.buildRouter().call(r);
+          }
+        });
     guestNode = OfferNode(
         OfferService(deviceId: 'guest', deviceName: 'Phone', allowLoopback: true),
         allowLoopback: true,
@@ -95,6 +105,13 @@ void main() {
     final mv = await guest.send(const JamCommand.move(2, 0));
     expect(mv.isOk, true);
     expect(hostJam.state!.items.first.title, 'H');
+  });
+
+  test('a 409 «no speaker» reaches the guest as noSpeaker, not full', () async {
+    await join();
+    noSpeaker = true;
+    expect((await guest.send(const JamCommand.play())).error, JamError.noSpeaker);
+    noSpeaker = false;
   });
 
   test('an unknown command reaches the guest as invalid (old host)', () async {

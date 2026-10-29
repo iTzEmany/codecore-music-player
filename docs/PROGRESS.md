@@ -1129,17 +1129,17 @@ mobile_scanner — fase 24 — 2026-10-19
 - [x] 66.4 Parte di ognuno e feeder
 - [x] 66.5 Suggeriti locali
 - [x] 66.6 Ritorno, ingresso e uscita (reducer, removeMember e controller; D-221)
-- [ ] 66.7 Controlli di fase
+- [x] 66.7 Controlli di fase
 
 ## Fase 67 — Jam della cassa (`fase-67-jam-della-cassa.md`)
-- [ ] 67.1 Uscite Bluetooth dal lato nativo
-- [ ] 67.2 Permesso e «È una cassa?»
-- [ ] 67.3 Impostazioni «Jam sulla cassa»
-- [ ] 67.4 Jam aperta da sé e annunciata
-- [ ] 67.5 Banner e «Dispositivi»
-- [ ] 67.6 Cassa assente
-- [ ] 67.7 La cassa di un ospite salva la Jam ferma
-- [ ] 67.8 Controlli di fase
+- [~] 67.1 Uscite Bluetooth dal lato nativo (manca la prova sul Motorola, D-223)
+- [~] 67.2 Permesso e «È una cassa?» (manca la prova sul Motorola, D-223)
+- [x] 67.3 Impostazioni «Jam sulla cassa»
+- [x] 67.4 Jam aperta da sé e annunciata
+- [x] 67.5 Banner e «Dispositivi»
+- [x] 67.6 Cassa assente
+- [x] 67.7 La cassa di un ospite salva la Jam ferma
+- [x] 67.8 Controlli di fase
 
 ## Fase 68 — Scoperta e chiusura (`fase-68-scoperta-e-chiusura-jam.md`)
 - [ ] 68.1 Maschera di rete vera

@@ -5646,4 +5646,77 @@ class AppLocalizationsDe extends AppLocalizations {
   String coverSizePx(int w, int h) {
     return '$w × $h';
   }
+
+  @override
+  String get speakerPermTitle => 'Bluetooth-Berechtigung';
+
+  @override
+  String get speakerPermBody =>
+      'Um deinen Lautsprecher zu erkennen, muss Codecore sehen, welche Bluetooth-Geräte verbunden sind. Sonst wird nichts gelesen.';
+
+  @override
+  String get speakerPermAllow => 'Erlauben';
+
+  @override
+  String get speakerNotNow => 'Nicht jetzt';
+
+  @override
+  String speakerAskTitle(String name) {
+    return 'Ist $name ein Lautsprecher?';
+  }
+
+  @override
+  String get speakerAskBody =>
+      'Wenn ja, öffnet Codecore beim Verbinden von selbst eine Jam, der andere beitreten können.';
+
+  @override
+  String get speakerYes => 'Ja';
+
+  @override
+  String get speakerNo => 'Nein';
+
+  @override
+  String get speakerJamSection => 'Jam auf dem Lautsprecher';
+
+  @override
+  String get speakerJamHint =>
+      'Verbindet sich ein Bluetooth-Lautsprecher, öffnet Codecore von selbst eine Jam, der andere beitreten können.';
+
+  @override
+  String get speakerNoDevices => 'Noch kein Gerät markiert';
+
+  @override
+  String get speakerIsSpeaker => 'Lautsprecher';
+
+  @override
+  String get speakerNotSpeaker => 'Kein Lautsprecher';
+
+  @override
+  String get speakerPermDenied => 'Bluetooth-Berechtigung verweigert';
+
+  @override
+  String get speakerPermRetry => 'Tippen, um erneut zu fragen';
+
+  @override
+  String speakerChange(String name) {
+    return '$name ändern';
+  }
+
+  @override
+  String jamInviteBanner(String name) {
+    return 'Der Jam von $name beitreten';
+  }
+
+  @override
+  String get jamInviteDismiss => 'Ausblenden';
+
+  @override
+  String get speakerAwayNotice => 'Lautsprecher verbinden';
+
+  @override
+  String get speakerOfferTitle => 'Den Jam auf deinem Lautsprecher abspielen?';
+
+  @override
+  String get speakerOfferBody =>
+      'Dein Lautsprecher ist verbunden und der Jam pausiert. Wenn du möchtest, startet die Musik von hier.';
 }

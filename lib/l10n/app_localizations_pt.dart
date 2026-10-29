@@ -5630,4 +5630,77 @@ class AppLocalizationsPt extends AppLocalizations {
   String coverSizePx(int w, int h) {
     return '$w × $h';
   }
+
+  @override
+  String get speakerPermTitle => 'Permissão de Bluetooth';
+
+  @override
+  String get speakerPermBody =>
+      'Para reconhecer a tua coluna, o Codecore precisa de ver que dispositivos Bluetooth estão ligados. Não lê mais nada.';
+
+  @override
+  String get speakerPermAllow => 'Permitir';
+
+  @override
+  String get speakerNotNow => 'Agora não';
+
+  @override
+  String speakerAskTitle(String name) {
+    return '$name é uma coluna?';
+  }
+
+  @override
+  String get speakerAskBody =>
+      'Se for, ao ligar o Codecore abre sozinho uma Jam a que os outros se podem juntar.';
+
+  @override
+  String get speakerYes => 'Sim';
+
+  @override
+  String get speakerNo => 'Não';
+
+  @override
+  String get speakerJamSection => 'Jam na coluna';
+
+  @override
+  String get speakerJamHint =>
+      'Quando uma coluna Bluetooth se liga, o Codecore abre sozinho uma Jam a que os outros se podem juntar.';
+
+  @override
+  String get speakerNoDevices => 'Ainda não há dispositivos marcados';
+
+  @override
+  String get speakerIsSpeaker => 'Coluna';
+
+  @override
+  String get speakerNotSpeaker => 'Não é uma coluna';
+
+  @override
+  String get speakerPermDenied => 'Permissão de Bluetooth recusada';
+
+  @override
+  String get speakerPermRetry => 'Toca para pedir de novo';
+
+  @override
+  String speakerChange(String name) {
+    return 'Alterar $name';
+  }
+
+  @override
+  String jamInviteBanner(String name) {
+    return 'Entrar na Jam de $name';
+  }
+
+  @override
+  String get jamInviteDismiss => 'Ocultar';
+
+  @override
+  String get speakerAwayNotice => 'Liga uma coluna';
+
+  @override
+  String get speakerOfferTitle => 'Tocar a Jam na tua coluna?';
+
+  @override
+  String get speakerOfferBody =>
+      'A tua coluna está ligada e a Jam está parada. Se quiseres, a música continua a partir daqui.';
 }

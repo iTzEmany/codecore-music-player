@@ -5676,4 +5676,77 @@ class AppLocalizationsFr extends AppLocalizations {
   String coverSizePx(int w, int h) {
     return '$w × $h';
   }
+
+  @override
+  String get speakerPermTitle => 'Autorisation Bluetooth';
+
+  @override
+  String get speakerPermBody =>
+      'Pour reconnaître ton enceinte, Codecore doit voir quels appareils Bluetooth sont connectés. Il ne lit rien d’autre.';
+
+  @override
+  String get speakerPermAllow => 'Autoriser';
+
+  @override
+  String get speakerNotNow => 'Pas maintenant';
+
+  @override
+  String speakerAskTitle(String name) {
+    return '$name est-elle une enceinte ?';
+  }
+
+  @override
+  String get speakerAskBody =>
+      'Si oui, Codecore ouvre tout seul une Jam à la connexion, que les autres peuvent rejoindre.';
+
+  @override
+  String get speakerYes => 'Oui';
+
+  @override
+  String get speakerNo => 'Non';
+
+  @override
+  String get speakerJamSection => 'Jam sur l’enceinte';
+
+  @override
+  String get speakerJamHint =>
+      'Quand une enceinte Bluetooth se connecte, Codecore ouvre tout seul une Jam que les autres peuvent rejoindre.';
+
+  @override
+  String get speakerNoDevices => 'Aucun appareil enregistré pour l’instant';
+
+  @override
+  String get speakerIsSpeaker => 'Enceinte';
+
+  @override
+  String get speakerNotSpeaker => 'Pas une enceinte';
+
+  @override
+  String get speakerPermDenied => 'Autorisation Bluetooth refusée';
+
+  @override
+  String get speakerPermRetry => 'Touche pour la redemander';
+
+  @override
+  String speakerChange(String name) {
+    return 'Modifier $name';
+  }
+
+  @override
+  String jamInviteBanner(String name) {
+    return 'Rejoindre la Jam de $name';
+  }
+
+  @override
+  String get jamInviteDismiss => 'Masquer';
+
+  @override
+  String get speakerAwayNotice => 'Connecte une enceinte';
+
+  @override
+  String get speakerOfferTitle => 'Jouer la Jam sur ton enceinte ?';
+
+  @override
+  String get speakerOfferBody =>
+      'Ton enceinte est connectée et la Jam est en pause. Si tu veux, la musique repart d’ici.';
 }

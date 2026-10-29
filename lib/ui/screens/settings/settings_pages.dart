@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/app_log.dart';
 import '../../../core/app_info.dart';
 import '../../../core/constants.dart';
+import '../../../core/platform.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/cover_ops.dart';
@@ -36,6 +37,7 @@ import 'log_export_tile.dart';
 import 'report_issue_tile.dart';
 import 'missing_tracks_screen.dart';
 import 'transition_settings_tiles.dart';
+import 'speaker_jam_tiles.dart';
 import 'trusted_devices_tiles.dart';
 import 'translation_models_tiles.dart';
 import 'update_tiles.dart';
@@ -391,6 +393,7 @@ List<SettingsGroup> _network(BuildContext context, WidgetRef ref) {
       ],
     ),
     ..._trustedGroup(context, ref),
+    ..._speakerGroup(context),
   ];
 }
 
@@ -544,6 +547,12 @@ List<SettingsGroup> _trustedGroup(BuildContext context, WidgetRef ref) {
   final tiles = trustedDevicesTiles(context, ref);
   if (tiles.isEmpty) return const [];
   return [SettingsGroup(title: context.l10n.trustedSection, children: tiles)];
+}
+
+/// «Jam sulla cassa»: Android only (the Bluetooth outputs come from the native side).
+List<SettingsGroup> _speakerGroup(BuildContext context) {
+  if (!isAndroid) return const [];
+  return [SettingsGroup(title: context.l10n.speakerJamSection, children: const [SpeakerJamTiles()])];
 }
 
 /// A (optionally titled) group of settings on a rounded surface.

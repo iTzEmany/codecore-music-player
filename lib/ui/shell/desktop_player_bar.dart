@@ -11,6 +11,7 @@ import '../../services/audio/play_queue.dart';
 import '../../services/jam/jam_models.dart';
 import '../screens/devices/devices_sheet.dart';
 import '../screens/jam/jam_screen.dart';
+import '../screens/jam/speaker_notices.dart';
 import '../screens/now_playing/now_playing_screen.dart';
 import '../theme/tokens.dart';
 import '../widgets/artist_links.dart';
@@ -234,7 +235,9 @@ class _JamControls extends ConsumerWidget {
           playing: playing,
           onPressed: s.jam?.current == null
               ? null
-              : () => ctrl.send(
+              : () => sendJamCommand(
+                  context,
+                  ctrl,
                   playing ? const JamCommand.pause() : const JamCommand.play(),
                 ),
         ),
@@ -242,7 +245,8 @@ class _JamControls extends ConsumerWidget {
           IconButton(
             tooltip: l.nextTrack,
             icon: const Icon(Icons.skip_next_rounded),
-            onPressed: () => ctrl.send(const JamCommand.next()),
+            onPressed: () =>
+                sendJamCommand(context, ctrl, const JamCommand.next()),
           ),
       ],
     );

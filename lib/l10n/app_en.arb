@@ -3038,5 +3038,47 @@
         "type": "int"
       }
     }
-  }
+  },
+  "speakerPermTitle": "Bluetooth permission",
+  "speakerPermBody": "To recognise your speaker, Codecore needs to see which Bluetooth devices are connected. It reads nothing else.",
+  "speakerPermAllow": "Allow",
+  "speakerNotNow": "Not now",
+  "speakerAskTitle": "Is {name} a speaker?",
+  "@speakerAskTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "speakerAskBody": "If it is, Codecore opens a Jam by itself when it connects, so others can join.",
+  "speakerYes": "Yes",
+  "speakerNo": "No",
+  "speakerJamSection": "Speaker Jam",
+  "speakerJamHint": "When a Bluetooth speaker connects, Codecore opens a Jam by itself that others can join.",
+  "speakerNoDevices": "No device marked yet",
+  "speakerIsSpeaker": "Speaker",
+  "speakerNotSpeaker": "Not a speaker",
+  "speakerPermDenied": "Bluetooth permission denied",
+  "speakerPermRetry": "Tap to ask again",
+  "speakerChange": "Change {name}",
+  "@speakerChange": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamInviteBanner": "Join {name}'s Jam",
+  "@jamInviteBanner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamInviteDismiss": "Hide",
+  "speakerAwayNotice": "Connect a speaker",
+  "speakerOfferTitle": "Play the Jam on your speaker?",
+  "speakerOfferBody": "Your speaker is connected and the Jam is paused. If you like, the music restarts from here."
 }

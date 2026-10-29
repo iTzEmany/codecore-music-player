@@ -198,4 +198,28 @@ void main() {
     ]));
     expect(asked, 1);
   });
+
+  test('remaining: our items after the current one, then the ones not sent, never twice', () async {
+    final f = JamPartFeeder(
+      ownId: 'a',
+      part: ['1', '2', '3', '4'],
+      send: (_) async => const JamResult.fail(JamError.full),
+      itemOf: (k) async => JamItem(id: 0, ownerDeviceId: 'a', title: k, ext: 'mp3', partKey: k),
+      suggest: (_) async => null,
+    );
+    JamItem it(int id, String owner, String ref) =>
+        JamItem(id: id, ownerDeviceId: owner, title: 't', ext: 'mp3', ref: ref, partKey: ref);
+    final js = JamState(
+      version: 2,
+      hostDeviceId: 'h',
+      outputDeviceId: 'h',
+      mode: JamMode.together,
+      currentIndex: 1,
+      items: [it(1, 'a', '1'), it(2, 'a', '2'), it(3, 'h', '9'), it(4, 'a', '3')],
+    );
+    await f.update(js); // the feeder has seen the Jam
+    // '1' and '2' played; '3' is in the Jam; '4' was never sent.
+    expect(f.remaining(js), [3, 4]);
+    expect(f.remaining(js.copyWith(mode: JamMode.host)), isEmpty);
+  });
 }

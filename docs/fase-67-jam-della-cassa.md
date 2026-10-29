@@ -24,7 +24,7 @@ Nelle impostazioni della Jam: interruttore acceso di serie, lista dei dispositiv
 **Fatto quando:** test widget dell'interruttore, della lista e del cambio; `settings_index_test` aggiornato.
 
 ### 67.4 — Jam aperta da sé e annunciata (R-111, R-113, R-115, D-196, D-211)
-`JamController.openSpeakerJam()`: Jam da host senza ospiti con `speaker = true` e uscita = solo l'host (invariante 4); nessun cambio visibile finché nessuno entra. Il pacchetto di scoperta (`discovery.dart`) porta `jam: {name}` finché la Jam della cassa è aperta. Senza ospiti, lo scollegamento la chiude in silenzio.
+`JamController.openSpeakerJam()` (chiamato da `SpeakerJam` tramite `port.open`): da fermo entra nello stato «in attesa» (D-226), solo l'annuncio, player, UI e servizio intatti; la Jam vera, con `speaker = true` e uscita = solo l'host (invariante 4), nasce alla prima richiesta accettata con la coda di quel momento; da host con Jam attiva `JamHost.makeSpeaker()`. Il pacchetto di scoperta (`discovery.dart`) porta `jam: {name}` finché la Jam della cassa è aperta. Senza ospiti, lo scollegamento la chiude in silenzio.
 
 **Fatto quando:** test: evento «cassa collegata» + interruttore acceso → Jam aperta e campo `jam` nel pacchetto; interruttore spento → niente; scollegamento senza ospiti → chiusa senza messaggi; nessuna uscita diversa dall'host accettata con `speaker = true`.
 
@@ -39,7 +39,7 @@ Lo scollegamento a Jam con ospiti → comando `speakerAway` dall'host: pausa, `s
 **Fatto quando:** test del reducer per ogni comando con la cassa assente; test con orologio finto per lo sblocco e per la fine a 10 minuti; test widget dell'avviso.
 
 ### 67.7 — La cassa di un ospite salva la Jam ferma (R-119, D-219, D-220)
-Con `speakerAwaySince != null`, un ospite il cui `SpeakerMonitor` vede una cassa collegata riceve il foglio «Suonare la Jam sulla tua cassa?»; sì → `setOutput(ospite)` + `speakerBack` mandato dall'host alla conferma (comando nuovo `offerSpeaker` dall'ospite, accettato solo con la Jam ferma). L'uscita resta all'ospite anche se torna la cassa dell'host; cassa dell'ospite sparita o ospite uscito → di nuovo `speakerAway`.
+Con `speakerAwaySince != null`, un ospite il cui `SpeakerMonitor` vede una cassa collegata riceve il foglio «Suonare la Jam sulla tua cassa?»; sì → comando `offerSpeaker` dall'ospite, accettato solo con `speaker && speakerAwaySince != null`: in un colpo solo uscite = [ospite] e `speakerAwaySince = null`; se la Jam non è ferma l'host risponde 409 `no speaker` (`JamError.noSpeaker`). L'uscita resta all'ospite anche se torna la cassa dell'host; cassa dell'ospite sparita o ospite uscito → di nuovo `speakerAway`.
 
 **Fatto quando:** test host+ospite in memoria per offerta accettata, offerta con cassa presente (rifiutata, nessun foglio), cassa dell'host che torna, uscita dell'ospite-uscita; test widget del foglio.
 

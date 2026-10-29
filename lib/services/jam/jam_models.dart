@@ -182,6 +182,8 @@ class JamState {
     this.nextItemId = 1,
     this.ended = false,
     this.mode = JamMode.host,
+    this.speaker = false,
+    this.speakerAwaySince,
   });
 
   final int version;
@@ -203,6 +205,12 @@ class JamState {
 
   /// Absent or unknown in JSON means [JamMode.host] (old peers, R-106).
   final JamMode mode;
+
+  /// A Bluetooth speaker plays for the host (JSON `spk`, absent = false).
+  final bool speaker;
+
+  /// Epoch ms (host clock) when the speaker disappeared; null = it is there.
+  final int? speakerAwaySince;
 
   JamParticipant? participant(String id) =>
       participants.where((p) => p.id == id).firstOrNull;
@@ -239,6 +247,9 @@ class JamState {
     int? nextItemId,
     bool? ended,
     JamMode? mode,
+    bool? speaker,
+    int? speakerAwaySince,
+    bool clearSpeakerAway = false,
   }) =>
       JamState(
         version: version ?? this.version,
@@ -255,6 +266,9 @@ class JamState {
         nextItemId: nextItemId ?? this.nextItemId,
         ended: ended ?? this.ended,
         mode: mode ?? this.mode,
+        speaker: speaker ?? this.speaker,
+        speakerAwaySince:
+            clearSpeakerAway ? null : speakerAwaySince ?? this.speakerAwaySince,
       );
 
   Map<String, Object?> toJson() => {
@@ -272,6 +286,8 @@ class JamState {
         'next': nextItemId,
         'ended': ended,
         if (mode != JamMode.host) 'mode': mode.name,
+        if (speaker) 'spk': true,
+        if (speakerAwaySince != null) 'spkAway': speakerAwaySince,
       };
 
   static JamState? tryParse(Object? j) {
@@ -323,6 +339,10 @@ class JamState {
       nextItemId: j['next'] is int ? j['next'] as int : items.length + 1,
       ended: j['ended'] == true,
       mode: j['mode'] == JamMode.together.name ? JamMode.together : JamMode.host,
+      speaker: j['spk'] == true,
+      speakerAwaySince: j['spk'] == true && j['spkAway'] is int && (j['spkAway'] as int) >= 0
+          ? j['spkAway'] as int
+          : null,
     );
   }
 }
@@ -345,6 +365,10 @@ enum JamCommandType {
   previous,
   // After `previous` for the same reason: an older host answers `invalid`.
   setMode,
+  // After `setMode`, same reason: an older host answers `invalid`.
+  speakerAway,
+  speakerBack,
+  offerSpeaker,
 }
 
 class JamCommand {
@@ -386,6 +410,15 @@ class JamCommand {
   /// Host only (D-184): switches the queue between host and together mode.
   const JamCommand.setMode(JamMode mode)
       : this._(JamCommandType.setMode, mode: mode);
+
+  /// The speaker is gone: the host, or the guest that was the only output (D-220).
+  const JamCommand.speakerAway() : this._(JamCommandType.speakerAway);
+
+  /// Host only: the speaker is back; the Jam stays paused.
+  const JamCommand.speakerBack() : this._(JamCommandType.speakerBack);
+
+  /// A guest offers its own output while the speaker is away.
+  const JamCommand.offerSpeaker() : this._(JamCommandType.offerSpeaker);
 
   final JamCommandType type;
   final JamMode? mode;
@@ -463,6 +496,12 @@ class JamCommand {
       case JamCommandType.setMode:
         final m = JamMode.values.where((e) => e.name == j['mode']).firstOrNull;
         return m == null ? null : JamCommand.setMode(m);
+      case JamCommandType.speakerAway:
+        return const JamCommand.speakerAway();
+      case JamCommandType.speakerBack:
+        return const JamCommand.speakerBack();
+      case JamCommandType.offerSpeaker:
+        return const JamCommand.offerSpeaker();
     }
   }
 }
@@ -473,6 +512,8 @@ enum JamError {
   invalid,
   full,
   ended,
+  // Last: with the speaker away, play/seek/next/jump/previous are refused.
+  noSpeaker,
 }
 
 class JamResult {

@@ -77,6 +77,18 @@ void main() {
     expect(st['status'], 'declined');
   });
 
+  test('open() starts the session without guests, idempotent; addMember after it does not reopen', () {
+    host.open();
+    expect(host.hosting, true);
+    expect(host.state!.participants.map((p) => p.id), ['host']);
+    final sid = host.sessionId;
+    host.open();
+    expect(host.sessionId, sid);
+    final c = host.addMember(id: 'g', name: 'G', host: '1.2.3.4', port: 1);
+    expect(c!.sid, sid);
+    expect(host.state!.participants, hasLength(2));
+  });
+
   test('request expires and refuses non-local', () async {
     await call('POST', 'request', body: reqBody());
     now = now.add(const Duration(minutes: 6));
@@ -281,5 +293,52 @@ void main() {
     expect(await ok.read().expand((c) => c).toList(), [1, 2, 3]);
     expect((await call('GET', '${s.sid}/cover/2', headers: auth)).statusCode, 404);
     expect((await call('GET', 'wrong/cover/1', headers: auth)).statusCode, 401);
+  });
+
+  test('the guest that plays for the speaker leaves: speakerAway, the host takes over (D-220)', () {
+    host.open();
+    host.makeSpeaker();
+    host.addMember(id: 'g', name: 'Phone', host: '192.168.1.50', port: 4000);
+    host.apply(const JamCommand.speakerAway());
+    expect(host.apply(const JamCommand.offerSpeaker(), from: 'g').isOk, isTrue);
+    expect(host.state!.outputs, ['g']);
+    host.removeMember('g');
+    final s = host.state!;
+    expect(s.speaker, isTrue);
+    expect(s.speakerAwaySince, isNotNull);
+    expect(s.outputs, ['host']);
+    expect(s.playing, isFalse);
+  });
+
+  test('makeSpeaker turns a running Jam into the speaker one', () {
+    host.addMember(id: 'g', name: 'Phone', host: '192.168.1.50', port: 4000);
+    host.makeSpeaker();
+    expect(host.state!.speaker, isTrue);
+    expect(host.state!.outputs, ['host']);
+  });
+
+  test('makeSpeaker on a Jam playing on a guest or on several outputs: only the host', () {
+    host.addMember(id: 'g', name: 'Phone', host: '192.168.1.50', port: 4000);
+    host.apply(const JamCommand.setOutput('g'));
+    expect(host.state!.outputs, ['g']);
+    host.makeSpeaker();
+    expect(host.state!.outputs, ['host']);
+
+    final other = JamHost(deviceId: 'host', deviceName: 'PC', now: () => now);
+    other.addMember(id: 'g', name: 'Phone', host: '192.168.1.50', port: 4000);
+    other.apply(const JamCommand.setOutputs(['host', 'g']));
+    expect(other.state!.outputs, hasLength(2));
+    other.makeSpeaker();
+    expect(other.state!.outputs, ['host']);
+  });
+
+  test('a playback command with the speaker away is a 409 "no speaker"', () async {
+    final s = await startSession();
+    host.makeSpeaker();
+    host.apply(const JamCommand.speakerAway());
+    final r = await call('POST', '${s.sid}/cmd',
+        body: const JamCommand.play().toJson(), headers: {'x-jam-token': s.token});
+    expect(r.statusCode, 409);
+    expect(await r.readAsString(), 'no speaker');
   });
 }

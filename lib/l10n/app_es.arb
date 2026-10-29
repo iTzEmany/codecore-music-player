@@ -3038,5 +3038,47 @@
         "type": "int"
       }
     }
-  }
+  },
+  "speakerPermTitle": "Permiso de Bluetooth",
+  "speakerPermBody": "Para reconocer tu altavoz, Codecore necesita ver qué dispositivos Bluetooth están conectados. No lee nada más.",
+  "speakerPermAllow": "Permitir",
+  "speakerNotNow": "Ahora no",
+  "speakerAskTitle": "¿{name} es un altavoz?",
+  "@speakerAskTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "speakerAskBody": "Si lo es, al conectarse Codecore abre solo una Jam a la que otros pueden unirse.",
+  "speakerYes": "Sí",
+  "speakerNo": "No",
+  "speakerJamSection": "Jam en el altavoz",
+  "speakerJamHint": "Cuando se conecta un altavoz Bluetooth, Codecore abre solo una Jam a la que otros pueden unirse.",
+  "speakerNoDevices": "Aún no hay dispositivos marcados",
+  "speakerIsSpeaker": "Altavoz",
+  "speakerNotSpeaker": "No es un altavoz",
+  "speakerPermDenied": "Permiso de Bluetooth denegado",
+  "speakerPermRetry": "Toca para pedirlo de nuevo",
+  "speakerChange": "Cambiar {name}",
+  "@speakerChange": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamInviteBanner": "Unirte a la Jam de {name}",
+  "@jamInviteBanner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamInviteDismiss": "Ocultar",
+  "speakerAwayNotice": "Conecta un altavoz",
+  "speakerOfferTitle": "¿Reproducir la Jam en tu altavoz?",
+  "speakerOfferBody": "Tu altavoz está conectado y la Jam está en pausa. Si quieres, la música sigue desde aquí."
 }
