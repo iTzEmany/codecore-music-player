@@ -243,7 +243,9 @@ class MainActivity : AudioServiceActivity() {
         btReceiver = r
         try {
             val f = IntentFilter(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)
-            if (Build.VERSION.SDK_INT >= 33) registerReceiver(r, f, Context.RECEIVER_NOT_EXPORTED)
+            // EXPORTED: the broadcast comes from the Bluetooth process (uid 1002), which a
+            // NOT_EXPORTED receiver never gets; it is a protected broadcast, so no spoofing.
+            if (Build.VERSION.SDK_INT >= 33) registerReceiver(r, f, Context.RECEIVER_EXPORTED)
             else registerReceiver(r, f)
         } catch (e: Exception) {
             android.util.Log.w("Codecore", "bluetooth receiver failed", e)

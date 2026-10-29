@@ -23,6 +23,23 @@ Hotspot del Motorola; Motorola host con le cuffie JBL segnate come cassa, Mi A3 
 
 **Fatto quando:** esiti scritti qui sotto, uno per riga; i KO diventano passi nuovi o vanno in «Rinviato» con il motivo.
 
+**Esiti (29/10, Motorola + Mi A3 sull'hotspot del Motorola, JBL Tune 720BT):**
+- UniBA (/16): i telefoni non si vedono, la rete filtra il broadcast (D-206); R-117 non dimostrabile lì.
+- Hotspot: scoperta, banner «Unisciti alla Jam di Ema», richiesta e «Accetta» OK (200 di 2302 brani in coda).
+- Solo l'host suona, anche con un brano della libreria dell'ospite: OK. «Successivo» dall'ospite: OK.
+- L'ospite non cambia la modalità della coda: OK. «Coda insieme»: maniglie sparite su entrambi, brano dell'ospite subito dopo il corrente; ritorno a «Coda dell'host» con le maniglie: OK.
+- «Coda dell'host» a Jam piena: l'aggiunta dell'ospite entra dopo il corrente scartando un ereditato: OK.
+- **KO 1** «Coda insieme» a Jam piena (200 brani dell'host): l'aggiunta a mano dell'ospite è rifiutata (`JamError.full` con `cur == 0`) senza messaggio, mentre la UI dice «Aggiunto in coda»; ogni posto liberato lo prende il feeder. → fase di rilievi.
+- **KO 2** R-114 sul Motorola (Android 15): JBL spente → la Jam continua dall'altoparlante, niente «Collega una cassa». Il ricevitore A2DP registrato `RECEIVER_NOT_EXPORTED` non riceve il broadcast del processo Bluetooth. Corretto in questa PR (`RECEIVER_EXPORTED`, broadcast protetto).
+- Con la correzione: JBL spente → «Collega una cassa» su entrambi e play bloccato anche dall'ospite; riaccese → sblocco, la Jam resta in pausa e riparte col play, suona solo il Motorola: OK.
+- **KO 3** cassa già collegata all'avvio dell'app → nessuna Jam della cassa: `openSpeakerJam` esce muto finché l'hub non c'è (`_host` null) e `SpeakerJam._opened` resta vero, quindi niente nuovo tentativo. Spegnere e riaccendere la cassa ad app avviata la apre. → fase di rilievi.
+- Bluetooth del Mi A3 (Android 11): «È una cassa?» → Sì, Jam della cassa aperta sul Mi A3, banner sul Motorola: OK.
+- R-119 a ruoli scambiati (Mi A3 host con le JBL, Motorola ospite): JBL staccate dal Mi A3 → «Collega una cassa» su entrambi; collegate al Motorola → «Suonare la Jam sulla tua cassa?» → Sì → suona solo il Motorola sulle JBL, il Mi A3 tace: OK.
+- **KO 4** l'offerta di R-119 si apre sotto la schermata Jam: con la Jam aperta non si vede, compare solo tornando alla Home. → fase di rilievi.
+- Richiesta nuova: con la cassa scollegata l'host può continuare sull'altoparlante del telefono (D-263). → fase di rilievi.
+- Non provati: R-88 … R-95 e il brano suggerito di «Coda insieme». → prova a mano della fase di rilievi.
+- Note: un calo del Wi-Fi del Mi A3 ha ritardato di ~20 s l'ingresso, poi è entrato da solo; avvisi «jam: no cover for …» (404) a ogni brano senza copertina, rumorosi nel log.
+
 ### 68.4 — Chiusura
 `docs/handoff.md` aggiornato, `docs/prossimi-lavori.md` §2 segnato come fatto per «Cassa Bluetooth e modalità della coda», pulizia del disco (`pulizia.sh`).
 
