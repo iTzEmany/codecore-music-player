@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:codecore/data/db/app_database.dart';
@@ -269,6 +270,28 @@ void main() {
     expect(c.read(jamProvider).left, isFalse);
   });
 
+  test('a guest whose link reports lost while leaving still reads «left», not «lost»', () async {
+    final jam = c.read(jamProvider.notifier);
+    jam.guestFactory = _LeavingGuest.new;
+    const peer = Peer(id: 'x', name: 'X', host: '10.0.0.9', port: 1, platform: 'linux');
+    await jam.request(peer);
+    expect(c.read(jamProvider).phase, JamPhase.active);
+    await jam.end();
+    final s = c.read(jamProvider);
+    expect((s.phase, s.left, s.lost), (JamPhase.ended, true, false));
+  });
+
+  test('a host that really disappears is «lost»', () async {
+    final jam = c.read(jamProvider.notifier);
+    jam.guestFactory = _LeavingGuest.new;
+    const peer = Peer(id: 'x', name: 'X', host: '10.0.0.9', port: 1, platform: 'linux');
+    await jam.request(peer);
+    _LeavingGuest.last.emitLost();
+    await Future<void>.delayed(Duration.zero);
+    final s = c.read(jamProvider);
+    expect((s.phase, s.left, s.lost), (JamPhase.ended, false, true));
+  });
+
   test('a 300-track seed in «Coda insieme» puts 180 in the Jam, the rest stays in the part', () async {
     final many = await manyTracks(300);
     await handler.playQueue(many, 0);
@@ -324,4 +347,37 @@ class _DecliningGuest extends JamGuest {
     Duration timeout = const Duration(seconds: 1),
   }) async =>
       JamJoinOutcome.declined;
+}
+
+/// Joins at once; the host drops it during leave(), so the poll reports lost.
+class _LeavingGuest extends JamGuest {
+  _LeavingGuest(JamHost h) : super(local: h) {
+    last = this;
+  }
+  static late _LeavingGuest last;
+  final _lostC = StreamController<void>.broadcast();
+  void emitLost() => _lostC.add(null);
+  @override
+  JamState? get state => const JamState(version: 1, hostDeviceId: 'h', outputDeviceId: 'h');
+  @override
+  Stream<JamState> get states => const Stream.empty();
+  @override
+  Stream<void> get lost => _lostC.stream;
+  @override
+  Future<JamJoinOutcome> join({
+    required String host,
+    required int port,
+    required String ownDeviceId,
+    required String ownName,
+    required int ownPort,
+    Duration timeout = const Duration(seconds: 1),
+  }) async =>
+      JamJoinOutcome.accepted;
+  @override
+  Future<void> leave() async {
+    emitLost();
+    await Future<void>.delayed(Duration.zero);
+  }
+  @override
+  Future<void> dispose() async {}
 }

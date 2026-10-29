@@ -967,6 +967,9 @@ class JamController extends Notifier<JamUiState> {
       await Future<void>.delayed(const Duration(milliseconds: 300));
     } else {
       _part.exitPart = _part.remaining(state.jam);
+      // The host drops us on /leave: that poll error is not a lost Jam.
+      await _lostSub?.cancel();
+      _lostSub = null;
       await _guest?.leave();
     }
     await _finish(left: state.role != JamRole.host);
