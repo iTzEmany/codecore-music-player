@@ -40,6 +40,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
     JamJoinOutcome.declined => l.jamDeclined(s.peerName),
     JamJoinOutcome.busy => l.jamBusy(s.peerName),
     JamJoinOutcome.cancelled => '',
+    JamJoinOutcome.tooSoon => l.jamTooSoon,
     _ => l.jamUnreachable,
   };
 

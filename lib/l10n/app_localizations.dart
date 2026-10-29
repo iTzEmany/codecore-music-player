@@ -9132,6 +9132,60 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Togli'**
   String get jamBrokerRemove;
+
+  /// No description provided for @jamSuspend.
+  ///
+  /// In it, this message translates to:
+  /// **'Sospendi'**
+  String get jamSuspend;
+
+  /// No description provided for @jamBlock.
+  ///
+  /// In it, this message translates to:
+  /// **'Blocca'**
+  String get jamBlock;
+
+  /// No description provided for @jamSuspendTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Sospendi per quanto tempo?'**
+  String get jamSuspendTitle;
+
+  /// No description provided for @jamUntilJamEnds.
+  ///
+  /// In it, this message translates to:
+  /// **'Fino alla fine della Jam'**
+  String get jamUntilJamEnds;
+
+  /// No description provided for @jamBlockedTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Dispositivi bloccati'**
+  String get jamBlockedTitle;
+
+  /// No description provided for @jamSuspendedTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Sospesi'**
+  String get jamSuspendedTitle;
+
+  /// No description provided for @jamUnblock.
+  ///
+  /// In it, this message translates to:
+  /// **'Sblocca'**
+  String get jamUnblock;
+
+  /// No description provided for @jamSuspendedUntil.
+  ///
+  /// In it, this message translates to:
+  /// **'Fino alle {time}'**
+  String jamSuspendedUntil(String time);
+
+  /// No description provided for @jamTooSoon.
+  ///
+  /// In it, this message translates to:
+  /// **'Aspetta un momento prima di riprovare'**
+  String get jamTooSoon;
 }
 
 class _AppLocalizationsDelegate

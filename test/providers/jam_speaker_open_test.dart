@@ -16,6 +16,7 @@ import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/play_queue.dart';
 import 'package:codecore/services/audio/playback_persistence.dart';
 import 'package:codecore/services/jam/jam_host.dart';
+import 'package:codecore/services/jam/jam_guest.dart' show JamJoinOutcome;
 import 'package:codecore/services/jam/speaker_jam.dart';
 import 'package:codecore/services/share/discovery.dart' show Peer;
 import 'package:drift/native.dart';
@@ -256,5 +257,20 @@ void main() {
     await jam.acceptRequest(_host.requests['r3']!);
     expect(_host.state!.items.length, maxJamItems - jamManualSeats);
     await jam.end(); // stops the feeder before the container goes
+  });
+
+  test('the third request within a minute is not sent', () async {
+    final jam = c.read(jamProvider.notifier);
+    var t = DateTime(2026, 1, 1, 12);
+    jam.now = () => t;
+    const peer = Peer(id: 'x', name: 'X', host: '10.0.0.9', port: 1, platform: 'linux');
+    await jam.request(peer);
+    await jam.request(peer);
+    expect(c.read(jamProvider).outcome, JamJoinOutcome.unreachable);
+    await jam.request(peer);
+    expect(c.read(jamProvider).outcome, JamJoinOutcome.tooSoon);
+    t = t.add(const Duration(seconds: 61));
+    await jam.request(peer);
+    expect(c.read(jamProvider).outcome, JamJoinOutcome.unreachable);
   });
 }

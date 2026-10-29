@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/jam_providers.dart';
+import '../../../providers/jam_remote_providers.dart';
 import '../../../services/jam/jam_host.dart';
+import '../../widgets/duration_choice_sheet.dart';
 import 'jam_screen.dart';
 
 /// Asks whether to start a Jam requested by a nearby device.
@@ -44,6 +46,26 @@ class _JamRequestDialogState extends ConsumerState<JamRequestDialog> {
     super.dispose();
   }
 
+  /// Rejects the request and mutes its sender: [minutes] null = until the Jam ends.
+  void _mute({required bool block, int? minutes}) {
+    _watch?.cancel();
+    final gate = ref.read(jamGateProvider);
+    if (block) {
+      gate.block(request.fromId, request.fromName);
+    } else {
+      gate.suspend(request.fromId, request.fromName, minutes == null ? null : Duration(minutes: minutes));
+    }
+    ref.read(jamProvider.notifier).decline(request);
+    Navigator.of(context).pop();
+  }
+
+  Future<void> _suspend() async {
+    final l = context.l10n;
+    final v = await showDurationChoiceSheet(context, title: l.jamSuspendTitle, endLabel: l.jamUntilJamEnds);
+    if (v == null || !mounted) return;
+    _mute(block: false, minutes: v == -1 ? null : v);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -52,6 +74,8 @@ class _JamRequestDialogState extends ConsumerState<JamRequestDialog> {
       title: Text(l.jamIncomingTitle(request.fromName)),
       content: Text(l.jamIncomingDialog),
       actions: [
+        TextButton(onPressed: _suspend, child: Text(l.jamSuspend)),
+        TextButton(onPressed: () => _mute(block: true), child: Text(l.jamBlock)),
         TextButton(
           onPressed: () {
             _watch?.cancel();

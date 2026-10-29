@@ -203,6 +203,10 @@ Set<String> jamPinKeys(JamState? s, String ownId) => {
 
 class JamController extends Notifier<JamUiState> {
   JamGuestLink? _guest;
+  final _recentRequests = <DateTime>[];
+
+  @visibleForTesting
+  DateTime Function() now = DateTime.now;
   JamOutput? _output;
   JamCache? _cache;
   JamClock? _clock;
@@ -280,6 +284,17 @@ class JamController extends Notifier<JamUiState> {
   /// Asks [peer] to start a Jam with this device (this device is the guest).
   Future<void> request(Peer peer) async {
     if (state.phase == JamPhase.requesting || state.active) return;
+    // Third request within a minute: do not send it (the host would mute us anyway).
+    final cutoff = now().subtract(const Duration(minutes: 1));
+    _recentRequests.removeWhere((t) => !t.isAfter(cutoff));
+    if (_recentRequests.length >= 2) {
+      // The callers push the Jam screen right after: let it open to hear the outcome.
+      state = JamUiState(phase: JamPhase.requesting, peerName: peer.name, peerId: peer.id);
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      state = state.copyWith(phase: JamPhase.idle, outcome: JamJoinOutcome.tooSoon);
+      return;
+    }
+    _recentRequests.add(now());
     if (_speakerPending) {
       // Joining another Jam: the waiting speaker Jam is given up.
       _speakerPending = false;

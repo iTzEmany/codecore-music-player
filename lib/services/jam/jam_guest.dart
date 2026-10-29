@@ -9,7 +9,7 @@ import 'jam_guest_link.dart';
 import 'jam_host.dart';
 import 'jam_models.dart';
 
-enum JamJoinOutcome { accepted, declined, expired, busy, unreachable, cancelled }
+enum JamJoinOutcome { accepted, declined, expired, busy, unreachable, cancelled, tooSoon }
 
 /// Client side of a Jam: asks the host, follows its state by long polling and
 /// sends commands. The guest also serves the files it owns through [local]

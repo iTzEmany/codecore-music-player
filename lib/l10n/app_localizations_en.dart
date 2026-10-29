@@ -5745,4 +5745,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get jamBrokerRemove => 'Remove';
+
+  @override
+  String get jamSuspend => 'Suspend';
+
+  @override
+  String get jamBlock => 'Block';
+
+  @override
+  String get jamSuspendTitle => 'Suspend for how long?';
+
+  @override
+  String get jamUntilJamEnds => 'Until the Jam ends';
+
+  @override
+  String get jamBlockedTitle => 'Blocked devices';
+
+  @override
+  String get jamSuspendedTitle => 'Suspended';
+
+  @override
+  String get jamUnblock => 'Unblock';
+
+  @override
+  String jamSuspendedUntil(String time) {
+    return 'Until $time';
+  }
+
+  @override
+  String get jamTooSoon => 'Wait a moment before trying again';
 }

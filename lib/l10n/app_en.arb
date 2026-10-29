@@ -3113,5 +3113,21 @@
   },
   "jamBrokerRestore": "Restore",
   "jamBrokerMoveUp": "Move up",
-  "jamBrokerRemove": "Remove"
+  "jamBrokerRemove": "Remove",
+  "jamSuspend": "Suspend",
+  "jamBlock": "Block",
+  "jamSuspendTitle": "Suspend for how long?",
+  "jamUntilJamEnds": "Until the Jam ends",
+  "jamBlockedTitle": "Blocked devices",
+  "jamSuspendedTitle": "Suspended",
+  "jamUnblock": "Unblock",
+  "jamSuspendedUntil": "Until {time}",
+  "@jamSuspendedUntil": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "jamTooSoon": "Wait a moment before trying again"
 }

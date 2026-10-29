@@ -3113,5 +3113,21 @@
   },
   "jamBrokerRestore": "Restaurar",
   "jamBrokerMoveUp": "Subir",
-  "jamBrokerRemove": "Quitar"
+  "jamBrokerRemove": "Quitar",
+  "jamSuspend": "Suspender",
+  "jamBlock": "Bloquear",
+  "jamSuspendTitle": "¿Suspender por cuánto tiempo?",
+  "jamUntilJamEnds": "Hasta que termine la Jam",
+  "jamBlockedTitle": "Dispositivos bloqueados",
+  "jamSuspendedTitle": "Suspendidos",
+  "jamUnblock": "Desbloquear",
+  "jamSuspendedUntil": "Hasta las {time}",
+  "@jamSuspendedUntil": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "jamTooSoon": "Espera un momento antes de volver a intentarlo"
 }
