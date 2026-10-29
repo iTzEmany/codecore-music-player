@@ -822,6 +822,7 @@ void speakerTests() {
       expect(err(s, const JamCommand.setOutput(guest), host), JamError.forbidden);
       expect(err(s, const JamCommand.setOutput(guest), guest), JamError.forbidden);
       expect(err(s, const JamCommand.setOutputs([host, guest]), host), JamError.forbidden);
+      expect(err(s, const JamCommand.setOutputs([guest]), host), JamError.forbidden);
       expect(err(s, const JamCommand.setOutput(host), host), isNull);
       // Normal Jam unchanged.
       final plain = speakerJam().copyWith(speaker: false);

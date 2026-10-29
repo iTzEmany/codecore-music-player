@@ -83,7 +83,7 @@ class SpeakerJam {
     final conn = connected();
     final changed = conn != _prev;
     _prev = conn;
-    if (!conn) _opened = false;
+    if (!conn || !enabled()) _opened = false;
     if (conn) _awaySent = false;
     switch (v.role) {
       case SpeakerRole.host:
@@ -111,7 +111,7 @@ class SpeakerJam {
       _grace ??= _timer(speakerJamGrace, () {
         _grace = null;
         // Nobody is waiting: no message (R-115).
-        unawaited(port.view.guests == 0 ? port.closeSilently() : port.end());
+        _run('grace end', () => port.view.guests == 0 ? port.closeSilently() : port.end());
       });
     } else {
       _cancelGrace();
@@ -121,21 +121,23 @@ class SpeakerJam {
       if (v.guests == 0) {
         if (!_closing) {
           _closing = true;
-          unawaited(port.closeSilently());
+          _run('closeSilently', port.closeSilently);
         }
       } else if (v.iAmOutput && !_awaySent) {
         _awaySent = true;
-        _run('speakerAway', () => port.send(const JamCommand.speakerAway()));
+        _run('speakerAway', () => port.send(const JamCommand.speakerAway()),
+            () => _awaySent = false);
       }
     } else if (v.awaySince != null) {
       // Ours is there: back to play, even if a guest's speaker was the one that went (D-220).
       if (!_backSent) {
         _backSent = true;
-        unawaited(port.send(const JamCommand.speakerBack()));
+        _run('speakerBack', () => port.send(const JamCommand.speakerBack()),
+            () => _backSent = false);
       }
     } else if (!enabled() && v.guests == 0) {
       _opened = false;
-      unawaited(port.closeSilently());
+      _run('closeSilently', port.closeSilently);
     }
   }
 
@@ -161,7 +163,8 @@ class SpeakerJam {
       _declinedAway = null;
       if (v.iAmOutput && !conn && !_awaySent) {
         _awaySent = true;
-        _run('speakerAway', () => port.send(const JamCommand.speakerAway()));
+        _run('speakerAway', () => port.send(const JamCommand.speakerAway()),
+            () => _awaySent = false);
       }
     }
   }

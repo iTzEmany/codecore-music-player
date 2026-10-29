@@ -19,6 +19,7 @@ class _Port implements SpeakerJamPort {
   @override
   Stream<void> get changes => _c.stream;
   Future<void> Function()? onOpen;
+  Object? sendError;
   @override
   Future<void> open() async {
     log.add('open');
@@ -27,7 +28,10 @@ class _Port implements SpeakerJamPort {
   @override
   Future<void> closeSilently() async => log.add('close');
   @override
-  Future<void> send(JamCommand cmd) async => log.add(cmd.type.name);
+  Future<void> send(JamCommand cmd) async {
+    log.add(cmd.type.name);
+    if (sendError != null) throw sendError!;
+  }
   @override
   Future<void> end() async => log.add('end');
 }
@@ -215,7 +219,68 @@ void main() {
     s.dispose();
   });
 
+  test('plugged, unplugged and plugged again with role none: opens twice', () async {
+    final s = make();
+    await plug(true);
+    await plug(false);
+    await plug(true);
+    expect(port.log, ['open', 'open']);
+    s.dispose();
+  });
+
+  test('switch off and on again with role none: reopens', () async {
+    connected = true;
+    final s = make();
+    enabled = false;
+    s.refresh();
+    enabled = true;
+    s.refresh();
+    expect(port.log, ['open', 'open']);
+    s.dispose();
+  });
+
+  test('two events with the Jam away and our speaker there: one speakerBack', () async {
+    connected = true;
+    port.view = hostWith;
+    final s = make();
+    const away = SpeakerJamView(role: SpeakerRole.host, speaker: true, awaySince: 5);
+    await port.set(away);
+    await port.set(away);
+    expect(port.log, ['speakerBack']);
+    s.dispose();
+  });
+
+  test('a failed speakerAway / speakerBack is repeated on the next refresh', () async {
+    connected = true;
+    port.view = hostWith;
+    final s = make();
+    port.sendError = StateError('net');
+    await plug(false);
+    await pump();
+    s.refresh();
+    await pump();
+    expect(port.log, ['speakerAway', 'speakerAway']);
+    port.log.clear();
+    connected = true;
+    await port.set(const SpeakerJamView(
+        role: SpeakerRole.host, speaker: true, guests: 1, awaySince: 5));
+    await pump();
+    s.refresh();
+    await pump();
+    expect(port.log, ['speakerBack', 'speakerBack']);
+    s.dispose();
+  });
+
   group('guest', () {
+    test('switched off: no offer', () async {
+      connected = true;
+      enabled = false;
+      port.view = const SpeakerJamView(role: SpeakerRole.guest, speaker: true, awaySince: 5);
+      final s = make();
+      expect(s.offerPending.value, isFalse);
+      s.dispose();
+    });
+
     const away = SpeakerJamView(role: SpeakerRole.guest, speaker: true, awaySince: 5);
 
     test('offer only while the Jam is stopped and our speaker is there', () async {

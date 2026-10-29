@@ -315,4 +315,29 @@ void main() {
     expect(host.state!.speaker, isTrue);
     expect(host.state!.outputs, ['host']);
   });
+
+  test('makeSpeaker on a Jam playing on a guest or on several outputs: only the host', () {
+    host.addMember(id: 'g', name: 'Phone', host: '192.168.1.50', port: 4000);
+    host.apply(const JamCommand.setOutput('g'));
+    expect(host.state!.outputs, ['g']);
+    host.makeSpeaker();
+    expect(host.state!.outputs, ['host']);
+
+    final other = JamHost(deviceId: 'host', deviceName: 'PC', now: () => now);
+    other.addMember(id: 'g', name: 'Phone', host: '192.168.1.50', port: 4000);
+    other.apply(const JamCommand.setOutputs(['host', 'g']));
+    expect(other.state!.outputs, hasLength(2));
+    other.makeSpeaker();
+    expect(other.state!.outputs, ['host']);
+  });
+
+  test('a playback command with the speaker away is a 409 "no speaker"', () async {
+    final s = await startSession();
+    host.makeSpeaker();
+    host.apply(const JamCommand.speakerAway());
+    final r = await call('POST', '${s.sid}/cmd',
+        body: const JamCommand.play().toJson(), headers: {'x-jam-token': s.token});
+    expect(r.statusCode, 409);
+    expect(await r.readAsString(), 'no speaker');
+  });
 }
