@@ -28,11 +28,14 @@ import '../support/fake_backend.dart';
 
 final _host = JamHost(deviceId: 'me', deviceName: 'PC');
 
+var _noHost = false;
+
 class _Hub extends ShareHubNotifier {
   @override
   ShareHubState build() => const ShareHubState();
+  void setActive(bool v) => state = ShareHubState(active: v);
   @override
-  JamHost? get jamHost => _host;
+  JamHost? get jamHost => _noHost ? null : _host;
   @override
   String? get deviceId => 'me';
   @override
@@ -52,6 +55,7 @@ void main() {
 
   setUp(() async {
     _host.clearSession();
+    _noHost = false;
     SharedPreferences.setMockInitialValues({});
     final store = SettingsStore(await SharedPreferences.getInstance());
     db = AppDatabase(NativeDatabase.memory());
@@ -98,6 +102,24 @@ void main() {
     await jam.closeSpeakerJamSilently();
     expect(c.read(shareHubProvider.notifier).speakerJamName, isNull);
     expect(jam.speakerPort.view.role, SpeakerRole.none);
+  });
+
+  test('openSpeakerJam is false with no hub Jam and true with one', () async {
+    final jam = c.read(jamProvider.notifier);
+    _noHost = true;
+    expect(await jam.openSpeakerJam(), isFalse);
+    _noHost = false;
+    expect(await jam.openSpeakerJam(), isTrue);
+  });
+
+  test('the hub becoming active tells the speaker Jam to try opening again', () async {
+    final jam = c.read(jamProvider.notifier);
+    var n = 0;
+    final sub = jam.speakerPort.changes.listen((_) => n++);
+    addTearDown(sub.cancel);
+    (c.read(shareHubProvider.notifier) as _Hub).setActive(true);
+    await Future<void>.delayed(Duration.zero);
+    expect(n, 1);
   });
 
   test('a request accepted while waiting starts the speaker Jam', () async {
