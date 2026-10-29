@@ -107,7 +107,7 @@ class _SpeakerPort implements SpeakerJamPort {
   @override
   Stream<void> get changes => _c._speakerChanges.stream;
   @override
-  Future<void> open() => _c.openSpeakerJam();
+  Future<bool> open() => _c.openSpeakerJam();
   @override
   Future<void> closeSilently() => _c.closeSpeakerJamSilently();
   @override
@@ -249,6 +249,8 @@ class JamController extends Notifier<JamUiState> {
     listenSelf((_, _) => _speakerChanges.add(null));
     _speakerPending = false;
     final hub = _hub = ref.read(shareHubProvider.notifier);
+    // The hub gets its Jam after it starts: let SpeakerJam retry an open it could not do.
+    ref.listen(shareHubProvider.select((s) => s.active), (_, _) => _speakerChanges.add(null));
     _reqSub = hub.newJamRequests.listen(_incoming.add);
     hub.onJamEnd = end;
     hub.onJamAction = (req, accept) =>
@@ -363,18 +365,21 @@ class JamController extends Notifier<JamUiState> {
 
   /// A running host Jam becomes the speaker's (D-218). From idle the Jam only waits
   /// ("in attesa") until a request is accepted; a guest does nothing.
-  Future<void> openSpeakerJam() async {
+  /// False only when the hub has no Jam yet, so the caller can retry once it has.
+  Future<bool> openSpeakerJam() async {
     final host = _host;
-    if (host == null || state.role == JamRole.guest || _speakerPending) return;
+    if (host == null) return false;
+    if (state.role == JamRole.guest || _speakerPending) return true;
     if (state.active) {
       host.makeSpeaker();
     } else if (state.phase != JamPhase.idle || _starting) {
-      return;
+      return true;
     } else {
       _speakerPending = true;
       _speakerChanges.add(null);
     }
     _hub.speakerJamName = ref.read(deviceNameProvider);
+    return true;
   }
 
   /// Closes the speaker's Jam with nobody in it, without any message (R-115, D-211).

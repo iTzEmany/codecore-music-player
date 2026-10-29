@@ -19,11 +19,13 @@ class _Port implements SpeakerJamPort {
   @override
   Stream<void> get changes => _c.stream;
   Future<void> Function()? onOpen;
+  var hubReady = true;
   Object? sendError;
   @override
-  Future<void> open() async {
+  Future<bool> open() async {
     log.add('open');
     await onOpen?.call();
+    return hubReady;
   }
   @override
   Future<void> closeSilently() async => log.add('close');
@@ -202,6 +204,20 @@ void main() {
         role: SpeakerRole.host, speaker: true, awaySince: 5));
     timers.single.$2();
     expect(port.log, ['close']);
+    s.dispose();
+  });
+
+  test('a speaker plugged before the hub is ready: the Jam opens once the hub is', () async {
+    port.hubReady = false;
+    final s = make();
+    await plug(true);
+    await pump();
+    expect(port.log, ['open']);
+    port.hubReady = true;
+    await port.set(const SpeakerJamView()); // the hub became ready
+    await pump();
+    await port.set(const SpeakerJamView());
+    expect(port.log, ['open', 'open']);
     s.dispose();
   });
 

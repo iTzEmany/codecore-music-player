@@ -36,7 +36,8 @@ abstract interface class SpeakerJamPort {
   Stream<void> get changes;
 
   /// Opens the Jam without guests (or turns the running one into the speaker's).
-  Future<void> open();
+  /// False when it could not open yet (no hub): [SpeakerJam] tries again on the next change.
+  Future<bool> open();
   Future<void> closeSilently();
   Future<void> send(JamCommand cmd);
   Future<void> end();
@@ -144,7 +145,9 @@ class SpeakerJam {
   void _openIfPlugged(bool conn) {
     if (conn && enabled() && !_opened) {
       _opened = true;
-      _run('open', port.open, () => _opened = false);
+      _run('open', () async {
+        if (!await port.open()) _opened = false;
+      }, () => _opened = false);
     }
   }
 
