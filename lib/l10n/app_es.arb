@@ -3084,5 +3084,33 @@
   "speakerContinueOnPhone": "Seguir en el teléfono",
   "speakerContinueOnPhoneLabel": "Seguir en el teléfono: la Jam suena por el altavoz de este teléfono, sin la caja",
   "speakerOfferTitle": "¿Reproducir la Jam en tu altavoz?",
-  "speakerOfferBody": "Tu altavoz está conectado y la Jam está en pausa. Si quieres, la música sigue desde aquí."
+  "speakerOfferBody": "Tu altavoz está conectado y la Jam está en pausa. Si quieres, la música sigue desde aquí.",
+  "jamRemoteTitle": "Jam a distancia",
+  "jamRemoteHint": "Los brokers (servidores) de la Jam a distancia, por orden de preferencia.",
+  "jamBrokerAdd": "Añadir broker",
+  "jamBrokerHost": "Dirección",
+  "jamBrokerPort": "Puerto",
+  "jamBrokerTls": "Conexión cifrada (TLS)",
+  "jamBrokerNoTls": "Sin TLS cualquiera en la red puede leer lo que pasa por el broker. Úsalo solo si sabes lo que haces.",
+  "jamBrokerInvalid": "Dirección o puerto no válidos",
+  "jamBrokerTest": "Probar conexión",
+  "jamBrokerTestOk": "{broker}: conexión correcta",
+  "@jamBrokerTestOk": {
+    "placeholders": {
+      "broker": {
+        "type": "String"
+      }
+    }
+  },
+  "jamBrokerTestFail": "{broker}: no se puede conectar (red, certificado o servidor inaccesible)",
+  "@jamBrokerTestFail": {
+    "placeholders": {
+      "broker": {
+        "type": "String"
+      }
+    }
+  },
+  "jamBrokerRestore": "Restaurar",
+  "jamBrokerMoveUp": "Subir",
+  "jamBrokerRemove": "Quitar"
 }

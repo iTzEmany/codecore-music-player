@@ -451,6 +451,12 @@ class SettingsStore {
   Future<void> writeTrustedDevicesRaw(String raw) =>
       _prefs.setString('trustedDevices', raw);
 
+  /// Remote Jam brokers, JSON `[{host, port, tls}]` (null = the defaults).
+  String? readJamBrokersRaw() => _prefs.getString('jamBrokers');
+
+  Future<void> writeJamBrokersRaw(String? raw) =>
+      raw == null ? _prefs.remove('jamBrokers') : _prefs.setString('jamBrokers', raw);
+
   /// The user's own themes, as written by `CustomThemes.encode`.
   String? readCustomThemesRaw() => _prefs.getString('customThemes');
 

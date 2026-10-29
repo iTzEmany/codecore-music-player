@@ -3328,5 +3328,33 @@
   "speakerContinueOnPhone": "Continuar no telemóvel",
   "speakerContinueOnPhoneLabel": "Continuar no telemóvel: a Jam toca no altifalante deste telemóvel, sem a coluna",
   "speakerOfferTitle": "Tocar a Jam na tua coluna?",
-  "speakerOfferBody": "A tua coluna está ligada e a Jam está parada. Se quiseres, a música continua a partir daqui."
+  "speakerOfferBody": "A tua coluna está ligada e a Jam está parada. Se quiseres, a música continua a partir daqui.",
+  "jamRemoteTitle": "Jam à distância",
+  "jamRemoteHint": "Os brokers (servidores) da Jam à distância, por ordem de preferência.",
+  "jamBrokerAdd": "Adicionar broker",
+  "jamBrokerHost": "Endereço",
+  "jamBrokerPort": "Porta",
+  "jamBrokerTls": "Ligação cifrada (TLS)",
+  "jamBrokerNoTls": "Sem TLS, qualquer pessoa na rede pode ler o que passa pelo broker. Usa só se souberes o que fazes.",
+  "jamBrokerInvalid": "Endereço ou porta inválidos",
+  "jamBrokerTest": "Testar ligação",
+  "jamBrokerTestOk": "{broker}: ligação bem-sucedida",
+  "@jamBrokerTestOk": {
+    "placeholders": {
+      "broker": {
+        "type": "String"
+      }
+    }
+  },
+  "jamBrokerTestFail": "{broker}: não consigo ligar (rede, certificado ou servidor inacessível)",
+  "@jamBrokerTestFail": {
+    "placeholders": {
+      "broker": {
+        "type": "String"
+      }
+    }
+  },
+  "jamBrokerRestore": "Repor",
+  "jamBrokerMoveUp": "Subir",
+  "jamBrokerRemove": "Remover"
 }

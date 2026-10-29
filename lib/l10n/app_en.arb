@@ -3084,5 +3084,33 @@
   "speakerContinueOnPhone": "Continue on the phone",
   "speakerContinueOnPhoneLabel": "Continue on the phone: the Jam plays from this phone’s speaker, without the speaker",
   "speakerOfferTitle": "Play the Jam on your speaker?",
-  "speakerOfferBody": "Your speaker is connected and the Jam is paused. If you like, the music restarts from here."
+  "speakerOfferBody": "Your speaker is connected and the Jam is paused. If you like, the music restarts from here.",
+  "jamRemoteTitle": "Remote Jam",
+  "jamRemoteHint": "The brokers (servers) for the remote Jam, in order of preference.",
+  "jamBrokerAdd": "Add broker",
+  "jamBrokerHost": "Address",
+  "jamBrokerPort": "Port",
+  "jamBrokerTls": "Encrypted connection (TLS)",
+  "jamBrokerNoTls": "Without TLS anyone on the network can read what goes through the broker. Use it only if you know what you are doing.",
+  "jamBrokerInvalid": "Invalid address or port",
+  "jamBrokerTest": "Test connection",
+  "jamBrokerTestOk": "{broker}: connection succeeded",
+  "@jamBrokerTestOk": {
+    "placeholders": {
+      "broker": {
+        "type": "String"
+      }
+    }
+  },
+  "jamBrokerTestFail": "{broker}: cannot connect (network, certificate or server unreachable)",
+  "@jamBrokerTestFail": {
+    "placeholders": {
+      "broker": {
+        "type": "String"
+      }
+    }
+  },
+  "jamBrokerRestore": "Restore",
+  "jamBrokerMoveUp": "Move up",
+  "jamBrokerRemove": "Remove"
 }

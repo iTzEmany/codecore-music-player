@@ -9042,6 +9042,90 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'La tua cassa è collegata e la Jam è ferma. Se vuoi, la musica riparte da qui.'**
   String get speakerOfferBody;
+
+  /// No description provided for @jamRemoteTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Jam a distanza'**
+  String get jamRemoteTitle;
+
+  /// No description provided for @jamRemoteHint.
+  ///
+  /// In it, this message translates to:
+  /// **'I broker (server) per la Jam a distanza, in ordine di preferenza.'**
+  String get jamRemoteHint;
+
+  /// No description provided for @jamBrokerAdd.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi broker'**
+  String get jamBrokerAdd;
+
+  /// No description provided for @jamBrokerHost.
+  ///
+  /// In it, this message translates to:
+  /// **'Indirizzo'**
+  String get jamBrokerHost;
+
+  /// No description provided for @jamBrokerPort.
+  ///
+  /// In it, this message translates to:
+  /// **'Porta'**
+  String get jamBrokerPort;
+
+  /// No description provided for @jamBrokerTls.
+  ///
+  /// In it, this message translates to:
+  /// **'Connessione cifrata (TLS)'**
+  String get jamBrokerTls;
+
+  /// No description provided for @jamBrokerNoTls.
+  ///
+  /// In it, this message translates to:
+  /// **'Senza TLS chiunque sulla rete può leggere ciò che passa dal broker. Usalo solo se sai cosa fai.'**
+  String get jamBrokerNoTls;
+
+  /// No description provided for @jamBrokerInvalid.
+  ///
+  /// In it, this message translates to:
+  /// **'Indirizzo o porta non validi'**
+  String get jamBrokerInvalid;
+
+  /// No description provided for @jamBrokerTest.
+  ///
+  /// In it, this message translates to:
+  /// **'Prova connessione'**
+  String get jamBrokerTest;
+
+  /// No description provided for @jamBrokerTestOk.
+  ///
+  /// In it, this message translates to:
+  /// **'{broker}: connessione riuscita'**
+  String jamBrokerTestOk(String broker);
+
+  /// No description provided for @jamBrokerTestFail.
+  ///
+  /// In it, this message translates to:
+  /// **'{broker}: non riesco a collegarmi (rete, certificato o server non raggiungibile)'**
+  String jamBrokerTestFail(String broker);
+
+  /// No description provided for @jamBrokerRestore.
+  ///
+  /// In it, this message translates to:
+  /// **'Ripristina'**
+  String get jamBrokerRestore;
+
+  /// No description provided for @jamBrokerMoveUp.
+  ///
+  /// In it, this message translates to:
+  /// **'Sposta su'**
+  String get jamBrokerMoveUp;
+
+  /// No description provided for @jamBrokerRemove.
+  ///
+  /// In it, this message translates to:
+  /// **'Togli'**
+  String get jamBrokerRemove;
 }
 
 class _AppLocalizationsDelegate

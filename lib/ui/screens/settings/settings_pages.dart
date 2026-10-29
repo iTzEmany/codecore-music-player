@@ -38,6 +38,7 @@ import 'report_issue_tile.dart';
 import 'missing_tracks_screen.dart';
 import 'transition_settings_tiles.dart';
 import 'speaker_jam_tiles.dart';
+import 'jam_remote_settings.dart';
 import 'trusted_devices_tiles.dart';
 import 'translation_models_tiles.dart';
 import 'update_tiles.dart';
@@ -382,6 +383,11 @@ List<SettingsGroup> _network(BuildContext context, WidgetRef ref) {
           // The hub reacts to this setting (service, notification, discovery).
           onChanged: (v) =>
               notifier.update((c) => c.copyWith(receiveFromLan: v)),
+        ),
+        ListTile(
+          leading: const Icon(Icons.public),
+          title: Text(l.jamRemoteTitle),
+          onTap: () => ShellNav.open<void>(context, const JamRemoteSettings()),
         ),
         ownFingerprintTile(context, ref),
         ListTile(

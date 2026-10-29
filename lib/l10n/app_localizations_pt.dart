@@ -5716,4 +5716,52 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get speakerOfferBody =>
       'A tua coluna está ligada e a Jam está parada. Se quiseres, a música continua a partir daqui.';
+
+  @override
+  String get jamRemoteTitle => 'Jam à distância';
+
+  @override
+  String get jamRemoteHint =>
+      'Os brokers (servidores) da Jam à distância, por ordem de preferência.';
+
+  @override
+  String get jamBrokerAdd => 'Adicionar broker';
+
+  @override
+  String get jamBrokerHost => 'Endereço';
+
+  @override
+  String get jamBrokerPort => 'Porta';
+
+  @override
+  String get jamBrokerTls => 'Ligação cifrada (TLS)';
+
+  @override
+  String get jamBrokerNoTls =>
+      'Sem TLS, qualquer pessoa na rede pode ler o que passa pelo broker. Usa só se souberes o que fazes.';
+
+  @override
+  String get jamBrokerInvalid => 'Endereço ou porta inválidos';
+
+  @override
+  String get jamBrokerTest => 'Testar ligação';
+
+  @override
+  String jamBrokerTestOk(String broker) {
+    return '$broker: ligação bem-sucedida';
+  }
+
+  @override
+  String jamBrokerTestFail(String broker) {
+    return '$broker: não consigo ligar (rede, certificado ou servidor inacessível)';
+  }
+
+  @override
+  String get jamBrokerRestore => 'Repor';
+
+  @override
+  String get jamBrokerMoveUp => 'Subir';
+
+  @override
+  String get jamBrokerRemove => 'Remover';
 }

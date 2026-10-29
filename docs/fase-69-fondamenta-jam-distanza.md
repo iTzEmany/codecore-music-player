@@ -65,6 +65,8 @@ La validazione di `POST /request` passa in `JamHost.admitRequest(...)`, che il r
 
 **Fatto quando:** test della validazione (host non vuoto, porta 1–65535), test widget di aggiunta, riordino, ripristino, avviso senza TLS e «Prova» con un `FakeMqttLink` riuscito e fallito; `test/live/jam_broker_live_test.dart` (si salta da sé senza `CODECORE_LIVE=1`, come gli altri di `test/live/`) eseguito una volta in locale: `broker.emqx.io:8883` e `test.mosquitto.org:8886` riusciti, `test.mosquitto.org:8883` rifiutato per il certificato (R-129); esiti con la data in questo documento.
 
+Esiti (29/10): `broker.emqx.io:8883` riuscito (connessione, iscrizione, pubblicazione e ritorno del messaggio); `test.mosquitto.org:8883` rifiutato per il certificato (`CERTIFICATE_VERIFY_FAILED`, R-129); `test.mosquitto.org:8886` **fallito** in due giri: il TLS si stabilisce (`openssl` e `SecureSocket` ok) ma il server chiude la connessione subito dopo il CONNECT MQTT (verificato anche con un CONNECT scritto a mano in Python, con altri clientId), quindi nessun messaggio torna (K-JD-04).
+
 ### 69.10 — Controlli di fase
 `flutter analyze`, comando mirato, build di debug, `/code-review high` su 69.3 (comando nuovo del protocollo Jam), 69.6 e 69.8, scheggia in modalità passo su 69.1 (apertura della Jam della cassa), 69.6 (gate) e 69.9 (validazione dei broker), review di architettura Opus di `JamGuestLink` e `admitRequest`. Prova sul Mi A3 col Linux in LAN (D-91): richieste ripetute, Sospendi 15 min, Blocca e Sblocca.
 
