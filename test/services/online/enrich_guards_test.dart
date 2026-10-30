@@ -502,6 +502,32 @@ void main() {
       expect([u.album, u.hasCover], ['Alb', false]);
     });
 
+    test('the cover does not exist but a lyrics text is found: the status stays 1', () async {
+      final id = await r.add(album: 'A', genre: 'G', year: 2000, trackNumber: 1);
+      r.web.coverMissing = true;
+      await r.svc.completeOne(id, {EnrichPart.meta, EnrichPart.lyrics}, force: true);
+      final t = (await r.repo.getById(id))!;
+      expect([t.lyricsPlain, t.enrichStatus], ['la la', isNot(2)]);
+    });
+
+    test('propose: a refused lyrics search without text throws RateLimited', () async {
+      final id = await r.add();
+      r.chain.limited = true;
+      await expectLater(
+        r.svc.propose((await r.repo.getById(id))!, metadata: false, curiosity: false),
+        throwsA(isA<RateLimitedException>()),
+      );
+    });
+
+    test('the song answered nothing and the artist was refused: none, marked', () async {
+      final id = await r.add();
+      r.finder.pair = const CuriosityPair(artistError: RateLimitedException(429));
+      expect(await r.svc.completeOne(id, {EnrichPart.curio}), {
+        EnrichPart.curio: PartOutcome.none,
+      });
+      expect((await r.enrichOf(id))!.curioNoneAt, isNotNull);
+    });
+
     test('the cover does not exist (404): nothing, mark set', () async {
       final id = await r.add(
         album: 'A',

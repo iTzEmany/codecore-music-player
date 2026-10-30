@@ -127,7 +127,9 @@ class DeezerClient {
         throw const RateLimitedException(429);
       }
       AppLog.w('Deezer error $code: ${err['message']}');
-      throw DeezerNetworkException(url); // not «no result»: unknown
+      // Quota (100) and busy service (700) are transient: unknown, not «no result».
+      if (code == 100 || code == 700) throw DeezerNetworkException(url);
+      return null;
     }
     return body;
   }

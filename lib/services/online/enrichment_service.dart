@@ -238,7 +238,11 @@ class EnrichmentService {
     final results = await Future.wait<Object?>([
       metadata ? guarded(_metadata(t, c, cancel, needGenre)) : Future<Object?>.value(),
       lyrics
-          ? guarded(_chain.find(t, cancel: cancel).then((r) => r.lyrics))
+          ? guarded(_chain.find(t, cancel: cancel).then((r) {
+              // A refusal is not «no text»: the manual run stops on it.
+              if (r.lyrics == null && r.limited) throw const RateLimitedException(429);
+              return r.lyrics;
+            }))
           : Future<Object?>.value(),
       curiosity
           ? guarded(wikipedia.find(c.title, c.artist, language(), cancel: cancel))
@@ -519,7 +523,7 @@ class EnrichmentService {
       final l = g._curio = r.value;
       if (l == null || l.outcome.failed) {
         out[EnrichPart.curio] = _lost(r.limited);
-      } else if (l.pair.song == null && l.outcome.limited) {
+      } else if (l.pair.song == null && l.outcome.songLimited) {
         out[EnrichPart.curio] = PartOutcome.limited;
       } else {
         // The part is the track's own text: an artist bio alone leaves it empty.
@@ -543,8 +547,8 @@ class EnrichmentService {
         final known = CoverStore.coverKeyFor(key);
         g._coverKey = covers.fileFor(known) != null
             ? known
-            : await _fetchCover(key, url, false, cancel);
-        g._coverGone = g._coverKey == null;
+            : await _fetchCover(key, url, false, cancel,
+                onGone: () => g._coverGone = true);
         g._coverAlbum = key;
       } on DioException catch (e, st) {
         if (CancelToken.isCancel(e)) rethrow;
@@ -668,9 +672,6 @@ class EnrichmentService {
       // is «nothing» (mark set); a download that failed is unknown (mark stays, invariant 3).
       if (!saved && g._coverGone) {
         g._settle(EnrichPart.meta, PartOutcome.none, g._now);
-        await (db.update(db.tracks)..where((r) => r.id.equals(trackId))).write(
-          const TracksCompanion(enrichStatus: Value(2)),
-        );
       } else {
         out[EnrichPart.meta] = saved ? PartOutcome.found : PartOutcome.failed;
       }
@@ -849,12 +850,16 @@ class EnrichmentService {
 
   /// Downloads the cover and saves its file; the `coverKey`, or null when the
   /// album has a file already (unless [replace]) or nothing could be saved.
+  /// [onGone] runs when the source has no such file (a local save error does not).
   Future<String?> _fetchCover(String albumKey, String url, bool replace,
-      CancelToken? cancel) async {
+      CancelToken? cancel, {void Function()? onGone}) async {
     final existing = CoverStore.coverKeyFor(albumKey);
     if (!replace && covers.fileFor(existing) != null) return null;
     final bytes = await web.getBytes(url, cancel: cancel);
-    if (bytes == null) return null;
+    if (bytes == null) {
+      onGone?.call();
+      return null;
+    }
     return covers.saveFromBytes(albumKey, bytes, 'image/jpeg', overwrite: replace);
   }
 
@@ -874,9 +879,14 @@ class EnrichmentService {
     final deezerUrl = isrc == null || isrc.isEmpty
         ? null
         : await _deezerCover(isrc, album, cancel);
-    if (deezerUrl != null &&
-        await _applyCover(t.id, t.albumKey, deezerUrl, false, cancel)) {
-      return true;
+    try {
+      if (deezerUrl != null &&
+          await _applyCover(t.id, t.albumKey, deezerUrl, false, cancel)) {
+        return true;
+      }
+    } on DioException catch (e, st) {
+      if (CancelToken.isCancel(e)) rethrow;
+      AppLog.w('Deezer cover download failed, trying iTunes', e, st);
     }
     await _limiter.wait();
     final found = await itunes.searchAlbum(album, artist, cancel: cancel);

@@ -269,6 +269,7 @@ void main() {
       final round = await completer().run();
       expect(r.chain.calls, 5);
       expect(round.failed, isTrue);
+      expect(round.noAnswer, isTrue);
     });
 
     test('meta answers while the lyrics throw: all 6 tracks are worked, not 5', () async {
@@ -300,6 +301,13 @@ void main() {
       final round2 = await withMark().run();
       // Starts after the failed first track; at the end of the queue it wraps once.
       expect(round2.updated[EnrichPart.lyrics], [ids[1], ids[2], ids[0]]);
+    });
+
+    test('the bookmark is written once per block, with the last track tried', () async {
+      final ids = [for (var n = 0; n < 25; n++) await track()];
+      final saved = <int>[];
+      await completer(loadMark: () => 0, saveMark: saved.add).run();
+      expect(saved, [ids[9], ids[19], ids[24]]);
     });
 
     test('a round counts what was updated and what had no text', () async {
@@ -469,6 +477,7 @@ void main() {
         onProgress: (c, t) => progress.add((c, t)),
         nowMs: () => clock,
       ).run();
+      expect(round.noAnswer, isFalse);
       expect(round.failed, isTrue); // a block lost: the next run reads it again
       expect(round.worked, 15);
       expect(progress, [(0, 25), (10, 25), (15, 25)]);

@@ -436,10 +436,21 @@ void main() {
     },
   );
 
-  test('a round that fails before any work still leaves a failed line', () async {
+  test('an error before any work leaves no line', () async {
     user = _Watched(breakAt: 1);
     c = open();
     await track();
+    await completer().start();
+    expect(await r.db.select(r.db.activityLogRows).get(), isEmpty);
+  });
+
+  test('five tracks with no answer leave one failed line with nothing done', () async {
+    user = UserActivity();
+    c = open();
+    r.chain.failed = true;
+    for (var n = 0; n < 6; n++) {
+      await track();
+    }
     await completer().start();
     final row = (await r.db.select(r.db.activityLogRows).get()).single;
     expect([row.kind, row.done, row.total, row.failed], ['enrichBackground', 0, 0, 1]);

@@ -13,6 +13,9 @@ class EnrichRound {
   /// The run stopped on an error (logged): the rest of the library waits for
   /// the next run; what was read before it is written and counted here.
   bool failed = false;
+
+  /// The run stopped because the sources answered none of the last tracks.
+  bool noAnswer = false;
   final Map<EnrichPart, List<int>> updated = {};
   final Map<EnrichPart, List<int>> none = {};
 }
@@ -135,7 +138,6 @@ class EnrichCompleter {
             if (switchedOn().isEmpty) break;
             tried.add(id);
             after = id;
-            saveMark?.call(id);
             try {
               final g = await service.gather(id, wanted, ignoreMarks: _now);
               block.add(g);
@@ -150,16 +152,16 @@ class EnrichCompleter {
             }
             if (stuck >= _maxStuck) {
               AppLog.w('completion: $_maxStuck tracks in a row got no answer, round stopped');
-              round.failed = true;
+              round.failed = round.noAnswer = true;
               break;
             }
-            if (block.length >= blockSize) await _commit(block, round);
+            if (block.length >= blockSize) await _commit(block, round, after);
           }
-          await _commit(block, round);
+          await _commit(block, round, after);
         }
       } finally {
         // Whatever was read is written, also after an error or a cancel.
-        await _commit(block, round);
+        await _commit(block, round, after);
       }
     } on Object catch (e, st) {
       AppLog.w('completion: round stopped', e, st);
@@ -171,8 +173,11 @@ class EnrichCompleter {
   Future<void> _commit(
     List<EnrichGather> block,
     EnrichRound round,
+    int after,
   ) async {
     if (block.isEmpty) return;
+    // Once per block, in step with the database: the last track tried.
+    if (after > 0) saveMark?.call(after);
     final items = [...block];
     block.clear();
     try {

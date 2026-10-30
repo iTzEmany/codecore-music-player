@@ -122,7 +122,7 @@ class DioWebClient implements WebClient {
           options: Options(responseType: ResponseType.bytes));
       _checkRateLimit(res.statusCode);
       final data = res.data;
-      if (res.statusCode == 404 || (data != null && data.length > maxBytes)) {
+      if (res.statusCode == 404 || res.statusCode == 410 || (data != null && data.length > maxBytes)) {
         return null;
       }
       if (res.statusCode != 200 || data == null) {
