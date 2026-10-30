@@ -51,6 +51,9 @@ Decisioni D-264…D-273 in `docs/decisioni.md`. Si riparte dalla fase 70 (`docs/
 
 ## Rinviato
 - **KO R-102**: a Jam piena il «Suggerito» ripropone brani già suonati nella Jam (§69.4, 30/10). Da correggere con un test che lo riproduce, prima della fase 70 o dentro.
+- **⋮ con «Scarica» nella schermata Jam** (R-93, deciso dall'utente il 30/10): oggi «Scarica» c'è solo nel player normale.
+- **Da verificare: «Casuale+» torna «Casuale» dopo l'uscita dalla Jam** (visto sul Motorola il 30/10): prima un test che lo riproduce.
+- **Bug Shuffle+ (segnalato dall'utente il 30/10)**: con Shuffle+ già acceso, avviare un album o una playlist arricchisce la nuova coda con suggeriti basati sui brani della coda precedente. Sospetto: `_syncSource` svuota pool e semi, ma un `_fill`/`_suggestOne` già in corso (`shuffle_plus_controller.dart`) finisce con i semi vecchi e inserisce lo stesso; il controllo dopo `prepare` non guarda se la sorgente è cambiata. Da riprodurre con un test prima di correggere.
 - **Coda di prima della Jam solo in memoria** (`JamController._saved`): l'ospite in «Coda insieme» perde la sua coda originale. Da valutare se salvarla su disco o restituirla intera.
 - **Due code per le domande sulla cassa** (`SpeakerMonitor._pending` e la coda della UI): da unificare.
 - La posizione mostrata nella Jam salta indietro di circa 1,3 s a ogni avvio di brano (`jam ui: shown position moved`).
