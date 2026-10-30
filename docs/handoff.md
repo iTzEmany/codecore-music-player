@@ -1,13 +1,37 @@
-# Handoff — 2026-10-29 (fase 69 «Fondamenta della Jam a distanza»)
+# Handoff — 2026-10-30 (refactor «arricchimento-unico» pianificato, fasi 69a e 69b)
 
 ## Prima di tutto (per la prossima chat)
+Prima della fase 70 vengono le fasi **69a** e **69b**, pianificate con `/refactor` il 30/10 (D-275…D-290). Il motivo: il completamento in background non lavora mai. Sul Motorola 1812 brani hanno una parte da completare e il giro si ferma in 15 s a ogni avvio. Inoltre «Arricchisci tutta la libreria» e il background sono due motori diversi, con due barre.
+
+Prompt:
+
+```
+/obiettivo fase 69a
+```
+
+Poi, in una chat nuova, `/obiettivo fase 69b`. Poi la fase 70 come previsto, a partire dalla sezione «Rilievi dalla fase 69» di `docs/fase-70-ponte-jam-distanza.md`.
+
+## Da sapere (refactor)
+- **Analisi e piano:** `docs/refactor/arricchimento-unico/analisi.md`, con i rilievi F-01…F-21 con `file:riga` e le sezioni «Misure di partenza», «Scelte», «Arrivo» e «Rete». Per ogni task, prima di toccare il codice, si leggono i rilievi che chiude.
+- **Fasi:** `docs/fase-69a-coda-arricchimento.md` e `docs/fase-69b-arricchimento-unico.md`. I nomi 69a e 69b servono a non confonderle con i task 69.5 e 69.6 della fase 69 (D-283).
+- **Intoccabili:** D-102, D-103 e D-104, lo schema DB v15 (nessuna migrazione) e il formato di backup e condivisione (D-280).
+- **Cambi di comportamento scelti:**
+  - D-277/D-284: un solo comando, «Arricchisci tutta la libreria»;
+  - D-278: le curiosità entrano nel lavoro manuale;
+  - D-285: lo stato «niente trovato» si assegna solo a un brano mai provato;
+  - D-286: la revisione tiene conto dei testi scritti a mano;
+  - D-288: niente arricchimento immediato a fine scansione.
+- **Misure sul Motorola** a fine 69a e a fine 69b (D-289): si chiede prima se il telefono è libero, poi `install -r` e DB e log copiati solo in lettura. Durante la pianificazione il telefono non è stato toccato oltre la lettura del 30/10, perché un'altra chat ci stava facendo prove.
+- Con queste fasi si chiude anche «53.10 completamento intero sul Motorola», qui sotto in «Rinviato».
+
+## Fase 69 (chiusa, PR #67)
 La fase 69 è nel codice (PR #67). Comprende i rilievi della prova 68.3 (69.1…69.3) e i mattoni della Jam a distanza:
 - `JamGuestLink`;
 - `JamGate` (2 richieste al minuto, Sospendi, Blocca), salvato in `JamSecretStore`;
 - `jam_crypto` su `sodium`;
 - broker MQTT con «Prova connessione».
 
-Decisioni D-264…D-273 in `docs/decisioni.md`. Si riparte dalla fase 70 (`docs/fase-70-ponte-jam-distanza.md`): prima la sezione «Rilievi dalla fase 69», poi 70.1.
+Decisioni D-264…D-273 in `docs/decisioni.md`. Dopo le fasi 69a e 69b si passa alla fase 70 (`docs/fase-70-ponte-jam-distanza.md`): prima la sezione «Rilievi dalla fase 69», poi 70.1.
 
 ## Stato
 - **69.1**: la Jam della cassa si riapre quando l'hub torna attivo.

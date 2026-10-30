@@ -2,7 +2,7 @@
 
 **Obiettivo:** host e ospite su reti diverse fanno una Jam via broker MQTT, cifrata da capo a capo: l'ospite entra col codice o col QR (Bluetooth nella fase 72), comanda come un ospite LAN e regge cadute del broker, della rete e il sottofondo. Le aggiunte alla coda da ospite remoto arrivano nella fase 71: fino ad allora l'ospite remoto non ha «Aggiungi».
 
-**Prerequisiti:** fase 69 chiusa. Requisiti R-120 … R-134, R-139, R-140, R-142, R-146, R-150 (parte remota), R-156 … R-158, RNF-14; decisioni D-229 … D-232, D-235, D-242 … D-247, D-250, D-257, D-259. Aree a rischio: protocollo Jam, protocollo di sicurezza (`lib/services/jam/remote/`), servizio in primo piano. Tutto il §Protocollo di sicurezza di `docs/feature-jam-distanza.md` vale alla lettera: un cambio di formula o di etichetta è una decisione nuova.
+**Prerequisiti:** fasi 69, 69a e 69b chiuse. Requisiti R-120 … R-134, R-139, R-140, R-142, R-146, R-150 (parte remota), R-156 … R-158, RNF-14; decisioni D-229 … D-232, D-235, D-242 … D-247, D-250, D-257, D-259. Aree a rischio: protocollo Jam, protocollo di sicurezza (`lib/services/jam/remote/`), servizio in primo piano. Tutto il §Protocollo di sicurezza di `docs/feature-jam-distanza.md` vale alla lettera: un cambio di formula o di etichetta è una decisione nuova.
 
 **Comando mirato:** `flutter test test/jam test/ui/jam_screen_test.dart test/ui/settings_index_test.dart`; build `flutter build apk --debug` quando si tocca il servizio (con `sorveglia.sh --pesante`).
 

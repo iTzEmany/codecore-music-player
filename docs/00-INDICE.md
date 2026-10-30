@@ -85,6 +85,8 @@ un'unica codebase Flutter per Android, Windows e Linux. Uso personale, niente co
 | 67 | `fase-67-jam-della-cassa.md` | Jam della cassa (Android): uscite A2DP dal nativo, permesso, «È una cassa?», Jam aperta da sé e annunciata in LAN, banner, solo l'host suona, cassa assente |
 | 68 | `fase-68-scoperta-e-chiusura-jam.md` | Scoperta con la maschera vera, misure di fluidità, prova a mano con due telefoni e la «cassa» |
 | 69 | `fase-69-fondamenta-jam-distanza.md` | Jam a distanza: anti-spam in LAN (2/min, Sospendi, Blocca), `JamGuestLink`, `sodium` con vettori noti, broker e «Prova connessione» |
+| 69a | `fase-69a-coda-arricchimento.md` | Refactor «arricchimento-unico» (1/2): il completamento in background riparte (segnalibro, testi «a riposo», contatore, copertine, errori Deezer) ed escono gli errori nascosti |
+| 69b | `fase-69b-arricchimento-unico.md` | Refactor «arricchimento-unico» (2/2): regola e stato in un punto, un solo motore per manuale e background, un solo comando in Impostazioni, `EnrichmentService` diviso |
 | 70 | `fase-70-ponte-jam-distanza.md` | Ponte MQTT cifrato: protocollo, riserva fra broker, ospiti remoti, ingresso con codice o QR, servizio in primo piano |
 | 71 | `fase-71-coda-remota.md` | Coda dell'ospite remoto: video id o ricerca titolo + artista, «Coda insieme», copertine e scheda dal video id |
 | 72 | `fase-72-bluetooth-e-amici.md` | Annuncio Bluetooth con gettone che ruota, Jam vicine, permessi, amici della Jam |
