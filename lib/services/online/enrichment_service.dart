@@ -123,6 +123,9 @@ class EnrichGather {
   /// What each part came to; final once [EnrichmentService.commit] has run.
   final Map<EnrichPart, PartOutcome> out;
 
+  /// The write of this track failed in commit; its parts came out failed.
+  bool lost = false;
+
   /// The sources gave an answer: meta asked without failing, or a part found / empty.
   bool get answered =>
       _metaAsked ||
@@ -575,6 +578,7 @@ class EnrichmentService {
           await db.transaction(() => _commitOne(g));
         } on Object catch (e, st) {
           AppLog.w('completion: track ${g.trackId} not saved', e, st);
+          g.lost = true;
           g.out.updateAll(
             (_, o) => o == PartOutcome.skipped ? o : PartOutcome.failed,
           );

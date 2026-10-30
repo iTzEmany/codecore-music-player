@@ -73,6 +73,19 @@ void main() {
     final rows = await r.db.select(r.db.activityLogRows).get();
     expect(rows.single.kind, 'enrichBackground');
   });
+
+  test('a round that lost every write leaves a failed line', () async {
+    await open();
+    await r.add(path: '/b.mp3');
+    await r.add(path: '/c.mp3');
+    await r.db.customStatement(
+      "CREATE TRIGGER boom BEFORE UPDATE ON tracks BEGIN SELECT RAISE(ABORT,'boom'); END",
+    );
+    await c.read(enrichCompleterProvider.notifier).runNow();
+    final rows = await r.db.select(r.db.activityLogRows).get();
+    expect(rows.single.kind, 'enrichBackground');
+    expect(rows.single.failed, isNot(0));
+  });
 }
 
 ProviderContainer _container(EnrichRig r, SettingsStore store, AppSettings? settings) =>

@@ -45,6 +45,25 @@ class _Flaky implements EnrichmentService {
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }
 
+/// A service whose first [failGathers] gathers throw.
+class _Throwing extends _Flaky {
+  _Throwing(EnrichmentService s, this.failGathers) : super(s, 0);
+
+  int failGathers;
+
+  @override
+  Future<EnrichGather> gather(
+    int trackId,
+    Set<EnrichPart> parts, {
+    bool force = false,
+    bool ignoreMarks = false,
+    CancelToken? cancel,
+  }) {
+    if (failGathers-- > 0) throw StateError('read failed');
+    return super.gather(trackId, parts, force: force, ignoreMarks: ignoreMarks);
+  }
+}
+
 void main() {
   late EnrichRig r;
   var clock = DateTime.now().millisecondsSinceEpoch;
@@ -301,6 +320,36 @@ void main() {
       final round2 = await withMark().run();
       // Starts after the failed first track; at the end of the queue it wraps once.
       expect(round2.updated[EnrichPart.lyrics], [ids[1], ids[2], ids[0]]);
+    });
+
+    test('five gathers that throw still move the bookmark', () async {
+      final ids = [for (var n = 0; n < 8; n++) await track()];
+      var mark = 0;
+      final c = EnrichCompleter(
+        service: _Throwing(r.svc, 5),
+        repo: r.credits,
+        parts: () => _lyrics,
+        waitIdle: () async {},
+        loadMark: () => mark,
+        saveMark: (id) => mark = id,
+        nowMs: () => clock,
+      );
+      await c.run();
+      expect(mark, greaterThanOrEqualTo(ids[4]));
+    });
+
+    test('a failed cover download is not a lost write: the round is not failed', () async {
+      await r.add(album: 'A', genre: 'G', year: 2000, trackNumber: 1);
+      r.web.coverDown = true;
+      final round = await completer(parts: {EnrichPart.meta}).run();
+      expect(round.failed, isFalse);
+    });
+
+    test('the wrap pass does not retry a track of the first pass', () async {
+      final ids = [for (var n = 0; n < 3; n++) await track()];
+      r.chain.failed = true;
+      await completer(loadMark: () => ids[0]).run();
+      expect(r.chain.calls, 3);
     });
 
     test('the bookmark is written once per block, with the last track tried', () async {
