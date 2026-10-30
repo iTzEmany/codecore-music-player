@@ -107,8 +107,15 @@ class ActivityLogScreen extends ConsumerWidget {
                         item != null
                             ? (item.kind == ActivityKind.scan && item.total == 0
                                   ? l.activityScanEnded
+                                  : item.kind == ActivityKind.enrich && item.failed
+                                  ? l.enrichInterrupted(
+                                      e.detail?['updated'] as int? ?? 0,
+                                      e.detail?['notFound'] as int? ?? 0,
+                                    )
                                   : item.kind == ActivityKind.enrichBackground
-                                  ? l.logEnrichRound(item.done, item.total)
+                                  ? item.failed && item.done == 0 && item.total == 0
+                                        ? l.logEnrichStopped
+                                        : l.logEnrichRound(item.done, item.total)
                                   : activityTitle(l, item))
                             : l.logImport(e.importName ?? ''),
                         maxLines: 1,

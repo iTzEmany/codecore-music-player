@@ -202,10 +202,14 @@ class ActivityLogNotifier extends Notifier<ActivityLogState> {
             : null;
         final done = end?.done ?? r.done;
         final total = end?.total ?? r.total;
+        final failed =
+            r.kind == ActivityKind.enrich && ref.read(enrichJobProvider).failed;
         add(
           LogEntry(
             at: now,
-            detail: (end == null
+            detail: failed
+                ? {'updated': end?.updated ?? 0, 'notFound': end?.notFound ?? 0}
+                : (end == null
                     ? total > 0 && done < total
                     : end.cancelled || end.rateLimited)
                 ? const {'stopped': true}
@@ -219,8 +223,9 @@ class ActivityLogNotifier extends Notifier<ActivityLogState> {
               running: false,
               // A scan that ended on an error says so in its line.
               failed:
+                  failed ||
                   r.kind == ActivityKind.scan &&
-                  ref.read(scanStateProvider).error != null,
+                      ref.read(scanStateProvider).error != null,
             ),
           ),
         );

@@ -3129,5 +3129,17 @@
       }
     }
   },
-  "jamTooSoon": "Warte einen Moment, bevor du es erneut versuchst"
+  "jamTooSoon": "Warte einen Moment, bevor du es erneut versuchst",
+  "enrichInterrupted": "Anreicherung durch einen Fehler unterbrochen: {updated} aktualisiert, {notFound} nicht gefunden",
+  "@enrichInterrupted": {
+    "placeholders": {
+      "updated": {
+        "type": "int"
+      },
+      "notFound": {
+        "type": "int"
+      }
+    }
+  },
+  "logEnrichStopped": "Vervollständigung gestoppt: keine Quelle antwortet"
 }

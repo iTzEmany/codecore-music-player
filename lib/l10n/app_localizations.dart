@@ -9186,6 +9186,18 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Aspetta un momento prima di riprovare'**
   String get jamTooSoon;
+
+  /// No description provided for @enrichInterrupted.
+  ///
+  /// In it, this message translates to:
+  /// **'Arricchimento interrotto da un errore: {updated} aggiornati, {notFound} non trovati'**
+  String enrichInterrupted(int updated, int notFound);
+
+  /// No description provided for @logEnrichStopped.
+  ///
+  /// In it, this message translates to:
+  /// **'Completamento fermato: nessuna fonte risponde'**
+  String get logEnrichStopped;
 }
 
 class _AppLocalizationsDelegate

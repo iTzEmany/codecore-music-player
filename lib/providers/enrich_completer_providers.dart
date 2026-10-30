@@ -74,6 +74,15 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
     repo: ref.read(creditsRepositoryProvider),
     parts: () => autoParts(ref.read(settingsProvider)),
     waitIdle: _waitIdle,
+    loadMark: () => ref.read(settingsStoreProvider).enrichMark,
+    saveMark: (id) => unawaited(
+      ref
+          .read(settingsStoreProvider)
+          .writeEnrichMark(id)
+          .catchError((Object e, StackTrace st) {
+            AppLog.w('completion: mark not saved', e, st);
+          }),
+    ),
     onProgress: (c, t) {
       if (ref.mounted) state = state.copyWith(complete: c, total: t);
     },
@@ -148,11 +157,16 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
         total: c.total,
       );
       final round = await _completer.run(now: now);
-      if (round.worked > 0) {
+      if (round.worked > 0 || round.failed) {
         await _log(round, stopped: _halt, failed: round.failed);
       }
     } on Object catch (e, st) {
-      AppLog.w('completion failed', e, st);
+      // A programming error is not a warning.
+      if (e is Error) {
+        AppLog.e('completion failed', e, st);
+      } else {
+        AppLog.w('completion failed', e, st);
+      }
     } finally {
       if (ref.mounted) state = state.copyWith(running: false);
     }

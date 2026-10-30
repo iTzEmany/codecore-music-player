@@ -14,6 +14,7 @@ import 'package:codecore/services/online/lrclib_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../support/enrich_fakes.dart';
 
@@ -80,6 +81,7 @@ void main() {
   late EnrichRig r;
   late UserActivity user;
   late ProviderContainer c;
+  late SettingsStore store;
   var n = 0;
 
   Future<int> track() => r.add(path: '/t${n++}.mp3');
@@ -91,6 +93,7 @@ void main() {
     final c = ProviderContainer(
       overrides: [
         ...extra,
+        settingsStoreProvider.overrideWithValue(store),
         databaseProvider.overrideWithValue(r.db),
         enrichmentServiceProvider.overrideWithValue(r.svc),
         creditsRepositoryProvider.overrideWithValue(r.credits),
@@ -123,7 +126,9 @@ void main() {
     expect(ok(), isTrue);
   }
 
-  setUp(() {
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    store = SettingsStore(await SharedPreferences.getInstance());
     r = EnrichRig();
     user = UserActivity()..busy = true; // the user is busy until a test says no
     c = open();
@@ -326,6 +331,7 @@ void main() {
     // Real activityProvider and userActivityProvider, fed by this job.
     c = ProviderContainer(
       overrides: [
+        settingsStoreProvider.overrideWithValue(store),
         databaseProvider.overrideWithValue(r.db),
         enrichmentServiceProvider.overrideWithValue(r.svc),
         creditsRepositoryProvider.overrideWithValue(r.credits),
@@ -429,6 +435,15 @@ void main() {
       expect(state().running, isFalse);
     },
   );
+
+  test('a round that fails before any work still leaves a failed line', () async {
+    user = _Watched(breakAt: 1);
+    c = open();
+    await track();
+    await completer().start();
+    final row = (await r.db.select(r.db.activityLogRows).get()).single;
+    expect([row.kind, row.done, row.total, row.failed], ['enrichBackground', 0, 0, 1]);
+  });
 
   test('with everything complete a start never shows a run', () async {
     user = UserActivity();

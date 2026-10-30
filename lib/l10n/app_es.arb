@@ -3129,5 +3129,17 @@
       }
     }
   },
-  "jamTooSoon": "Espera un momento antes de volver a intentarlo"
+  "jamTooSoon": "Espera un momento antes de volver a intentarlo",
+  "enrichInterrupted": "Enriquecimiento interrumpido por un error: {updated} actualizadas, {notFound} no encontradas",
+  "@enrichInterrupted": {
+    "placeholders": {
+      "updated": {
+        "type": "int"
+      },
+      "notFound": {
+        "type": "int"
+      }
+    }
+  },
+  "logEnrichStopped": "Completado detenido: ninguna fuente responde"
 }

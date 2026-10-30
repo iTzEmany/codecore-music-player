@@ -5805,4 +5805,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get jamTooSoon => 'Espera un momento antes de volver a intentarlo';
+
+  @override
+  String enrichInterrupted(int updated, int notFound) {
+    return 'Enriquecimiento interrumpido por un error: $updated actualizadas, $notFound no encontradas';
+  }
+
+  @override
+  String get logEnrichStopped => 'Completado detenido: ninguna fuente responde';
 }

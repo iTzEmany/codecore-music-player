@@ -3373,5 +3373,17 @@
       }
     }
   },
-  "jamTooSoon": "Espera um momento antes de tentar de novo"
+  "jamTooSoon": "Espera um momento antes de tentar de novo",
+  "enrichInterrupted": "Enriquecimento interrompido por um erro: {updated} atualizadas, {notFound} não encontradas",
+  "@enrichInterrupted": {
+    "placeholders": {
+      "updated": {
+        "type": "int"
+      },
+      "notFound": {
+        "type": "int"
+      }
+    }
+  },
+  "logEnrichStopped": "Conclusão parada: nenhuma fonte responde"
 }

@@ -3692,5 +3692,17 @@
       }
     }
   },
-  "jamTooSoon": "Aspetta un momento prima di riprovare"
+  "jamTooSoon": "Aspetta un momento prima di riprovare",
+  "enrichInterrupted": "Arricchimento interrotto da un errore: {updated} aggiornati, {notFound} non trovati",
+  "@enrichInterrupted": {
+    "placeholders": {
+      "updated": {
+        "type": "int"
+      },
+      "notFound": {
+        "type": "int"
+      }
+    }
+  },
+  "logEnrichStopped": "Completamento fermato: nessuna fonte risponde"
 }
