@@ -18,7 +18,7 @@
 | statica veloce | `flutter analyze` | 2m |
 | codice generato | `dart run build_runner build --delete-conflicting-outputs` (solo tabelle drift) · `flutter gen-l10n` (ARB) | 4m · 1m |
 | suite completa (CI; in locale solo se chiesta) | `flutter test` | 6m |
-| build | `flutter build apk --debug` · `flutter build linux` | 8m · 10m |
+| build | `JAVA_HOME=~/.jdks/jbr-17.0.14 PATH=$JAVA_HOME/bin:$PATH flutter build apk --debug` (senza JAVA_HOME Gradle esce subito) · `flutter build linux` | 8m · 10m |
 | perf sul Mi A3 | `JAVA_HOME=~/.jdks/jbr-17.0.14 PATH=$JAVA_HOME/bin:$PATH python3 scripts/perf_device.py 0d7ae9df206e --label <l> --playback` | 40m |
 
 ## Parallelismo

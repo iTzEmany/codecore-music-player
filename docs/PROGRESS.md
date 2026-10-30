@@ -1160,10 +1160,10 @@ mobile_scanner — fase 24 — 2026-10-19
 - [x] 69.10 Controlli di fase
 
 ## Fase 69a — La coda dell'arricchimento riparte (`fase-69a-coda-arricchimento.md`)
-- [ ] 69a.1 La coda avanza (segnalibro, contatore)
-- [ ] 69a.2 Le fonti che non rispondono non sembrano «niente» (testi, copertine, Deezer, curiosità)
-- [ ] 69a.3 Errori visibili (lavoro manuale, Registro, `Error`)
-- [ ] 69a.4 Controlli di fase (misura sul Motorola, D-289)
+- [x] 69a.1 La coda avanza (segnalibro, contatore) (b4e6a02)
+- [x] 69a.2 Le fonti che non rispondono non sembrano «niente» (testi, copertine, Deezer, curiosità) (7d9bd33)
+- [x] 69a.3 Errori visibili (lavoro manuale, Registro, `Error`) (bd8ea87, 4650805 dopo la review)
+- [x] 69a.4 Controlli di fase (misura sul Motorola, D-289) (e28cd28, 8aee0bb; misura: 1787 dovuti, giro con 35 brani nel Registro)
 
 ## Fase 69b — Un solo motore di arricchimento (`fase-69b-arricchimento-unico.md`)
 - [ ] 69b.1 Rete, regola unica e stato

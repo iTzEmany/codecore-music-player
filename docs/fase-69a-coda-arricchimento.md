@@ -120,3 +120,14 @@ I due test di avvio dal provider vero passano senza errori.
 
    Esiti qui sotto. Le copie si cancellano con `pulizia.sh`.
 4. In `docs/02-architettura.md` §«Arricchimento» (riga circa 335): segnalibro, `limited` dei testi, `getBytes`.
+
+## Esiti di 69a.4 (2026-10-30)
+
+- Comando mirato verde e `flutter analyze` pulito. `/code-review high` fatta: 9 rilievi corretti (4650805); il «answered» duplicato è stato scartato perché lo riscrive 69b. La scheggia (modalità passo) ha trovato due bug medi, corretti in e28cd28: il segnalibro restava fermo se ogni lettura lanciava, e un giro che perdeva le scritture non lasciava righe nel Registro. Ha segnalato anche due test mancanti (il passaggio dall'inizio senza ripetizioni e `getBytes` reale), ora aggiunti.
+- **Motorola, prima misura** (18:52–19:09, APK con 69a.1–69a.3): **fallita**. Il log diceva «LRCLIB answered 503» e 11 s dopo «5 tracks in a row got no answer». La causa: il blocco di 20 brani si legge prima che i testi siano rifiutati, e i brani dovuti solo per i testi uscivano tutti `skipped` e facevano salire il contatore. Corretto in 8aee0bb: un brano che non chiede niente non conta. Nella stessa misura il segnalibro funzionava (0 → 474) e la riga del giro fallito era nel Registro.
+- **Motorola, seconda misura** (19:12–19:28, APK con 8aee0bb, musica in pausa per D-296):
+  - brani con una parte dovuta: **1787** (1823 prima dell'installazione; partenza dell'analisi 1812). Solo musica: 1737 → 1710 dopo i 15 minuti. ✔
+  - Registro: giro `enrichBackground` con lavoro, fermato con «Pausa» per scrivere la riga: 35 brani aggiornati (crediti 31, curiosità 17, meta 4) e 3 senza risposta. ✔
+  - log: un solo «LRCLIB answered 503» all'avvio (19:12:45), nessun «tracks in a row got no answer», nessun `[E]`. Gli avvisi sono 503 di MusicBrainz sui crediti, e il giro è andato avanti. ✔
+  - segnalibro 474 → 601 dopo 15 minuti.
+- Copie: `.backup-motorola/codecore-data-2026-10-30.tar` (prima della prima installazione) e `.backup-motorola/codecore-2026-10-30-1915/` (prima della seconda), da cancellare con `pulizia.sh` a fine obiettivo.
