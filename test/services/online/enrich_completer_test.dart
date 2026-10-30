@@ -441,6 +441,26 @@ void main() {
       expect(c.running, isFalse);
     });
 
+    test('tracks due only for lyrics do not stop the round once LRCLIB rests', () async {
+      r.chain.limited = true;
+      for (var n = 0; n < 7; n++) {
+        await r.add(
+          path: '/l$n.mp3',
+          album: 'A',
+          genre: 'G',
+          year: 2000,
+          trackNumber: 1,
+          hasCover: true,
+        );
+      }
+      final meta = await track();
+      final round = await completer(parts: {EnrichPart.meta, EnrichPart.lyrics}).run();
+      expect(round.noAnswer, isFalse);
+      expect(round.failed, isFalse);
+      expect(round.updated[EnrichPart.meta], [meta]);
+      expect(r.chain.calls, 1);
+    });
+
     test('stop ends a wait for the user', () async {
       await track();
       final c = completer(idle: () => Completer<void>().future);

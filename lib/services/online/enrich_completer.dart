@@ -112,7 +112,7 @@ class EnrichCompleter {
     var after = loadMark?.call() ?? 0;
     _saved = after;
     var canWrap = after > 0; // end of the queue: one pass from the start
-    var stuck = 0; // tracks in a row with no part found or answered «nothing» (offline)
+    var stuck = 0; // tracks in a row that asked a source and got no answer (offline); one that asked nothing doesn't count
     Set<EnrichPart> switchedOn() => wanted = parts().difference(refused);
     try {
       try {
@@ -143,7 +143,13 @@ class EnrichCompleter {
             try {
               final g = await service.gather(id, wanted, ignoreMarks: _now);
               block.add(g);
-              stuck = g.answered ? 0 : stuck + 1;
+              // A track whose parts were all refused meanwhile asked nothing: neither a sign of offline nor of life.
+              final asked = g.out.values.any((o) => o != PartOutcome.skipped);
+              if (g.answered) {
+                stuck = 0;
+              } else if (asked) {
+                stuck++;
+              }
               refused.addAll([
                 for (final e in g.out.entries)
                   if (e.value == PartOutcome.limited) e.key,
