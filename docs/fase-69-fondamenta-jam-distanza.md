@@ -68,13 +68,13 @@ Esiti qui sotto, uno per riga; KO nuovi → righe in `docs/action-plan.md`.
 - **R-92 OK**: l'ospite vede la miniatura dei brani online e la copertina di libreria (da `/cover`) dei brani dell'host.
 - **R-93 OK nel player normale**: «Scarica» dal ⋮ su un brano online. Il brano entra in libreria e alla riapertura «Scarica» non c'è più.
   - La sparizione a foglio aperto non si è vista, perché il download è finito in meno di 1 s.
-  - La schermata Jam non ha un ⋮ e non offre «Scarica»: da chiarire se R-93 debba valere anche lì.
+  - La schermata Jam non ha un ⋮ e non offre «Scarica». **Deciso dall'utente (30/10)**: il ⋮ con «Scarica» ci deve essere anche lì (da fare).
 - **R-91 OK**: l'ospite aggiunge due brani online e poi esce. I brani restano nella Jam dell'host, che li suona da sé.
 - **R-102 OK**: a parte finita, l'host riceve brani «Suggerito» dalla sua libreria.
 - **Jam nata corta OK**: con 6 brani dell'host, le aggiunte a mano dell'ospite entrano finché c'è posto, poi compare «La Jam è piena», senza falsi «Aggiunto». Il tetto esatto di 180 non è stato contato.
 - **KO R-102**: con la Jam piena, il «Suggerito» ripropone brani già suonati nella Jam (premuto «Successivo» 30–40 volte, sono tornati «Look At Me» e i brani Mi-1…Mi-6). Probabilmente i brani scartati dalla Jam piena escono dall'insieme degli esclusi (`jam_suggestion.dart`).
 - **Da verificare**:
-  - dopo l'uscita dalla Jam il Motorola è tornato da «Casuale+» a «Casuale»;
+  - dopo l'uscita dalla Jam il Motorola è tornato da «Casuale+» a «Casuale» (l'utente chiede di verificarlo: con un test che lo riproduce, poi sul telefono);
   - un'aggiunta da una riga YouTube Music a Jam piena ha detto «Aggiunto in coda» ma non è rimasta (una volta, non riprodotta).
 - **Nota**: l'ospite che esce da «Coda insieme» ritrova la sua parte non suonata (D-186), aggiunte comprese. La coda di prima della Jam è salvata solo in memoria.
 
