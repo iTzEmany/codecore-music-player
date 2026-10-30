@@ -138,6 +138,7 @@ class EnrichGather {
   CreditsPart? _credits;
   CuriosityLookup? _curio;
   String? _coverKey, _coverAlbum; // the file saved, and the album key it is for
+  bool _coverGone = false; // the source answered «no such cover» (not a network error)
 
   void _settle(EnrichPart p, PartOutcome o, int now) {
     out[p] = o;
@@ -445,6 +446,7 @@ class EnrichmentService {
               wantSynced: parts.contains(EnrichPart.synced),
               cancel: cancel,
             ),
+            timeout: false,
           )
         : null;
     // Both settle before a cancellation is rethrown.
@@ -464,7 +466,7 @@ class EnrichmentService {
       final lost =
           r.failed ||
           (res?.failed ?? false); // no answer is not an empty answer
-      final lostO = _lost(r.limited);
+      final lostO = _lost(r.limited || (res?.limited ?? false));
       if (doLyrics) {
         g._plain = hasPlain ? text!.plain : null;
         settle(
@@ -517,7 +519,7 @@ class EnrichmentService {
       final l = g._curio = r.value;
       if (l == null || l.outcome.failed) {
         out[EnrichPart.curio] = _lost(r.limited);
-      } else if (l.outcome.limited) {
+      } else if (l.pair.song == null && l.outcome.limited) {
         out[EnrichPart.curio] = PartOutcome.limited;
       } else {
         // The part is the track's own text: an artist bio alone leaves it empty.
@@ -542,6 +544,7 @@ class EnrichmentService {
         g._coverKey = covers.fileFor(known) != null
             ? known
             : await _fetchCover(key, url, false, cancel);
+        g._coverGone = g._coverKey == null;
         g._coverAlbum = key;
       } on DioException catch (e, st) {
         if (CancelToken.isCancel(e)) rethrow;
@@ -661,8 +664,16 @@ class EnrichmentService {
         f.coverSource == 0;
     if (saved) await tracks.setCoverForAlbum(albumKey, true, coverKey);
     if (coverPending) {
-      // No cover, nothing else filled: not «found», and the mark stays (invariant 3).
-      out[EnrichPart.meta] = saved ? PartOutcome.found : PartOutcome.failed;
+      // No cover, nothing else filled: not «found». A cover that does not exist
+      // is «nothing» (mark set); a download that failed is unknown (mark stays, invariant 3).
+      if (!saved && g._coverGone) {
+        g._settle(EnrichPart.meta, PartOutcome.none, g._now);
+        await (db.update(db.tracks)..where((r) => r.id.equals(trackId))).write(
+          const TracksCompanion(enrichStatus: Value(2)),
+        );
+      } else {
+        out[EnrichPart.meta] = saved ? PartOutcome.found : PartOutcome.failed;
+      }
       if (saved) {
         marks[EnrichPart.meta] = null;
         await (db.update(db.tracks)..where((r) => r.id.equals(trackId))).write(
@@ -761,8 +772,13 @@ class EnrichmentService {
     }
     var (found, key) = await _writeFields(t, p, f);
     if (f.contains(EnrichField.cover) && p.coverUrl != null) {
-      found = await _applyCover(t.id, key, p.coverUrl!, replaceCover, cancel) ||
-          found;
+      try {
+        found = await _applyCover(t.id, key, p.coverUrl!, replaceCover, cancel) ||
+            found;
+      } on DioException catch (e, st) {
+        if (CancelToken.isCancel(e)) rethrow;
+        AppLog.w('apply: cover of track ${t.id} failed', e, st);
+      }
     }
     return found;
   }

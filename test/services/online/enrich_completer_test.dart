@@ -407,6 +407,18 @@ void main() {
       expect((await r.enrichOf(ids[0]))?.metaNoneAt, isNull);
     });
 
+    test('LRCLIB resting: meta and curiosities of the next tracks are worked', () async {
+      r.chain.limited = true;
+      final ids = [for (var n = 0; n < 3; n++) await track()];
+      final round = await completer(
+        parts: {EnrichPart.meta, EnrichPart.lyrics, EnrichPart.curio},
+      ).run();
+      expect(r.chain.calls, 1); // the lyrics are refused for the round
+      expect(round.updated[EnrichPart.meta], ids);
+      expect(round.updated[EnrichPart.curio], ids);
+      expect(round.updated[EnrichPart.lyrics], isNull);
+    });
+
     test('a refused part alone ends the round after one request', () async {
       r.web.itunes = ItunesMode.limited;
       for (var n = 0; n < 30; n++) {

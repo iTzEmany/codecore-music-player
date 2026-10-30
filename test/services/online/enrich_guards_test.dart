@@ -1,6 +1,8 @@
 import 'package:codecore/core/clock.dart';
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/services/online/curiosity_finder.dart';
+import 'package:codecore/services/online/itunes_client.dart' show ItunesMatch;
+import 'package:codecore/services/online/wikipedia_client.dart' show Curiosity;
 import 'package:codecore/services/online/enrichment_service.dart';
 import 'package:codecore/services/online/http_client.dart';
 import 'package:codecore/services/online/lrclib_client.dart';
@@ -339,6 +341,21 @@ void main() {
       expect((await r.enrichOf(id))!.curioNoneAt, isNotNull);
     });
 
+    test('artist refused but the song text found: found, mark cleared', () async {
+      final id = await r.add();
+      await r.credits.saveEnrich(
+        TrackEnrichCompanion(trackId: Value(id), curioNoneAt: const Value(1)),
+      );
+      r.finder.pair = CuriosityPair(
+        song: Curiosity('A story', Uri.parse('https://it.wikipedia.org/wiki/X'), 'it'),
+        artistError: const RateLimitedException(429),
+      );
+      expect(await r.svc.completeOne(id, {EnrichPart.curio}), {
+        EnrichPart.curio: PartOutcome.found,
+      });
+      expect((await r.enrichOf(id))!.curioNoneAt, isNull);
+    });
+
     test(
       'every part found: columns, credits and marks are all written',
       () async {
@@ -462,6 +479,40 @@ void main() {
       expect(out, {EnrichPart.meta: PartOutcome.failed});
       expect((await r.enrichOf(id))!.metaNoneAt, 1);
       expect((await r.repo.getById(id))!.hasCover, isFalse);
+    });
+
+    test('apply with the cover download down: fields written, no cover, no throw', () async {
+      final id = await r.add();
+      final t = (await r.repo.getById(id))!;
+      r.web.coverDown = true;
+      final ok = await r.svc.apply(
+        EnrichmentProposal(
+          track: t,
+          meta: const ItunesMatch(
+            title: 'T',
+            artist: 'A',
+            album: 'Alb',
+            artworkUrl: 'https://x/c.jpg',
+          ),
+        ),
+        {EnrichField.album, EnrichField.cover},
+      );
+      expect(ok, isTrue);
+      final u = (await r.repo.getById(id))!;
+      expect([u.album, u.hasCover], ['Alb', false]);
+    });
+
+    test('the cover does not exist (404): nothing, mark set', () async {
+      final id = await r.add(
+        album: 'A',
+        genre: 'G',
+        year: 2000,
+        trackNumber: 1,
+      );
+      r.web.coverMissing = true;
+      final out = await r.svc.completeOne(id, {EnrichPart.meta}, force: true);
+      expect(out, {EnrichPart.meta: PartOutcome.none});
+      expect((await r.enrichOf(id))!.metaNoneAt, isNotNull);
     });
 
     test('the cover is the only thing to fill and it is saved: found, mark cleared', () async {

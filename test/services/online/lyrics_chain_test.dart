@@ -249,11 +249,25 @@ void main() {
     expect(ovh.calls, 0);
   });
 
-  test('429 from a fallback is rethrown', () async {
-    final c = LyricsChain(
-      lrclib: _Lrclib(null),
-      netease: _Ne(null, error: const RateLimitedException(429)),
+  test('LRCLIB resting: limited, though another source gave a text', () async {
+    final t = DateTime(2026);
+    final chain = LyricsChain(
+      lrclib: _Lrclib(null, error: const WebUnavailableException('u', 503)),
+      ovh: _Ovh(_plain),
+      now: () => t,
     );
-    await expectLater(c.find(_track()), throwsA(isA<RateLimitedException>()));
+    final first = await chain.find(_track());
+    final second = await chain.find(_track());
+    expect([first.limited, second.limited], [false, true]);
+    expect(second.lyrics, isNotNull);
+  });
+
+  test('429 from a fallback after a LRCLIB text: text kept, limited', () async {
+    final r = await LyricsChain(
+      lrclib: _Lrclib(_plain),
+      netease: _Ne(null, error: const RateLimitedException(429)),
+    ).find(_track());
+    expect(r.lyrics?.plain, 'a');
+    expect([r.limited, r.syncedFailed], [true, true]);
   });
 }

@@ -21,11 +21,16 @@ class _Web implements WebClient {
   bool deezerKnowsIsrc = true;
   bool deezerQuota = false;
   bool itunesGenre = true;
+  bool itunesEmpty = false;
+  int? deezerError; // any Deezer answer is this error code
 
   @override
   Future<Object?> getJson(String url,
       {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async {
     urls.add(url);
+    if (url.contains('deezer') && deezerError != null) {
+      return {'error': {'code': deezerError, 'message': 'err'}};
+    }
     if (url.contains('deezer') && deezerQuota) {
       return {'error': {'code': 4, 'message': 'Quota'}};
     }
@@ -60,6 +65,7 @@ class _Web implements WebClient {
       };
     }
     if (url.contains('itunes')) {
+      if (itunesEmpty) return {'results': <Object>[]};
       return {
         'results': [
           {
@@ -178,6 +184,22 @@ void main() {
     expect(prop.source, 'itunes');
     expect(prop.meta!.album, 'iTunes Album');
     expect(prop.disc, isNull);
+  });
+
+  test('Deezer error code 100: meta failed, no mark; code 800: nothing, mark', () async {
+    final id = (await add()).id;
+    web
+      ..deezerError = 100
+      ..itunesEmpty = true;
+    expect(await svc.completeOne(id, {EnrichPart.meta}), {
+      EnrichPart.meta: PartOutcome.failed,
+    });
+    expect(await db.select(db.trackEnrich).get(), isEmpty);
+    web.deezerError = 800;
+    expect(await svc.completeOne(id, {EnrichPart.meta}), {
+      EnrichPart.meta: PartOutcome.none,
+    });
+    expect((await db.select(db.trackEnrich).getSingle()).metaNoneAt, isNotNull);
   });
 
   test('option off: no Deezer request', () async {

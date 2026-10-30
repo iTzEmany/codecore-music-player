@@ -35,7 +35,7 @@ abstract class WebClient {
   Future<Object?> getJson(String url,
       {Map<String, String>? query, CancelToken? cancel, bool strict = false});
 
-  /// Raw bytes for https URLs up to [maxBytes]; null otherwise.
+  /// Raw bytes for https URLs up to [maxBytes]; null when there is no such file (not https, 404, too big). Network errors and other bad answers throw [DioException] (a cancellation as ever).
   Future<List<int>?> getBytes(String url,
       {int maxBytes = 5 * 1024 * 1024, CancelToken? cancel});
 }
@@ -122,14 +122,21 @@ class DioWebClient implements WebClient {
           options: Options(responseType: ResponseType.bytes));
       _checkRateLimit(res.statusCode);
       final data = res.data;
-      if (res.statusCode != 200 || data == null || data.length > maxBytes) {
+      if (res.statusCode == 404 || (data != null && data.length > maxBytes)) {
         return null;
+      }
+      if (res.statusCode != 200 || data == null) {
+        throw DioException.badResponse(
+          statusCode: res.statusCode ?? 0,
+          requestOptions: res.requestOptions,
+          response: res,
+        );
       }
       return data;
     } on DioException catch (e, st) {
       if (CancelToken.isCancel(e)) rethrow;
       AppLog.w('GET bytes failed: $url', e, st);
-      return null;
+      rethrow; // the network is down: not the same as «no such file»
     }
   }
 }

@@ -127,7 +127,7 @@ class DeezerClient {
         throw const RateLimitedException(429);
       }
       AppLog.w('Deezer error $code: ${err['message']}');
-      return null;
+      throw DeezerNetworkException(url); // not «no result»: unknown
     }
     return body;
   }
