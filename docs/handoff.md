@@ -21,15 +21,10 @@ Decisioni D-264…D-273 in `docs/decisioni.md`. Si riparte dalla fase 70 (`docs/
   - `test.mosquitto.org:8886` chiude dopo il CONNECT.
 
 ## Tocca a te
-- **Resti della 69.4**: la prova sui due telefoni l'ho fatta io (D-274) e gli esiti sono in `docs/fase-69-fondamenta-jam-distanza.md` §69.4. Restano da provare a mano:
-  - R-89 (swipe di un brano online);
-  - R-91;
-  - R-92 (copertine dell'ospite);
-  - R-93 («Scarica»);
-  - lo scarto;
-  - il brano suggerito di «Coda insieme»;
-  - l'aggiunta che entra nei 20 posti di una Jam nata corta.
-- **Volume del Mi A3**: il volume Bluetooth (A2DP) è rimasto a 0 (prima era 7). Rialzalo con le cuffie collegate.
+- **69.4 finita in autonomia (D-274)**, esiti in §69.4. Restano solo:
+  - «Scarica» che sparisce a foglio aperto, da provare con un brano lungo;
+  - decidere se la schermata Jam debba avere il ⋮ con «Scarica».
+- **Coda del Motorola**: dopo la prova del 30/10 i primi 6 brani della coda sono quelli di prima, il seguito no (D-186: l'ospite ritrova la sua parte non suonata). Il volume A2DP del Mi A3 è tornato a 7.
 - **Mosquitto 8886 da decidere** (D-258): chiude ogni connessione dopo il CONNECT, in tre giri, con TLS valido. Puoi toglierlo dalla lista predefinita (`kDefaultJamBrokers`) o sostituirlo con un altro broker TLS pubblico.
 - **Prova a mano del gate**:
   - «Fino alla fine della Jam» durante una Jam vera, e che sparisca al riavvio;
@@ -55,6 +50,8 @@ Decisioni D-264…D-273 in `docs/decisioni.md`. Si riparte dalla fase 70 (`docs/
 - **APK**: si compila con `JAVA_HOME=~/.jdks/jbr-17.0.14` (`docs/gotchas.md`).
 
 ## Rinviato
+- **KO R-102**: a Jam piena il «Suggerito» ripropone brani già suonati nella Jam (§69.4, 30/10). Da correggere con un test che lo riproduce, prima della fase 70 o dentro.
+- **Coda di prima della Jam solo in memoria** (`JamController._saved`): l'ospite in «Coda insieme» perde la sua coda originale. Da valutare se salvarla su disco o restituirla intera.
 - **Due code per le domande sulla cassa** (`SpeakerMonitor._pending` e la coda della UI): da unificare.
 - La posizione mostrata nella Jam salta indietro di circa 1,3 s a ogni avvio di brano (`jam ui: shown position moved`).
 - 53.10 completamento intero sul Motorola (fermo a 421/2317).

@@ -1151,7 +1151,7 @@ mobile_scanner — fase 24 — 2026-10-19
 - [x] 69.1 La Jam della cassa con la cassa già collegata all'avvio (KO 3 della 68.3)
 - [x] 69.2 L'offerta della cassa sopra la schermata della Jam (KO 4)
 - [x] 69.3 Jam piena non muta e «Continua sul telefono» (KO 1, D-263)
-- [~] 69.4 Prova a mano dei rilievi e resti della 68.3 (fatta in autonomia, D-274; restano R-89, R-91…R-93, scarto e suggerito)
+- [x] 69.4 Prova dei rilievi e resti della 68.3 (in autonomia, D-274; KO R-102 «Suggerito» che ripete brani a Jam piena, in handoff)
 - [x] 69.5 `JamGuestLink` senza spostare codice
 - [x] 69.6 `admitRequest` e `JamGate`
 - [x] 69.7 Sospendi, Blocca e l'avviso dell'ospite
