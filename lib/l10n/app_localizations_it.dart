@@ -5797,4 +5797,8 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get logEnrichStopped =>
       'Completamento fermato: nessuna fonte risponde';
+
+  @override
+  String get logEnrichFailed =>
+      'Completamento non riuscito: un errore l\'ha fermato';
 }

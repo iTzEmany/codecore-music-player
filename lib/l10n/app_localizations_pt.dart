@@ -5804,4 +5804,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get logEnrichStopped => 'Conclusão parada: nenhuma fonte responde';
+
+  @override
+  String get logEnrichFailed => 'Conclusão falhou: um erro a interrompeu';
 }

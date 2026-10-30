@@ -455,6 +455,7 @@ void main() {
     await completer().start();
     final row = (await r.db.select(r.db.activityLogRows).get()).single;
     expect([row.kind, row.done, row.total, row.failed], ['enrichBackground', 0, 0, 1]);
+    expect(row.detail, contains('"noAnswer":true'));
   });
 
   test('with everything complete a start never shows a run', () async {

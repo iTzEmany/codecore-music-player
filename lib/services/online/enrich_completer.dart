@@ -10,8 +10,9 @@ import 'enrichment_service.dart';
 class EnrichRound {
   int worked = 0;
 
-  /// The run stopped on an error (logged): the rest of the library waits for
-  /// the next run; what was read before it is written and counted here.
+  /// The run stopped on an error (logged), lost a write (a track or a whole
+  /// block not saved) or stopped with [noAnswer]: the rest of the library waits
+  /// for the next run; what was read before it is written and counted here.
   bool failed = false;
 
   /// The run stopped because the sources answered none of the last tracks.
@@ -155,7 +156,11 @@ class EnrichCompleter {
                   if (e.value == PartOutcome.limited) e.key,
               ]);
             } on Object catch (e, st) {
-              AppLog.w('completion: track $id not read', e, st);
+              if (e is Error) {
+                AppLog.e('completion: track $id not read', e, st);
+              } else {
+                AppLog.w('completion: track $id not read', e, st);
+              }
               stuck++;
             }
             if (stuck >= _maxStuck) {
@@ -172,7 +177,11 @@ class EnrichCompleter {
         await _commit(block, round, after);
       }
     } on Object catch (e, st) {
-      AppLog.w('completion: round stopped', e, st);
+      if (e is Error) {
+        AppLog.e('completion: round stopped', e, st);
+      } else {
+        AppLog.w('completion: round stopped', e, st);
+      }
       round.failed = true;
     }
     return round;
@@ -183,8 +192,8 @@ class EnrichCompleter {
     EnrichRound round,
     int after,
   ) async {
-    // Once per block, in step with the database: the last track tried (also
-    // when every read threw, or the same tracks would be retried each start).
+    // Saved before the write and also when it fails (or every read threw), so a
+    // bad block is not retried at each start; lost tracks come back after the wrap.
     if (after > 0 && after != _saved) {
       _saved = after;
       saveMark?.call(after);
@@ -211,7 +220,11 @@ class EnrichCompleter {
         }
       }
     } on Object catch (e, st) {
-      AppLog.w('completion: block of ${items.length} not saved', e, st);
+      if (e is Error) {
+        AppLog.e('completion: block of ${items.length} not saved', e, st);
+      } else {
+        AppLog.w('completion: block of ${items.length} not saved', e, st);
+      }
       round.failed = true;
     }
     final c = await repo.enrichCounts(

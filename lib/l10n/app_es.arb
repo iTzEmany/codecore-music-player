@@ -3141,5 +3141,6 @@
       }
     }
   },
-  "logEnrichStopped": "Completado detenido: ninguna fuente responde"
+  "logEnrichStopped": "Completado detenido: ninguna fuente responde",
+  "logEnrichFailed": "Completado fallido: un error lo detuvo"
 }

@@ -3141,5 +3141,6 @@
       }
     }
   },
-  "logEnrichStopped": "Vervollständigung gestoppt: keine Quelle antwortet"
+  "logEnrichStopped": "Vervollständigung gestoppt: keine Quelle antwortet",
+  "logEnrichFailed": "Vervollständigung fehlgeschlagen: ein Fehler hat sie gestoppt"
 }

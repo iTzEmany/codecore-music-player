@@ -5813,4 +5813,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get logEnrichStopped => 'Completado detenido: ninguna fuente responde';
+
+  @override
+  String get logEnrichFailed => 'Completado fallido: un error lo detuvo';
 }

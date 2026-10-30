@@ -85,6 +85,7 @@ void main() {
     final rows = await r.db.select(r.db.activityLogRows).get();
     expect(rows.single.kind, 'enrichBackground');
     expect(rows.single.failed, isNot(0));
+    expect(rows.single.detail, isNot(contains('noAnswer')));
   });
 }
 

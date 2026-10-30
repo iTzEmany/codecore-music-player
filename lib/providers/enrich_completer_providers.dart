@@ -157,7 +157,7 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
         total: c.total,
       );
       final round = await _completer.run(now: now);
-      if (round.worked > 0 || round.noAnswer || round.failed) {
+      if (round.worked > 0 || round.failed) {
         await _log(round, stopped: _halt, failed: round.failed);
       }
     } on Object catch (e, st) {
@@ -246,6 +246,7 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
         ),
         detail: {
           if (stopped) 'stopped': true,
+          if (round.noAnswer) 'noAnswer': true,
           'updated': byPart(round.updated),
           'none': byPart(round.none),
         },

@@ -577,7 +577,11 @@ class EnrichmentService {
         try {
           await db.transaction(() => _commitOne(g));
         } on Object catch (e, st) {
-          AppLog.w('completion: track ${g.trackId} not saved', e, st);
+          if (e is Error) {
+            AppLog.e('completion: track ${g.trackId} not saved', e, st);
+          } else {
+            AppLog.w('completion: track ${g.trackId} not saved', e, st);
+          }
           g.lost = true;
           g.out.updateAll(
             (_, o) => o == PartOutcome.skipped ? o : PartOutcome.failed,

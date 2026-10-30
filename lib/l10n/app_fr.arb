@@ -3385,5 +3385,6 @@
       }
     }
   },
-  "logEnrichStopped": "Complétion arrêtée : aucune source ne répond"
+  "logEnrichStopped": "Complétion arrêtée : aucune source ne répond",
+  "logEnrichFailed": "Complétion échouée : une erreur l'a arrêtée"
 }

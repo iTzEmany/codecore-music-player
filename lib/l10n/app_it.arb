@@ -3704,5 +3704,6 @@
       }
     }
   },
-  "logEnrichStopped": "Completamento fermato: nessuna fonte risponde"
+  "logEnrichStopped": "Completamento fermato: nessuna fonte risponde",
+  "logEnrichFailed": "Completamento non riuscito: un errore l'ha fermato"
 }

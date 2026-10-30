@@ -5850,4 +5850,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get logEnrichStopped => 'Complétion arrêtée : aucune source ne répond';
+
+  @override
+  String get logEnrichFailed => 'Complétion échouée : une erreur l\'a arrêtée';
 }

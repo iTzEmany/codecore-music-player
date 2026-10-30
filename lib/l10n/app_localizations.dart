@@ -9198,6 +9198,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Completamento fermato: nessuna fonte risponde'**
   String get logEnrichStopped;
+
+  /// No description provided for @logEnrichFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Completamento non riuscito: un errore l\'ha fermato'**
+  String get logEnrichFailed;
 }
 
 class _AppLocalizationsDelegate

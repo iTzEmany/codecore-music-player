@@ -5821,4 +5821,8 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get logEnrichStopped =>
       'Vervollständigung gestoppt: keine Quelle antwortet';
+
+  @override
+  String get logEnrichFailed =>
+      'Vervollständigung fehlgeschlagen: ein Fehler hat sie gestoppt';
 }

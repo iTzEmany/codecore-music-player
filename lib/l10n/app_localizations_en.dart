@@ -5782,4 +5782,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logEnrichStopped => 'Completion stopped: no source is answering';
+
+  @override
+  String get logEnrichFailed => 'Completion failed: an error stopped it';
 }

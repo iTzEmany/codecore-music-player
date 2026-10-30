@@ -3141,5 +3141,6 @@
       }
     }
   },
-  "logEnrichStopped": "Completion stopped: no source is answering"
+  "logEnrichStopped": "Completion stopped: no source is answering",
+  "logEnrichFailed": "Completion failed: an error stopped it"
 }
