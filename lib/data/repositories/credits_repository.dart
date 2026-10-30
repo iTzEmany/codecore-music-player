@@ -27,7 +27,7 @@ class CreditsRepository {
   /// Ids of tracks with a part of [parts] due at [now], by id, without the
   /// [exclude] ones, at most [limit]. The same rule as `isDue` (an empty part
   /// not marked «nothing» in the last 30 days), in SQL and on light columns.
-  /// [ignoreMarks]: a «nothing» mark of any age does not count. Tracks of kind
+  /// [after]: only ids above it. [ignoreMarks]: a «nothing» mark of any age does not count. Tracks of kind
   /// music or stream, not missing or hidden.
   Future<List<int>> dueTrackIds(
     Set<EnrichPart> parts,
@@ -35,13 +35,18 @@ class CreditsRepository {
     int limit = 20,
     Set<int> exclude = const {},
     bool ignoreMarks = false,
+    int after = 0,
   }) async {
     if (parts.isEmpty) return const [];
     final rows = await _db
         .customSelect(
-          'SELECT t.id FROM $_eligible AND (${_dueWhere(parts, ignoreMarks)}) '
+          'SELECT t.id FROM $_eligible AND t.id > ?3 AND (${_dueWhere(parts, ignoreMarks)}) '
           'ORDER BY t.id LIMIT ?2',
-          variables: [_retryBefore(now), Variable<int>(limit + exclude.length)],
+          variables: [
+            _retryBefore(now),
+            Variable<int>(limit + exclude.length),
+            Variable<int>(after),
+          ],
           readsFrom: {_db.tracks, _db.trackEnrich, _db.trackCredits},
         )
         .get();

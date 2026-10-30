@@ -123,6 +123,11 @@ class EnrichGather {
   /// What each part came to; final once [EnrichmentService.commit] has run.
   final Map<EnrichPart, PartOutcome> out;
 
+  /// The sources gave an answer: meta asked without failing, or a part found / empty.
+  bool get answered =>
+      _metaAsked ||
+      out.values.any((o) => o == PartOutcome.found || o == PartOutcome.none);
+
   Track? _track; // as read; null when the track is gone
   int _now = 0;
   final _marks = <EnrichPart, int?>{}; // now = searched with nothing, null = found

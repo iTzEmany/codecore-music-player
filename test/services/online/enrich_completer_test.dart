@@ -93,6 +93,8 @@ void main() {
 
   EnrichCompleter completer({
     Set<EnrichPart> parts = _lyrics,
+    int Function()? loadMark,
+    void Function(int)? saveMark,
     Future<void> Function()? idle,
     void Function(int, int)? progress,
   }) => EnrichCompleter(
@@ -101,6 +103,8 @@ void main() {
     parts: () => parts,
     waitIdle: idle ?? () async {},
     onProgress: progress,
+    loadMark: loadMark,
+    saveMark: saveMark,
     nowMs: () => clock,
   );
 
@@ -267,6 +271,37 @@ void main() {
       expect(round.failed, isTrue);
     });
 
+    test('meta answers while the lyrics throw: all 6 tracks are worked, not 5', () async {
+      r.chain.failed = true;
+      for (var n = 0; n < 6; n++) {
+        await track();
+      }
+      final round = await completer(
+        parts: {EnrichPart.meta, EnrichPart.lyrics},
+      ).run();
+      expect(r.chain.calls, 6);
+      expect(round.failed, isFalse);
+    });
+
+    test('the bookmark moves past a failed track, and wraps at the end of the queue', () async {
+      final ids = [for (var n = 0; n < 3; n++) await track()];
+      var mark = 0;
+      EnrichCompleter withMark() => completer(loadMark: () => mark, saveMark: (id) => mark = id);
+      final first = withMark();
+      r.chain.failed = true;
+      r.chain.during = () async {
+        if (r.chain.calls == 1) first.cancel();
+      };
+      await first.run();
+      expect(mark, ids[0]);
+
+      r.chain.failed = false;
+      r.chain.during = null;
+      final round2 = await withMark().run();
+      // Starts after the failed first track; at the end of the queue it wraps once.
+      expect(round2.updated[EnrichPart.lyrics], [ids[1], ids[2], ids[0]]);
+    });
+
     test('a round counts what was updated and what had no text', () async {
       r.chain.resultFor = (t) => t.path.endsWith('${i - 1}.mp3')
           ? null
@@ -422,7 +457,7 @@ void main() {
         onProgress: (c, t) => progress.add((c, t)),
         nowMs: () => clock,
       ).run();
-      expect(round.failed, isFalse);
+      expect(round.failed, isTrue); // a block lost: the next run reads it again
       expect(round.worked, 15);
       expect(progress, [(0, 25), (10, 25), (15, 25)]);
     });
@@ -510,6 +545,14 @@ void main() {
         music,
         stream,
       ]);
+    });
+
+    test('after: only ids above the bookmark', () async {
+      final ids = [for (var n = 0; n < 4; n++) await track()];
+      expect(
+        await r.credits.dueTrackIds(_lyrics, DateTime.now(), after: ids[1]),
+        [ids[2], ids[3]],
+      );
     });
 
     test('limit and exclude', () async {

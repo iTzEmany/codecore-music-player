@@ -28,6 +28,8 @@ class EnrichCompleter {
     required this.parts,
     required this.waitIdle,
     this.onProgress,
+    this.loadMark,
+    this.saveMark,
     int Function()? nowMs,
   }) : _nowMs = nowMs ?? _clock;
 
@@ -48,6 +50,10 @@ class EnrichCompleter {
 
   /// After each committed block: tracks complete, tracks in all.
   final void Function(int complete, int total)? onProgress;
+  /// Bookmark: the last track tried, so a run starts after it. Without them
+  /// every run starts from the first track.
+  final int Function()? loadMark;
+  final void Function(int id)? saveMark;
   final int Function() _nowMs;
 
   Future<EnrichRound>? _current;
@@ -99,6 +105,8 @@ class EnrichCompleter {
     final refused = <EnrichPart>{}; // a source that said «too many requests»: not again in this round
     final block = <EnrichGather>[];
     var wanted = parts();
+    var after = loadMark?.call() ?? 0;
+    var canWrap = after > 0; // end of the queue: one pass from the start
     var stuck = 0; // tracks in a row with no part found or answered «nothing» (offline)
     Set<EnrichPart> switchedOn() => wanted = parts().difference(refused);
     try {
@@ -110,8 +118,14 @@ class EnrichCompleter {
             limit: _chunk,
             exclude: tried,
             ignoreMarks: _now,
+            after: after,
           );
-          if (ids.isEmpty) break;
+          if (ids.isEmpty) {
+            if (!canWrap) break;
+            canWrap = false;
+            after = 0;
+            continue;
+          }
           for (final id in ids) {
             if (_cancelled) break;
             if (!_now) await _idle();
@@ -120,13 +134,12 @@ class EnrichCompleter {
             // The switches may have changed since the chunk was read.
             if (switchedOn().isEmpty) break;
             tried.add(id);
+            after = id;
+            saveMark?.call(id);
             try {
               final g = await service.gather(id, wanted, ignoreMarks: _now);
               block.add(g);
-              final ok = g.out.values.any(
-                (o) => o == PartOutcome.found || o == PartOutcome.none,
-              );
-              stuck = ok ? 0 : stuck + 1;
+              stuck = g.answered ? 0 : stuck + 1;
               refused.addAll([
                 for (final e in g.out.entries)
                   if (e.value == PartOutcome.limited) e.key,
@@ -181,6 +194,7 @@ class EnrichCompleter {
       }
     } on Object catch (e, st) {
       AppLog.w('completion: block of ${items.length} not saved', e, st);
+      round.failed = true;
     }
     final c = await repo.enrichCounts(
       parts(),

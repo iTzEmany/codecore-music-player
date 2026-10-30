@@ -12,6 +12,7 @@ import '../../data/db/app_database.dart';
 import '../../data/repositories/backup_queries.dart';
 import '../../data/repositories/track_kinds.dart';
 import '../../data/settings/jam_secret_store.dart';
+import '../../data/settings/settings_store.dart' show enrichMarkKey;
 
 const kBackupFormat = 1;
 
@@ -22,6 +23,7 @@ const kDeviceBoundKeys = {
   'trustedDevices',
   jamBlockedKey,
   jamSuspendedKey,
+  enrichMarkKey,
 };
 
 class BackupSummary {
