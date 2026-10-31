@@ -149,7 +149,7 @@ Riceve `mode` e `parts`, e la pausa per inattività (D-104) vale solo con `AskMo
 
 Passano al runner anche:
 - «Arricchisci album» (`album_detail_screen.dart:250`);
-- «Riprova» (`review_providers.dart:56`). Rimette lo stato a 0 come oggi, poi `retryNone`; `onFinished` lancia la seconda opinione come oggi.
+- «Riprova» (`review_providers.dart:56`). Non rimette lo stato a 0 (non lo faceva nemmeno prima): avvia `start(ids)` in `retryNone`, poi la seconda opinione, che si salta se il lavoro è fallito.
 
 `BatchProgress` diventa `EnrichJobResult` (aggiornati, non trovati, totale, errore). Si aggiornano `enrich_result_listener.dart` e `activity_log_providers.dart:200`. La barra resta «Arricchimento: N di M» (D-282). `ActivityKind.enrich` resta, anche per le righe vecchie del Registro.
 
@@ -209,3 +209,12 @@ Si tolgono `enrichMany`, `BatchProgress`, `needsEnrichment` e `CreditsEnricher.i
    - `docs/02-architettura.md` §«Arricchimento», righe circa 335–342: `EnrichEngine`, `EnrichRunner`, regola unica, «Riprova» sul runner;
    - `docs/feature-arricchimento.md`, dove descrive i due comandi o `_autoEnrich`;
    - le guide in `docs/guida` che citano «Completa l'arricchimento», controllate con `scripts/check_docs_links.py`.
+
+## Rimandati dalla 69b
+- `propose` chiede ancora testi, Wikipedia e crediti fuori dal motore, con la regola «crediti dovuti» duplicata: va costruito su una lettura del motore che non prenota.
+- Un lavoro manuale salta in silenzio un brano che il background tiene in lavorazione (finestra di un solo brano): contarlo a parte o riprovarlo alla fine.
+- Il provider del completer tiene in cache il motore (`_built`) e non segue un rebuild di `enrichEngineProvider` (cambio o ripristino del DB).
+- `gather`/`commit` sono pubblici ed `EnrichGather` è mutabile, quindi un gather senza commit lascia la prenotazione: `completeOne(bool force)` dovrebbe prendere un `AskMode`.
+- `allRefused` è vero anche se l'utente spegne le parti dopo un rifiuto.
+- Il conteggio di «Arricchisci tutta la libreria» in `retryNone` arriva di rado a «Libreria completa»: scelta di prodotto, la decide l'utente.
+- Fondere `EnrichCompleter` nel suo provider.
