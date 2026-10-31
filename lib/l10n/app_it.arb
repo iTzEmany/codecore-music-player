@@ -282,18 +282,6 @@
   "fieldCuriosity": "Curiosità",
   "enrichAlbum": "Arricchisci album",
   "enrichLibrary": "Arricchisci tutta la libreria",
-  "enrichConfirmTitle": "Arricchire la libreria?",
-  "enrichConfirmBody": "{count} brani, circa {minutes} minuti. Vengono riempiti solo i campi vuoti.",
-  "@enrichConfirmBody": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
   "enrichRunning": "Arricchimento {done}/{total}",
   "@enrichRunning": {
     "placeholders": {
@@ -3552,20 +3540,6 @@
   },
   "activityStopped": "Fermata",
   "activityScanEnded": "Scansione",
-  "enrichCompleteTitle": "Completa l'arricchimento",
-  "enrichCompleteHint": "Cerca subito ciò che manca ai brani, anche mentre usi l'app",
-  "enrichCompleteProgress": "{done} di {total} brani completi",
-  "@enrichCompleteProgress": {
-    "placeholders": {
-      "done": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "enrichCompleteStop": "Interrompi",
   "enrichRoundTitle": "Giro di arricchimento",
   "enrichRoundUpdated": "Aggiornati",
   "enrichRoundNone": "Senza risultato",
@@ -3705,5 +3679,19 @@
     }
   },
   "logEnrichStopped": "Completamento fermato: nessuna fonte risponde",
-  "logEnrichFailed": "Completamento non riuscito: un errore l'ha fermato"
+  "logEnrichFailed": "Completamento non riuscito: un errore l'ha fermato",
+  "enrichLibraryDue": "{count} brani da completare, circa {minutes} minuti",
+  "@enrichLibraryDue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichLibraryComplete": "Libreria completa",
+  "enrichLibraryStop": "Interrompi",
+  "activityEnrichWaiting": "Completamento: in attesa"
 }

@@ -1,3 +1,4 @@
+import '../../../core/app_log.dart';
 import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +10,6 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/selection_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/online_providers.dart';
-import '../../../services/online/enrichment_service.dart' show needsEnrichment;
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../shell/shell_nav.dart';
@@ -248,14 +248,19 @@ class _AlbumMenu extends ConsumerWidget {
           case _AlbumAction.share:
             DevicesSheet.show(context, trackIds: [for (final t in list) t.id]);
           case _AlbumAction.enrich:
-            final todo = [
-              for (final t in list)
-                if (needsEnrichment(t)) t.id,
-            ];
-            if (todo.isEmpty) {
-              showMsg(context, l.enrichNothingToDo);
-            } else if (!ref.read(enrichJobProvider.notifier).start(todo)) {
-              showMsg(context, l.enrichBusy);
+            try {
+              final r = await ref
+                  .read(enrichJobProvider.notifier)
+                  .startDue(among: [for (final t in list) t.id]);
+              if (!context.mounted) return;
+              if (r == EnrichStart.nothing) showMsg(context, l.enrichNothingToDo);
+              if (r == EnrichStart.busy) showMsg(context, l.enrichBusy);
+            } on Object catch (e, st) {
+              if (e is Error) {
+                AppLog.e('enrich album: not started', e, st);
+              } else {
+                AppLog.w('enrich album: not started', e, st);
+              }
             }
           case _AlbumAction.cover:
             showCoverPicker(

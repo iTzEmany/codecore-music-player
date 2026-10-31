@@ -138,11 +138,10 @@ void main() {
   test(
     'a run completes the tracks and leaves one line with the ids behind it',
     () async {
-      user.busy = false;
-      user.touch();
+      user = UserActivity(); // idle
+      c = open();
       final ids = [await track(), await track()];
-      // The user is not idle for 5 s yet: «Completa» goes ahead anyway.
-      await completer().runNow();
+      await completer().start();
       expect(r.chain.calls, 2);
       expect(state().running, isFalse);
       final rows = await r.db.select(r.db.activityLogRows).get();
@@ -156,19 +155,20 @@ void main() {
   );
 
   test('a track that got one part and missed another is counted once, as completed', () async {
-    user.busy = false;
+    user = UserActivity(); // idle
+    c = open();
     final id = await track();
     await track();
     // Plain text found, no synced one: lyrics updated, synced «none» for the same track.
     r.chain.resultFor = (t) =>
         t.id == id ? const LyricsResult(plain: 'la la') : null;
-    await completer().runNow();
+    await completer().start();
     final row = (await r.db.select(r.db.activityLogRows).get()).single;
     expect([row.done, row.total], [1, 1], reason: 'one completed, one without result');
   });
 
   test(
-    'a pause by hand holds the run until resumed or «Completa» overrides it',
+    'a pause by hand holds the run until resumed',
     () async {
       await track();
       await track();
@@ -181,8 +181,7 @@ void main() {
       notifier.pause();
       expect(state().paused, isTrue);
       await until(() => !state().running);
-      user.busy = false;
-      user.touch();
+      notifier.activity = UserActivity(); // the user is idle
       await Future<void>.delayed(const Duration(milliseconds: 50));
       expect(
         r.chain.calls,
@@ -190,13 +189,24 @@ void main() {
         reason: 'a pause by hand lasts until «Riprendi»',
       );
 
-      // The 5 s of quiet are not wanted in this test.
-      await notifier.runNow();
-      expect(r.chain.calls, 2);
+      await notifier.resume();
       expect(state().paused, isFalse);
+      await until(() => r.chain.calls == 2);
       await until(() => !state().running);
     },
   );
+
+  test('the state says waiting while the run waits for the user, and not once it works', () async {
+    await track();
+    final notifier = completer();
+    unawaited(notifier.start());
+    await until(() => state().waiting);
+    expect([state().running, r.chain.calls], [true, 0]);
+    notifier.activity = UserActivity(); // the user is idle
+    await until(() => r.chain.calls == 1);
+    await until(() => !state().running);
+    expect(state().waiting, isFalse);
+  });
 
   test('resume starts again by itself, once the user is idle', () async {
     await track();
@@ -226,19 +236,6 @@ void main() {
     expect(await r.db.select(r.db.activityLogRows).get(), isEmpty);
   });
 
-  test(
-    '«Completa» turns a run that waits for the user into an immediate one',
-    () async {
-      await track();
-      final notifier = completer();
-      unawaited(notifier.start());
-      await until(() => state().running);
-      await notifier.runNow();
-      expect(r.chain.calls, 1);
-      await until(() => !state().running);
-    },
-  );
-
   test('without the activity wired, a plain run never works a track', () async {
     await track();
     final notifier = c.read(enrichCompleterProvider.notifier)
@@ -249,32 +246,6 @@ void main() {
     expect(r.chain.calls, 0);
     notifier.cancel();
     await until(() => !state().running);
-  });
-
-  test('«Completa» while the run is writing its line starts a visible run', () async {
-    user = UserActivity(); // idle
-    final gate = Completer<void>();
-    c = open(
-      extra: [
-        activityLogRepositoryProvider.overrideWithValue(_GatedLog(r.db, gate)),
-      ],
-    );
-    await track();
-    final notifier = completer();
-    final first = notifier.start();
-    await until(() => r.chain.calls == 1);
-    await Future<void>.delayed(const Duration(milliseconds: 50));
-    expect(state().running, isTrue, reason: 'the service is done, the line is not');
-    await track();
-    final seen = <bool>[];
-    r.chain.during = () async =>
-        seen.add(state().running && state().manual);
-    final now = notifier.runNow();
-    gate.complete();
-    await first;
-    await now;
-    expect(r.chain.calls, 2, reason: 'the new track was worked');
-    expect(seen.last, isTrue, reason: 'by a run the Attività centre shows');
   });
 
   test('nothing due: no run shows up', () async {
@@ -316,15 +287,6 @@ void main() {
     notifier.cancel();
     await run;
     expect([r.chain.calls, state().running], [0, false]);
-  });
-
-  test('«Completa» while a run is still counting works now, not when the user is idle', () async {
-    await track(); // the user is busy: a plain run would wait
-    final notifier = completer();
-    unawaited(notifier.start());
-    await notifier.runNow();
-    expect(r.chain.calls, 1);
-    expect(state().running, isFalse);
   });
 
   test('with the real activity list, an enrichment in progress holds the completion', () async {
@@ -413,9 +375,11 @@ void main() {
     await track();
     await track();
     final notifier = completer();
-    r.chain.during = () async => notifier.pause();
+    r.chain.during = () async {
+      if (r.chain.calls == 2) notifier.pause(); // aborts the second
+    };
     await notifier.start();
-    expect(r.chain.calls, 1);
+    expect(r.chain.calls, 2);
     final rows = await r.db.select(r.db.activityLogRows).get();
     expect(rows.single.detail, contains('"stopped":true'));
     expect(rows.single.failed, 0);

@@ -18,6 +18,7 @@ class EnrichCompleter {
     required this.parts,
     required this.waitIdle,
     this.onProgress,
+    this.onWaiting,
     this.loadMark,
     this.saveMark,
     int Function()? nowMs,
@@ -37,6 +38,9 @@ class EnrichCompleter {
   /// After each committed block: tracks complete, tracks in all.
   final void Function(int complete, int total)? onProgress;
 
+  /// See [EnrichRunner.onWaiting].
+  final void Function(bool waiting)? onWaiting;
+
   /// Bookmark: the last track tried, so a run starts after it. Without them
   /// every run starts from the first track.
   final int Function()? loadMark;
@@ -52,24 +56,18 @@ class EnrichCompleter {
   /// ends at once.
   void cancel() => _runner?.cancel();
 
-  /// One run until nothing is due, [cancel] or an error. A [mode] other than
-  /// [AskMode.due]: no waiting for the user, and parts marked «nothing»
-  /// recently are asked again (still only if empty). Called during a run it
-  /// joins it: the same future comes back, and such a mode turns that run into
-  /// a «now» one from the next track.
-  Future<EnrichRound> run({AskMode mode = AskMode.due}) {
+  /// One run until nothing is due, [cancel] or an error. Called during a run
+  /// it joins it: the same future comes back.
+  Future<EnrichRound> run() {
     final current = _current;
-    if (current != null) {
-      _runner?.promote(mode);
-      return current;
-    }
+    if (current != null) return current;
     final runner = _runner = EnrichRunner(
       engine: engine,
       ids: MarkCursor(repo, load: loadMark, save: saveMark),
       parts: parts,
       waitIdle: waitIdle,
-      mode: mode,
       onProgress: onProgress,
+      onWaiting: onWaiting,
       nowMs: _nowMs,
     );
     return _current = runner.run().whenComplete(() {

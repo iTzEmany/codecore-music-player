@@ -3,7 +3,7 @@ import 'package:codecore/data/repositories/library_queries.dart';
 import 'package:codecore/data/repositories/playlist_repository.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/library/rules/rule_parser.dart';
-import 'package:codecore/services/online/enrichment_service.dart';
+import 'package:codecore/services/online/enrich_parts.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -78,7 +78,7 @@ void main() {
   test('«does it need lyrics?» answers the same on a list row', () async {
     final rows = await tracks.watchTracks().first;
     final r = rows.firstWhere((t) => t.id == rich), b = rows.firstWhere((t) => t.id == bare);
-    expect(needsEnrichment(r, metadata: false, curiosities: true), isFalse);
-    expect(needsEnrichment(b, metadata: false, curiosities: true), isTrue);
+    expect(isDue(EnrichPart.curio, r, null, DateTime.now()), isFalse);
+    expect(isDue(EnrichPart.curio, b, null, DateTime.now()), isTrue);
   });
 }

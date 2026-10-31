@@ -1048,18 +1048,6 @@ abstract class AppLocalizations {
   /// **'Arricchisci tutta la libreria'**
   String get enrichLibrary;
 
-  /// No description provided for @enrichConfirmTitle.
-  ///
-  /// In it, this message translates to:
-  /// **'Arricchire la libreria?'**
-  String get enrichConfirmTitle;
-
-  /// No description provided for @enrichConfirmBody.
-  ///
-  /// In it, this message translates to:
-  /// **'{count} brani, circa {minutes} minuti. Vengono riempiti solo i campi vuoti.'**
-  String enrichConfirmBody(int count, int minutes);
-
   /// No description provided for @enrichRunning.
   ///
   /// In it, this message translates to:
@@ -8773,30 +8761,6 @@ abstract class AppLocalizations {
   /// **'Scansione'**
   String get activityScanEnded;
 
-  /// No description provided for @enrichCompleteTitle.
-  ///
-  /// In it, this message translates to:
-  /// **'Completa l\'arricchimento'**
-  String get enrichCompleteTitle;
-
-  /// No description provided for @enrichCompleteHint.
-  ///
-  /// In it, this message translates to:
-  /// **'Cerca subito ciò che manca ai brani, anche mentre usi l\'app'**
-  String get enrichCompleteHint;
-
-  /// No description provided for @enrichCompleteProgress.
-  ///
-  /// In it, this message translates to:
-  /// **'{done} di {total} brani completi'**
-  String enrichCompleteProgress(int done, int total);
-
-  /// No description provided for @enrichCompleteStop.
-  ///
-  /// In it, this message translates to:
-  /// **'Interrompi'**
-  String get enrichCompleteStop;
-
   /// No description provided for @enrichRoundTitle.
   ///
   /// In it, this message translates to:
@@ -9204,6 +9168,30 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Completamento non riuscito: un errore l\'ha fermato'**
   String get logEnrichFailed;
+
+  /// No description provided for @enrichLibraryDue.
+  ///
+  /// In it, this message translates to:
+  /// **'{count} brani da completare, circa {minutes} minuti'**
+  String enrichLibraryDue(int count, int minutes);
+
+  /// No description provided for @enrichLibraryComplete.
+  ///
+  /// In it, this message translates to:
+  /// **'Libreria completa'**
+  String get enrichLibraryComplete;
+
+  /// No description provided for @enrichLibraryStop.
+  ///
+  /// In it, this message translates to:
+  /// **'Interrompi'**
+  String get enrichLibraryStop;
+
+  /// No description provided for @activityEnrichWaiting.
+  ///
+  /// In it, this message translates to:
+  /// **'Completamento: in attesa'**
+  String get activityEnrichWaiting;
 }
 
 class _AppLocalizationsDelegate

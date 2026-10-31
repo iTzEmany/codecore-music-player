@@ -594,14 +594,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enrichLibrary => 'Enrich whole library';
 
   @override
-  String get enrichConfirmTitle => 'Enrich the library?';
-
-  @override
-  String enrichConfirmBody(int count, int minutes) {
-    return '$count tracks, about $minutes minutes. Only empty fields are filled.';
-  }
-
-  @override
   String enrichRunning(int done, int total) {
     return 'Enriching $done/$total';
   }
@@ -5537,21 +5529,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get activityScanEnded => 'Scan';
 
   @override
-  String get enrichCompleteTitle => 'Complete the enrichment';
-
-  @override
-  String get enrichCompleteHint =>
-      'Look up what the songs are missing right now, even while you use the app';
-
-  @override
-  String enrichCompleteProgress(int done, int total) {
-    return '$done of $total songs complete';
-  }
-
-  @override
-  String get enrichCompleteStop => 'Stop';
-
-  @override
   String get enrichRoundTitle => 'Enrichment round';
 
   @override
@@ -5785,4 +5762,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logEnrichFailed => 'Completion failed: an error stopped it';
+
+  @override
+  String enrichLibraryDue(int count, int minutes) {
+    return '$count tracks to complete, about $minutes minutes';
+  }
+
+  @override
+  String get enrichLibraryComplete => 'Library complete';
+
+  @override
+  String get enrichLibraryStop => 'Stop';
+
+  @override
+  String get activityEnrichWaiting => 'Completing: waiting';
 }

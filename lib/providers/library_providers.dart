@@ -23,7 +23,6 @@ import '../services/library/track_editor.dart';
 import '../services/library/track_file_sync.dart';
 import '../core/paths.dart';
 import 'database_providers.dart';
-import 'online_providers.dart';
 import 'settings_providers.dart';
 
 final tagReaderProvider = Provider<TagReader>(
@@ -127,27 +126,10 @@ class ScanNotifier extends Notifier<ScanState> {
         }
       }
       state = ScanState(progress: state.progress, error: error);
-      await _autoEnrich();
     } on Object catch (e, st) {
       AppLog.e('scan failed', e, st);
       state = ScanState(error: '$e');
     }
-  }
-
-  Future<void> _autoEnrich() async {
-    final s = ref.read(settingsProvider);
-    if (!s.autoEnrich && !s.autoLyrics) return;
-    final fresh = (await ref.read(trackRepositoryProvider).watchTracks().first)
-        .where((t) => t.enrichStatus == 0)
-        .map((t) => t.id)
-        .toList();
-    ref
-        .read(enrichJobProvider.notifier)
-        .start(
-          fresh,
-          includeLyrics: s.autoLyrics,
-          includeMetadata: s.autoEnrich,
-        );
   }
 }
 

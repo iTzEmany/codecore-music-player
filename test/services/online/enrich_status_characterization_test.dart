@@ -6,9 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/enrich_fakes.dart';
 
-/// Fixes what `tracks.enrich_status` and the job counts are TODAY, defects
-/// included. A DEFECT assertion says in its name which finding and which
-/// change flips it.
+/// Fixes what `tracks.enrich_status` and the job counts are.
 class _Reads extends QueryInterceptor {
   int selects = 0;
 
@@ -40,11 +38,11 @@ void main() {
   Future<int> statusOf(int id) async => (await r.repo.getById(id))!.enrichStatus;
 
   Future<int> viaMany(int id, {bool lyrics = false}) async {
-    await r.svc.enrichMany([id], includeLyrics: lyrics).toList();
+    await r.runManual([id], parts: {EnrichPart.meta, if (lyrics) EnrichPart.lyrics});
     return statusOf(id);
   }
 
-  group('enrichMany', () {
+  group('manual job', () {
     test('found: status 1', () async {
       expect(await viaMany(await r.add()), 1);
     });
@@ -54,15 +52,15 @@ void main() {
       expect(await viaMany(await r.add()), 2);
     });
 
-    test('(DEFECT F-08, flips with the runner in 69b.8: stays 0) offline: status 2', () async {
+    test('offline: status unchanged (0)', () async {
       r.web.itunes = ItunesMode.down;
-      expect(await viaMany(await r.add()), 2);
+      expect(await viaMany(await r.add()), 0);
     });
 
-    test('(DEFECT F-08, flips with the runner in 69b.8: stays 0) lyrics failed + meta none: status 2', () async {
+    test('lyrics failed + meta none: status unchanged (0)', () async {
       r.web.itunes = ItunesMode.empty;
       r.chain.failed = true;
-      expect(await viaMany(await r.add(), lyrics: true), 2);
+      expect(await viaMany(await r.add(), lyrics: true), 0);
     });
 
     test('a track at 1, then nothing: status stays 1 (D-285)', () async {
@@ -75,17 +73,17 @@ void main() {
     test('a match that writes nothing is «nothing», not found: status 2, not counted as updated', () async {
       r.web.itunesGenre = false;
       final id = await r.add(album: 'A', year: 2000, trackNumber: 1, hasCover: true);
-      final events = await r.svc.enrichMany([id], includeLyrics: false).toList();
+      final round = await r.runManual([id]);
       expect(await statusOf(id), 2);
-      expect((events.last.updated, events.last.notFound), (0, 1));
+      expect((round.updatedTracks, round.notFoundTracks), (0, 1));
     });
 
     test('a failed cover download leaves the status as it was', () async {
       r.web.coverDown = true;
       final id = await r.add(album: 'A', year: 2000, genre: 'G', trackNumber: 1);
-      final events = await r.svc.enrichMany([id], includeLyrics: false).toList();
+      final round = await r.runManual([id]);
       expect(await statusOf(id), 0);
-      expect((events.last.updated, events.last.notFound), (0, 1));
+      expect((round.updatedTracks, round.notFoundTracks), (0, 0), reason: 'no answer: neither found nor «nothing»');
     });
 
     test('job counts on 3 tracks: filled, no match, already complete', () async {
@@ -106,12 +104,10 @@ void main() {
           r.web.itunes = r.web.count('itunes') >= 2 ? ItunesMode.empty : ItunesMode.match;
         }
       };
-      final events = await r.svc.enrichMany([a, b, c], includeLyrics: false).toList();
-      final last = events.last;
-      expect(
-        (last.done, last.total, last.updated, last.notFound, last.finished),
-        (3, 3, 1, 1, true),
-      );
+      final seen = <(int, int)>[];
+      final round = await r.runManual([a, b, c], onProgress: (d, t) => seen.add((d, t)));
+      expect((round.updatedTracks, round.notFoundTracks), (1, 1));
+      expect(seen.last, (3, 3));
     });
   });
 

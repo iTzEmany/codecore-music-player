@@ -1,67 +1,123 @@
+import 'dart:async';
+
+import 'package:codecore/data/db/app_database.dart';
+import 'package:codecore/data/settings/settings_store.dart';
+import 'package:codecore/providers/database_providers.dart';
 import 'package:codecore/providers/online_providers.dart';
-import 'package:codecore/services/online/enrichment_service.dart';
-import 'package:dio/dio.dart' show CancelToken;
+import 'package:codecore/providers/settings_providers.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _Breaking extends _Service {
-  _Breaking() : super(const BatchProgress());
+import '../support/enrich_fakes.dart';
 
+class _Settings extends SettingsNotifier {
   @override
-  Stream<BatchProgress> enrichMany(List<int> ids,
-          {CancelToken? cancel,
-          bool includeLyrics = true,
-          bool includeCuriosities = false,
-          bool includeMetadata = true,
-          bool force = false}) async* {
-    yield const BatchProgress(done: 2, total: 5, updated: 1, notFound: 1);
-    throw StateError('boom');
-  }
-}
-
-class _Service implements EnrichmentService {
-  _Service(this.last);
-
-  final BatchProgress last;
-
-  @override
-  Stream<BatchProgress> enrichMany(List<int> ids,
-          {CancelToken? cancel,
-          bool includeLyrics = true,
-          bool includeCuriosities = false,
-          bool includeMetadata = true,
-          bool force = false}) =>
-      Stream.value(last);
-
-  @override
-  dynamic noSuchMethod(Invocation i) => throw UnimplementedError();
+  AppSettings build() => AppSettings();
 }
 
 void main() {
-  Future<int> finishedCalls(BatchProgress last) async {
-    final c = ProviderContainer(overrides: [enrichmentServiceProvider.overrideWithValue(_Service(last))]);
-    addTearDown(c.dispose);
-    var calls = 0;
-    c.read(enrichJobProvider.notifier).start([1], onFinished: () => calls++);
-    await Future<void>.delayed(Duration.zero);
-    await Future<void>.delayed(Duration.zero);
-    return calls;
+  late EnrichRig r;
+  late ProviderContainer c;
+
+  setUp(() {
+    r = EnrichRig();
+    c = ProviderContainer(
+      overrides: [
+        databaseProvider.overrideWithValue(r.db),
+        enrichEngineProvider.overrideWithValue(r.engine),
+        creditsRepositoryProvider.overrideWithValue(r.credits),
+        settingsProvider.overrideWith(_Settings.new),
+      ],
+    );
+  });
+  tearDown(() async {
+    c.dispose();
+    await r.dispose();
+  });
+
+  Future<EnrichJobState> finished() async {
+    for (var i = 0; i < 300; i++) {
+      final s = c.read(enrichJobProvider);
+      if (!s.running && s.result != null) return s;
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
+    fail('the job never ended');
   }
 
   test('onFinished runs when the job ends, not when it was cancelled', () async {
-    expect(await finishedCalls(const BatchProgress(finished: true)), 1);
-    expect(await finishedCalls(const BatchProgress(finished: true, cancelled: true)), 0);
+    var calls = 0;
+    final job = c.read(enrichJobProvider.notifier);
+    expect(job.start([await r.add()], onFinished: () => calls++), isTrue);
+    expect(c.read(enrichJobProvider).progress?.total, 1); // the bar starts at «0 di 1»
+    await finished();
+    expect(calls, 1);
+
+    // Cancelled before the first block: the job ends without «finished».
+    job.clearResult();
+    final ids = [await r.add(path: '/b.mp3'), await r.add(path: '/c.mp3')];
+    expect(job.start(ids, onFinished: () => calls++), isTrue);
+    job.cancel();
+    final s = await finished();
+    expect([s.result!.cancelled, calls], [true, 1]);
   });
 
-  test('a job that breaks keeps its counts, is marked failed and does not finish', () async {
-    final c = ProviderContainer(overrides: [enrichmentServiceProvider.overrideWithValue(_Breaking())]);
-    addTearDown(c.dispose);
+  test('a job that loses every write is marked failed and does not finish', () async {
+    final ids = [for (var i = 0; i < 3; i++) await r.add(path: '/$i.mp3')];
+    await r.db.customStatement(
+      "CREATE TRIGGER boom BEFORE UPDATE ON tracks BEGIN SELECT RAISE(ABORT,'boom'); END",
+    );
     var calls = 0;
-    c.read(enrichJobProvider.notifier).start([1, 2, 3, 4, 5], onFinished: () => calls++);
-    await Future<void>.delayed(Duration.zero);
-    await Future<void>.delayed(Duration.zero);
-    final s = c.read(enrichJobProvider);
-    expect([s.running, s.failed, s.result?.updated, s.result?.notFound], [false, true, 1, 1]);
-    expect(calls, 0);
+    c.read(enrichJobProvider.notifier).start(ids, onFinished: () => calls++);
+    final s = await finished();
+    expect([s.result!.failed, s.result!.total, calls], [true, 3, 0]);
+    expect(s.result!.logDetail, {'updated': 0, 'notFound': 0});
+  });
+
+  test('offline: 2 tracks end failed, and the second opinion (onFinished) is not started', () async {
+    r.web.itunes = ItunesMode.down;
+    r.chain.failed = true;
+    r.finder.error = StateError('offline');
+    var calls = 0;
+    final ids = [await r.add(path: '/a.mp3'), await r.add(path: '/b.mp3')];
+    c.read(enrichJobProvider.notifier).start(ids, onFinished: () => calls++);
+    final s = await finished();
+    expect([s.result!.failed, s.result!.done, s.result!.total, calls], [true, 2, 2, 0]);
+  });
+
+  test('«Interrompi» aborts the request in flight, and done is the real count', () async {
+    final ids = [for (var i = 0; i < 3; i++) await r.add(path: '/$i.mp3')];
+    final job = c.read(enrichJobProvider.notifier);
+    r.chain.during = () async {
+      if (r.chain.calls == 2) r.chain.hold = Completer<void>(); // the second search never answers
+    };
+    job.start(ids);
+    for (var i = 0; i < 300 && r.chain.calls < 2; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
+    job.cancel();
+    final s = await finished().timeout(const Duration(seconds: 5));
+    expect([s.result!.cancelled, s.result!.failed, s.result!.done, s.result!.total], [true, false, 1, 3]);
+  });
+
+  test('startDue asks again a part marked «nothing» yesterday', () async {
+    final id = await r.add();
+    final yesterday = DateTime.now().subtract(const Duration(days: 1)).millisecondsSinceEpoch;
+    await r.db.into(r.db.trackEnrich).insert(
+      TrackEnrichCompanion(trackId: Value(id), lyricsNoneAt: Value(yesterday)),
+    );
+    expect(await c.read(enrichJobProvider.notifier).startDue(), EnrichStart.started);
+    await finished();
+    expect((await r.repo.getById(id))!.lyricsPlain, 'la la');
+  });
+
+  test('startDue asks the tracks with something due, then finds nothing', () async {
+    await r.add();
+    final job = c.read(enrichJobProvider.notifier);
+    expect(await job.startDue(), EnrichStart.started);
+    final s = await finished();
+    expect([s.result!.total, s.result!.updated], [1, 1]);
+    job.clearResult();
+    expect(await job.startDue(), EnrichStart.nothing);
   });
 }

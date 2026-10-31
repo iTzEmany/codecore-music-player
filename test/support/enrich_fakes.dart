@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:codecore/data/db/app_database.dart';
@@ -13,6 +14,7 @@ import 'package:codecore/services/online/deezer_gw_client.dart';
 import 'package:codecore/services/online/cover_fetcher.dart';
 import 'package:codecore/services/online/credits_enricher.dart';
 import 'package:codecore/services/online/enrich_engine.dart';
+import 'package:codecore/services/online/enrich_runner.dart';
 import 'package:codecore/services/online/enrichment_service.dart';
 import 'package:codecore/services/online/metadata_resolver.dart';
 import 'package:codecore/services/online/http_client.dart';
@@ -191,6 +193,9 @@ class FakeChain extends LyricsChain {
   /// Runs while the search is «on the network», before it answers.
   Future<void> Function()? during;
 
+  /// While set, the search never answers by itself; only a cancel ends it.
+  Completer<void>? hold;
+
   @override
   Future<LyricsChainResult> find(
     Track t, {
@@ -200,6 +205,14 @@ class FakeChain extends LyricsChain {
     calls++;
     wantSyncedSeen = wantSynced;
     await during?.call();
+    final h = hold;
+    if (h != null) {
+      await Future.any([
+        h.future,
+        if (cancel != null)
+          cancel.whenCancel.then<void>((_) => throw DioException.requestCancelled(requestOptions: RequestOptions(), reason: 'cancel')),
+      ]);
+    }
     if (limited) {
       return const LyricsChainResult(
         failed: true,
@@ -219,6 +232,9 @@ class FakeChain extends LyricsChain {
 
 class FakeFinder implements CuriosityFinder {
   int calls = 0;
+
+  /// Thrown by every search, when set (offline).
+  Object? error;
   CuriosityPair pair = CuriosityPair(
     song: Curiosity(
       'A story',
@@ -242,6 +258,7 @@ class FakeFinder implements CuriosityFinder {
     cancel,
   }) async {
     calls++;
+    if (error != null) throw error!;
     return pair;
   }
 
@@ -379,6 +396,20 @@ class EnrichRig {
   late final FakeFinder finder;
   late final EnrichmentService svc;
   late final EnrichEngine engine;
+
+  /// A manual job: the runner over a fixed list, every part «nothing» marks included.
+  Future<EnrichRound> runManual(
+    List<int> ids, {
+    Set<EnrichPart> parts = const {EnrichPart.meta},
+    void Function(int done, int total)? onProgress,
+  }) => EnrichRunner(
+    engine: engine,
+    ids: FixedIds(ids),
+    parts: () => parts,
+    waitIdle: () async {},
+    mode: AskMode.retryNone,
+    onProgress: onProgress,
+  ).run();
 
   Future<void> dispose() async {
     await db.close();

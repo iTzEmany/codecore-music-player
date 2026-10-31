@@ -180,7 +180,7 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
           _resyncPlayer();
         }
         // An import enriches its songs itself, after putting the CSV tags on.
-        if (parseImportTag(item?.tag) == null) await _autoEnrich(path);
+        if (parseImportTag(item?.tag) == null) await _enrichAfterDownload(path);
       },
     );
     ref.listen(settingsProvider.select((s) => s.downloadParallel),
@@ -193,7 +193,7 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
     return const [];
   }
 
-  Future<void> _autoEnrich(String path) async {
+  Future<void> _enrichAfterDownload(String path) async {
     try {
       final id = await ref.read(trackRepositoryProvider).idForPath(path);
       if (id != null) afterDownload(ref, id);

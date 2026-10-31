@@ -137,7 +137,7 @@ void main() {
       final ids = [for (var n = 0; n < 3; n++) await track()];
       final first = completer();
       r.chain.during = () async {
-        if (r.chain.calls == 1) first.cancel();
+        if (r.chain.calls == 2) first.cancel(); // the second is aborted
       };
       final round1 = await first.run();
       expect(round1.worked, 1);
@@ -146,7 +146,7 @@ void main() {
       r.chain.during = null;
       final round2 = await completer().run();
       expect(round2.updated[EnrichPart.lyrics], [ids[1], ids[2]]);
-      expect(r.chain.calls, 3); // the first was not asked again
+      expect(r.chain.calls, 4); // the first was not asked again; the aborted one is
     });
 
     test('nothing due, or no part on: no request and no wait', () async {
@@ -315,7 +315,7 @@ void main() {
       final first = withMark();
       r.chain.failed = true;
       r.chain.during = () async {
-        if (r.chain.calls == 1) first.cancel();
+        if (r.chain.calls == 2) first.cancel();
       };
       await first.run();
       expect(mark, ids[0]);
@@ -430,22 +430,6 @@ void main() {
       expect((await r.enrichOf(id))?.curioNoneAt, isNull);
     });
 
-    test('now during a round in progress turns it into a now round', () async {
-      await track();
-      await track();
-      final marked = await track();
-      await mark(marked, lyrics: clock - _day);
-      final c = completer(idle: () => Completer<void>().future);
-      final plan = c.run();
-      await pumpEventQueue();
-      expect(r.chain.calls, 0); // waiting for the user
-      expect(identical(c.run(mode: AskMode.retryNone), plan), isTrue);
-      expect(identical(c.run(), plan), isTrue);
-      final round = await plan;
-      expect(round.worked, 3); // also the «nothing» of yesterday
-      expect(c.running, isFalse);
-    });
-
     test('tracks due only for lyrics do not stop the round once LRCLIB rests', () async {
       r.chain.limited = true;
       for (var n = 0; n < 7; n++) {
@@ -479,23 +463,6 @@ void main() {
           .timeout(const Duration(seconds: 2));
       c.cancel();
       await run;
-    });
-
-    test('now promotes: the stretch already passed in plain mode is asked again', () async {
-      final ids = [for (var n = 0; n < 4; n++) await track()];
-      await mark(ids[1], lyrics: clock - _day); // recent «nothing»
-      final gate = Completer<void>();
-      var idles = 0;
-      final c = completer(
-        loadMark: () => ids[0],
-        idle: () => ++idles == 2 ? gate.future : Future.value(),
-      );
-      final plan = c.run();
-      await pumpEventQueue();
-      expect(r.chain.calls, 1); // ids[2] read; ids[1] skipped as «nothing»
-      c.run(mode: AskMode.retryNone);
-      final round = await plan;
-      expect(round.updated[EnrichPart.lyrics], contains(ids[1]));
     });
 
     test('stop ends a wait for the user', () async {
@@ -566,8 +533,9 @@ void main() {
       };
       final round = await c.run();
       expect(round.failed, isFalse);
-      expect(round.updated[EnrichPart.lyrics], [ids[0], ids[1]]);
-      expect((await r.repo.getById(ids[1]))!.lyricsPlain, 'la la');
+      expect(round.updated[EnrichPart.lyrics], [ids[0]]); // the one in flight is aborted
+      expect((await r.repo.getById(ids[0]))!.lyricsPlain, 'la la');
+      expect((await r.repo.getById(ids[1]))!.lyricsPlain, isNull);
     });
 
     test('a block that cannot be saved: the round goes on and the counts follow', () async {
@@ -603,62 +571,19 @@ void main() {
     });
   });
 
-  group('now', () {
-    late List<int> ids;
-    setUp(() async {
-      ids = [
-        await track(plain: 'a', synced: '[00:01.00]a'),
-        await track(plain: 'b', synced: '[00:01.00]b'),
-        await track(), // «nothing» yesterday
-        await track(),
-        await track(),
-      ];
-      await mark(ids[2], lyrics: clock - _day);
-    });
-
-    test('works the 3 incomplete ones, even the «nothing» of yesterday, without waiting', () async {
-      var idles = 0;
-      final round = await completer(
-        parts: _lyricsAndSynced,
-        idle: () async => idles++,
-      ).run(mode: AskMode.retryNone);
-      expect(round.worked, 3);
-      expect(idles, 0);
-      expect((await r.repo.getById(ids[2]))!.lyricsPlain, 'la la');
-      expect((await r.enrichOf(ids[2]))?.lyricsNoneAt, isNull);
-    });
-
-    test(
-      'the plan skips the «nothing» of yesterday and waits for the user',
-      () async {
-        var idles = 0;
-        final round = await completer(
-          parts: _lyricsAndSynced,
-          idle: () async => idles++,
-        ).run();
-        expect(round.worked, 2);
-        expect(idles, 2);
-      },
-    );
-
-    test('stop: no track after the one in progress', () async {
-      final c = completer(parts: _lyricsAndSynced);
-      r.chain.during = () async {
-        if (r.chain.calls == 2) c.cancel();
-      };
-      final round = await c.run(mode: AskMode.retryNone);
-      expect(round.worked, 2);
-      expect(r.chain.calls, 2);
-      expect(c.running, isFalse);
-    });
-
-    test('curiosities already there are not asked again', () async {
-      await track(plain: 'a', curiosities: 'text\nsource');
-      final c = completer(parts: {EnrichPart.curio});
-      await c.run(mode: AskMode.retryNone);
-      // Only the 5 without a text: the sixth is complete.
-      expect(r.finder.calls, 5);
-    });
+  test('the plan skips the «nothing» of yesterday and waits for the user', () async {
+    final ids = [
+      await track(plain: 'a', synced: '[00:01.00]a'),
+      await track(plain: 'b', synced: '[00:01.00]b'),
+      await track(), // «nothing» yesterday
+      await track(),
+      await track(),
+    ];
+    await mark(ids[2], lyrics: clock - _day);
+    var idles = 0;
+    final round = await completer(parts: _lyricsAndSynced, idle: () async => idles++).run();
+    expect(round.worked, 2);
+    expect(idles, 2);
   });
 
   group('dueTrackIds', () {
@@ -693,6 +618,12 @@ void main() {
       );
       expect(await due(2), [ids[1], ids[2]]);
       expect(await due(20), [ids[1], ids[2], ids[3]]);
+    });
+
+    test('among keeps only the given ids', () async {
+      final ids = [for (var n = 0; n < 4; n++) await track()];
+      expect(await r.credits.dueTrackIds(_lyrics, DateTime.now(), among: [ids[1], ids[3]]), [ids[1], ids[3]]);
+      expect(await r.credits.dueTrackIds(_lyrics, DateTime.now(), among: const []), isEmpty);
     });
 
     test(
@@ -786,9 +717,8 @@ void main() {
             expected,
             reason: '$part $mode',
           );
-          if (mode != AskMode.due) continue;
-          final c = await r.credits.enrichCounts({part}, now);
-          expect((c.complete, c.total), (eligible.length - expected.length, eligible.length), reason: '$part');
+          final c = await r.credits.enrichCounts({part}, now, mode: mode);
+          expect((c.complete, c.total), (eligible.length - expected.length, eligible.length), reason: '$part $mode');
         }
       }
       expect(await r.credits.dueTrackIds({EnrichPart.lyrics}, now), isNot(contains(byUser)));

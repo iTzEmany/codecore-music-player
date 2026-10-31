@@ -594,14 +594,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get enrichLibrary => 'Gesamte Bibliothek anreichern';
 
   @override
-  String get enrichConfirmTitle => 'Bibliothek anreichern?';
-
-  @override
-  String enrichConfirmBody(int count, int minutes) {
-    return '$count Titel, etwa $minutes Minuten. Es werden nur leere Felder gefüllt.';
-  }
-
-  @override
   String enrichRunning(int done, int total) {
     return 'Anreicherung $done/$total';
   }
@@ -5575,21 +5567,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get activityScanEnded => 'Scan';
 
   @override
-  String get enrichCompleteTitle => 'Anreicherung vervollständigen';
-
-  @override
-  String get enrichCompleteHint =>
-      'Sucht sofort, was den Titeln fehlt, auch während du die App benutzt';
-
-  @override
-  String enrichCompleteProgress(int done, int total) {
-    return '$done von $total Titeln vollständig';
-  }
-
-  @override
-  String get enrichCompleteStop => 'Abbrechen';
-
-  @override
   String get enrichRoundTitle => 'Anreicherungsdurchlauf';
 
   @override
@@ -5825,4 +5802,18 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get logEnrichFailed =>
       'Vervollständigung fehlgeschlagen: ein Fehler hat sie gestoppt';
+
+  @override
+  String enrichLibraryDue(int count, int minutes) {
+    return '$count Titel zu ergänzen, etwa $minutes Minuten';
+  }
+
+  @override
+  String get enrichLibraryComplete => 'Bibliothek vollständig';
+
+  @override
+  String get enrichLibraryStop => 'Abbrechen';
+
+  @override
+  String get activityEnrichWaiting => 'Vervollständigung: wartet';
 }

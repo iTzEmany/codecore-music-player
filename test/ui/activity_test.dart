@@ -3,6 +3,7 @@ import 'package:codecore/providers/activity_providers.dart';
 import 'package:codecore/providers/enrich_completer_providers.dart';
 import 'package:codecore/providers/library_providers.dart' show ScanState;
 import 'package:codecore/providers/online_providers.dart' show EnrichJobState;
+import 'package:codecore/ui/screens/activity/activity_sheet.dart' show activityTitle;
 import 'package:codecore/ui/widgets/activity_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -169,6 +170,20 @@ void main() {
     expect([item.kind, item.done, item.total, item.paused],
         [ActivityKind.enrichBackground, 1530, 2196, true]);
     expect(item.cancellable, isTrue);
+  });
+
+  test('buildActivity: a waiting completion has no bar; the title says «in attesa»', () {
+    final item = buildActivity(
+        scan: const ScanState(),
+        enrich: const EnrichJobState(),
+        downloads: const [],
+        outgoing: const [],
+        enrichBackground: enrichBackgroundOf(
+            const EnrichCompleterState(running: true, waiting: true, complete: 3, total: 10))).running.single;
+    expect([item.waiting, item.progress], [true, null]);
+    expect(activityTitle(lookupAppLocalizations(const Locale('it')), item), 'Completamento: in attesa');
+    final working = ActivityItem(kind: ActivityKind.enrichBackground, key: 'k', name: null, done: 3, total: 10);
+    expect(activityTitle(lookupAppLocalizations(const Locale('it')), working), contains('3 di 10'));
   });
 }
 

@@ -26,7 +26,8 @@ class CreditsRepository {
   /// Ids of tracks with a part of [parts] due at [now], by id, at most
   /// [limit]. The same rule as `isDue` (an empty part
   /// not marked «nothing» in the last 30 days), in SQL and on light columns.
-  /// [after]: only ids above it; [upTo]: and up to this one.
+  /// [after]: only ids above it; [upTo]: and up to this one; [among]: only
+  /// these ids.
   /// [mode]: see [AskMode]. Tracks of kind music or stream, not missing or hidden.
   Future<List<int>> dueTrackIds(
     Set<EnrichPart> parts,
@@ -35,11 +36,13 @@ class CreditsRepository {
     AskMode mode = AskMode.due,
     int after = 0,
     int? upTo,
+    Iterable<int>? among,
   }) async {
-    if (parts.isEmpty) return const [];
+    if (parts.isEmpty || (among != null && among.isEmpty)) return const [];
     final rows = await _db
         .customSelect(
           'SELECT t.id FROM $eligibleSql AND t.id > ?3 AND t.id <= ?4 '
+          '${among == null ? '' : 'AND t.id IN (${among.join(',')}) '}' // ints only
           'AND (${dueSql(parts, mode)}) ORDER BY t.id LIMIT ?2',
           variables: [
             _retryBefore(now),
@@ -54,20 +57,31 @@ class CreditsRepository {
   }
 
   /// How many eligible tracks have nothing due among [parts] (`complete`) out
-  /// of all of them (`total`).
+  /// of all of them (`total`); due as in [mode].
   Future<({int complete, int total})> enrichCounts(
     Set<EnrichPart> parts,
-    DateTime now,
-  ) async {
-    final r = await _db
-        .customSelect(
-          'SELECT COUNT(*) AS total, '
-          '${parts.isEmpty ? '0' : 'COALESCE(SUM(${dueSql(parts, AskMode.due)}), 0)'} AS due '
-          'FROM $eligibleSql',
-          variables: [if (parts.isNotEmpty) _retryBefore(now)],
-          readsFrom: {_db.tracks, _db.trackEnrich, _db.trackCredits},
-        )
-        .getSingle();
+    DateTime now, {
+    AskMode mode = AskMode.due,
+  }) => _counts(parts, now, mode).getSingle().then(_toCounts);
+
+  /// [enrichCounts] again at each change of the tracks.
+  Stream<({int complete, int total})> watchEnrichCounts(
+    Set<EnrichPart> parts,
+    DateTime now, {
+    AskMode mode = AskMode.due,
+  }) => _counts(parts, now, mode).watchSingle().map(_toCounts);
+
+  Selectable<QueryRow> _counts(Set<EnrichPart> parts, DateTime now, AskMode mode) =>
+      _db.customSelect(
+        'SELECT COUNT(*) AS total, '
+        '${parts.isEmpty ? '0' : 'COALESCE(SUM(${dueSql(parts, mode)}), 0)'} AS due '
+        'FROM $eligibleSql',
+        // ?1 is in the SQL only for a plain run.
+        variables: [if (parts.isNotEmpty && mode == AskMode.due) _retryBefore(now)],
+        readsFrom: {_db.tracks, _db.trackEnrich, _db.trackCredits},
+      );
+
+  static ({int complete, int total}) _toCounts(QueryRow r) {
     final total = r.read<int>('total');
     return (complete: total - r.read<int>('due'), total: total);
   }

@@ -173,7 +173,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
                 target.host, target.port, pin, entry.value.id),
           );
           final row = await repo.byPath(entry.key);
-          if (row != null) afterReceive(read, row.id, entry.value.meta);
+          if (row != null) afterReceive(read, row.id);
         }
       }
       if (mounted) setState(() => _received = saved.length);

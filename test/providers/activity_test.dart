@@ -14,7 +14,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:codecore/providers/library_providers.dart';
 import 'package:codecore/providers/online_providers.dart';
 import 'package:codecore/services/online/download_queue.dart';
-import 'package:codecore/services/online/enrichment_service.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:codecore/services/scanner/library_scanner.dart';
 import 'package:codecore/services/share/offers.dart';
@@ -57,7 +56,7 @@ void main() {
       ),
       enrich: const EnrichJobState(
         running: true,
-        progress: BatchProgress(done: 1, total: 4),
+        progress: EnrichJobResult(done: 1, total: 4),
       ),
       downloads: [
         DownloadItem(

@@ -510,13 +510,18 @@ void main() {
       expect([t.lyricsPlain, t.enrichStatus], ['la la', isNot(2)]);
     });
 
-    test('propose: a refused lyrics search without text throws RateLimited', () async {
+    test('propose: a refused lyrics search without text says limited, nothing thrown', () async {
       final id = await r.add();
       r.chain.limited = true;
-      await expectLater(
-        r.svc.propose((await r.repo.getById(id))!, metadata: false, curiosity: false),
-        throwsA(isA<RateLimitedException>()),
-      );
+      final p = await r.svc.propose((await r.repo.getById(id))!);
+      expect(p.limited, isTrue);
+      expect(p.lyrics, isNull);
+    });
+
+    test('propose: a refused source (iTunes) says limited too', () async {
+      r.web.itunes = ItunesMode.limited;
+      final p = await r.svc.propose((await r.repo.getById(await r.add()))!);
+      expect([p.limited, p.meta], [true, isNull]);
     });
 
     test('the song answered nothing and the artist was refused: none, marked', () async {

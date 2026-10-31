@@ -202,18 +202,13 @@ class ActivityLogNotifier extends Notifier<ActivityLogState> {
             : null;
         final done = end?.done ?? r.done;
         final total = end?.total ?? r.total;
-        final failed =
-            r.kind == ActivityKind.enrich && ref.read(enrichJobProvider).failed;
+        final failed = end?.failed ?? false;
         add(
           LogEntry(
             at: now,
-            detail: failed
-                ? {'updated': end?.updated ?? 0, 'notFound': end?.notFound ?? 0}
-                : (end == null
-                    ? total > 0 && done < total
-                    : end.cancelled || end.rateLimited)
-                ? const {'stopped': true}
-                : null,
+            detail: end == null
+                ? (total > 0 && done < total ? const {'stopped': true} : null)
+                : end.logDetail,
             item: ActivityItem(
               kind: r.kind,
               key: r.key,

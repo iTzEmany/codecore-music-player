@@ -158,18 +158,17 @@ void main() {
     return (await db.select(db.tracks).getSingle());
   }
 
-  Future<EnrichmentProposal> propose(Track t, {bool needGenre = true}) =>
-      svc.propose(t, lyrics: false, curiosity: false, needGenre: needGenre);
+  Future<EnrichmentProposal> propose(Track t) => svc.propose(t);
 
-  test('Deezer confirms with a cover and no genre is wanted: iTunes is not asked',
+  test('Deezer confirms with a cover and the track has a genre: iTunes is not asked',
       () async {
-    final prop = await propose(await add(), needGenre: false);
+    final t = await add();
+    await (db.update(db.tracks)..where((r) => r.id.equals(t.id)))
+        .write(const TracksCompanion(genre: Value('Pop')));
+    await engine.completeOne(t.id, {EnrichPart.meta});
     expect(web.count('itunes'), 0);
-    expect(prop.source, 'deezer');
-    expect(prop.meta!.album, 'Deezer Album');
-    expect(prop.disc, 2);
-    expect(prop.isrc, 'ITABC2400001');
-    expect(prop.coverUrl, 'https://d/cover.jpg');
+    final r = (await repo.getById(t.id))!;
+    expect([r.album, r.discNumber, r.isrc, r.hasCover], ['Deezer Album', 2, 'ITABC2400001', true]);
   });
 
   test('Deezer confirmed with a cover: the iTunes genre wins, Deezer is the fallback',

@@ -16,7 +16,7 @@ class EnrichResultListener extends ConsumerWidget {
     ref.listen(enrichJobProvider, (_, next) {
       final r = next.result;
       if (r == null) return;
-      final text = next.failed
+      final text = r.failed
           ? l.enrichInterrupted(r.updated, r.notFound)
           : r.rateLimited
           ? l.serviceUnavailable

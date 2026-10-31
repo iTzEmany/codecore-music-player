@@ -213,8 +213,6 @@
   "fieldCuriosity": "Wissenswertes",
   "enrichAlbum": "Album anreichern",
   "enrichLibrary": "Gesamte Bibliothek anreichern",
-  "enrichConfirmTitle": "Bibliothek anreichern?",
-  "enrichConfirmBody": "{count} Titel, etwa {minutes} Minuten. Es werden nur leere Felder gefüllt.",
   "enrichRunning": "Anreicherung {done}/{total}",
   "enrichResult": "{updated} aktualisiert, {notFound} nicht gefunden",
   "enrichBusy": "Eine Anreicherung läuft bereits",
@@ -2989,20 +2987,6 @@
   },
   "activityStopped": "Gestoppt",
   "activityScanEnded": "Scan",
-  "enrichCompleteTitle": "Anreicherung vervollständigen",
-  "enrichCompleteHint": "Sucht sofort, was den Titeln fehlt, auch während du die App benutzt",
-  "enrichCompleteProgress": "{done} von {total} Titeln vollständig",
-  "@enrichCompleteProgress": {
-    "placeholders": {
-      "done": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "enrichCompleteStop": "Abbrechen",
   "enrichRoundTitle": "Anreicherungsdurchlauf",
   "enrichRoundUpdated": "Aktualisiert",
   "enrichRoundNone": "Ohne Ergebnis",
@@ -3142,5 +3126,19 @@
     }
   },
   "logEnrichStopped": "Vervollständigung gestoppt: keine Quelle antwortet",
-  "logEnrichFailed": "Vervollständigung fehlgeschlagen: ein Fehler hat sie gestoppt"
+  "logEnrichFailed": "Vervollständigung fehlgeschlagen: ein Fehler hat sie gestoppt",
+  "enrichLibraryDue": "{count} Titel zu ergänzen, etwa {minutes} Minuten",
+  "@enrichLibraryDue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichLibraryComplete": "Bibliothek vollständig",
+  "enrichLibraryStop": "Abbrechen",
+  "activityEnrichWaiting": "Vervollständigung: wartet"
 }

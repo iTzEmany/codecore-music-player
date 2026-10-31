@@ -61,6 +61,7 @@ final streamPreparerProvider = Provider<StreamPreparer>((ref) {
     isMetered: () async => (await ref.read(networkProbeProvider).current()).metered,
     enrich: (r, rowId) async {
       final proposal = await enrichment.propose(_syntheticTrack(r));
+      if (proposal.limited) return; // a refusal is not «nothing found»: try again later
       // Tags go to the database only, never into the cached file.
       final row = await tracks.getById(await rowId);
       if (row == null) return;

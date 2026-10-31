@@ -50,7 +50,7 @@ class ReviewActions {
 
   final Ref _ref;
 
-  /// «Riprova»: the batch enrichment (the same job as «Arricchisci») asks the
+  /// «Riprova»: the manual enrichment job (the same as «Arricchisci») asks the
   /// online sources again, even for tracks it gave up on; then YouTube Music
   /// gives its second opinion on the ones that still have holes.
   Future<ReviewRetryResult> retry(Set<int> ids) async {
@@ -61,7 +61,6 @@ class ReviewActions {
     final list = ids.toList();
     final started = _ref.read(enrichJobProvider.notifier).start(
           list,
-          force: true,
           onFinished: () => unawaited(
               _ref.read(secondOpinionJobProvider.notifier).run(list, force: true)),
         );

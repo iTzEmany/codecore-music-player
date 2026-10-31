@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
+
 import '../../core/app_log.dart';
 import '../../core/clock.dart';
 import '../../data/repositories/credits_repository.dart';
@@ -18,8 +20,28 @@ class EnrichRound {
 
   /// The run stopped because the sources answered none of the last tracks.
   bool noAnswer = false;
+
+  /// A source answered «too many requests» and its part was left out.
+  bool limited = false;
+
+  /// Every part was refused before the ids were used up.
+  bool allRefused = false;
+
+  /// The run ended with tracks in a row that got no answer (offline), cancel aside.
+  bool endedSilent = false;
+
+  /// Tracks gone through (a cancelled one is not counted).
+  int processed = 0;
   final Map<EnrichPart, List<int>> updated = {};
   final Map<EnrichPart, List<int>> none = {};
+
+  static Set<int> _tracks(Map<EnrichPart, List<int>> m) => {for (final l in m.values) ...l};
+
+  /// Distinct tracks that got something.
+  int get updatedTracks => _tracks(updated).length;
+
+  /// Distinct tracks asked in vain for every part (one that got a part is not counted twice).
+  int get notFoundTracks => _tracks(none).difference(_tracks(updated)).length;
 }
 
 /// Where a run takes its ids from, and how far it got.
@@ -38,8 +60,8 @@ abstract class EnrichIds {
   /// A block ends: the position is kept.
   void checkpoint();
 
-  /// The run was promoted past plain: what it skipped is to be asked again.
-  void widen() {}
+  /// The progress is cheap to read: report it after each track.
+  bool get perTrack => false;
 
   /// Tracks done and tracks in all, for the progress line.
   Future<({int done, int total})> progress(Set<EnrichPart> parts, DateTime now);
@@ -72,7 +94,7 @@ class FixedIds implements EnrichIds {
   void checkpoint() {}
 
   @override
-  void widen() {}
+  bool get perTrack => true;
 
   @override
   Future<({int done, int total})> progress(
@@ -98,7 +120,7 @@ class MarkCursor implements EnrichIds {
   final int _start;
   late int _after, _saved;
   late var _canWrap = _start > 0;
-  late var _wrapTo = _start; // the wrap pass goes up to here
+  late final _wrapTo = _start; // the wrap pass goes up to here
   var _wrapped = false;
 
   Future<List<int>> _query(
@@ -133,14 +155,8 @@ class MarkCursor implements EnrichIds {
   @override
   void tried(int id) => _after = id;
 
-  /// Also the stretch from the bookmark to here, passed in plain mode, is
-  /// covered by the wrap pass.
   @override
-  void widen() {
-    if (_wrapped) return;
-    if (_after > _wrapTo) _wrapTo = _after;
-    _canWrap = _wrapTo > 0;
-  }
+  bool get perTrack => false;
 
   /// Saved before the block is written and also when it fails (or every read
   /// threw), so a bad block is not retried at each start; lost tracks come
@@ -175,6 +191,7 @@ class EnrichRunner {
     required this.waitIdle,
     this.mode = AskMode.due,
     this.onProgress,
+    this.onWaiting,
     int Function()? nowMs,
   }) : _nowMs = nowMs ?? _clock;
 
@@ -196,28 +213,26 @@ class EnrichRunner {
 
   /// After each committed block: tracks done, tracks in all.
   final void Function(int done, int total)? onProgress;
+
+  /// True while the run waits for the user to leave the app alone; false when it stops waiting.
+  final void Function(bool waiting)? onWaiting;
   final int Function() _nowMs;
 
   bool _cancelled = false;
+  final _token = CancelToken();
 
-  /// How the parts are asked; [promote] can change it during the run.
-  AskMode mode;
+  /// [cancel] was called.
+  bool get cancelled => _cancelled;
+
+  /// How the parts are asked.
+  final AskMode mode;
   Completer<void>? _wake;
 
-  /// No track is started after the one in progress, and a wait for the user
-  /// ends at once.
+  /// No track is started after the one in progress, the request in flight is
+  /// aborted, and a wait for the user ends at once.
   void cancel() {
     _cancelled = true;
-    _poke();
-  }
-
-  /// A [mode] other than [AskMode.due] turns a plain run into a «now» one
-  /// from the next track: no waiting for the user, and parts marked «nothing»
-  /// recently are asked again (still only if empty).
-  void promote(AskMode to) {
-    if (to == AskMode.due || mode != AskMode.due) return;
-    mode = to;
-    ids.widen();
+    _token.cancel();
     _poke();
   }
 
@@ -226,21 +241,21 @@ class EnrichRunner {
     if (w != null && !w.isCompleted) w.complete();
   }
 
-  /// Waits for the user to leave the app alone, or for [cancel] / a switch to «now».
+  /// Waits for the user to leave the app alone, or for [cancel].
   /// While the user is busy, what is gathered is written first: a track
   /// stays claimed by the engine until its block commits.
   Future<void> _idle(List<EnrichGather> block, EnrichRound round) async {
     final wake = _wake = Completer<void>();
     final idle = waitIdle();
-    if (block.isNotEmpty) {
-      var ready = false;
-      unawaited(idle.then((_) => ready = true, onError: (Object _) => ready = true)); // the error surfaces below
-      await Future<void>.delayed(Duration.zero); // after every microtask: an idle user is never «busy» here
-      if (!ready && !_cancelled && mode == AskMode.due) {
-        await _commit(block, round);
-      }
+    var ready = false;
+    unawaited(idle.then((_) => ready = true, onError: (Object _) => ready = true)); // the error surfaces below
+    await Future<void>.delayed(Duration.zero); // after every microtask: an idle user is never «busy» here
+    if (!ready && block.isNotEmpty && !_cancelled) {
+      await _commit(block, round);
     }
+    if (!ready) onWaiting?.call(true);
     await Future.any([idle, wake.future]);
+    if (!ready) onWaiting?.call(false);
     _wake = null;
   }
 
@@ -250,6 +265,7 @@ class EnrichRunner {
     final refused = <EnrichPart>{}; // a source that said «too many requests»: not again in this round
     final block = <EnrichGather>[];
     var wanted = parts();
+    var exhausted = false;
     var stuck = 0; // tracks in a row that asked a source and got no answer (offline); one that asked nothing doesn't count
     Set<EnrichPart> switchedOn() => wanted = parts().difference(refused);
     try {
@@ -261,7 +277,10 @@ class EnrichRunner {
             DateTime.fromMillisecondsSinceEpoch(_nowMs()),
             _chunk,
           );
-          if (chunk.isEmpty) break;
+          if (chunk.isEmpty) {
+            exhausted = true;
+            break;
+          }
           for (final id in chunk) {
             if (_cancelled) break;
             if (mode == AskMode.due) await _idle(block, round);
@@ -269,9 +288,8 @@ class EnrichRunner {
             if (_cancelled) break;
             // The switches may have changed since the chunk was read.
             if (switchedOn().isEmpty) break;
-            ids.tried(id);
             try {
-              final g = await engine.gather(id, wanted, mode: mode);
+              final g = await engine.gather(id, wanted, mode: mode, cancel: _token);
               block.add(g);
               switch (g.signal) {
                 case GatherSignal.answered:
@@ -281,17 +299,28 @@ class EnrichRunner {
                 case GatherSignal.askedNothing:
                   break;
               }
-              refused.addAll([
+              final limited = [
                 for (final e in g.out.entries)
                   if (e.value == PartOutcome.limited) e.key,
-              ]);
+              ];
+              if (limited.isNotEmpty) round.limited = true;
+              refused.addAll(limited);
+              round.processed++;
             } on Object catch (e, st) {
+              // Aborted by [cancel]: not tried, so a later run starts with it.
+              if (e is DioException && CancelToken.isCancel(e)) break;
+              round.processed++;
               if (e is Error) {
                 AppLog.e('completion: track $id not read', e, st);
               } else {
                 AppLog.w('completion: track $id not read', e, st);
               }
               stuck++;
+            }
+            ids.tried(id);
+            if (ids.perTrack) {
+              final c = await ids.progress(wanted, DateTime.fromMillisecondsSinceEpoch(_nowMs()));
+              onProgress?.call(c.done, c.total);
             }
             if (stuck >= _maxStuck) {
               AppLog.w('completion: $_maxStuck tracks in a row got no answer, round stopped');
@@ -306,6 +335,8 @@ class EnrichRunner {
         // Whatever was read is written, also after an error or a cancel.
         await _commit(block, round);
       }
+      round.endedSilent = stuck > 0 && !_cancelled;
+      round.allRefused = !exhausted && !_cancelled && stuck < _maxStuck && refused.isNotEmpty && wanted.isEmpty;
     } on Object catch (e, st) {
       if (e is Error) {
         AppLog.e('completion: round stopped', e, st);

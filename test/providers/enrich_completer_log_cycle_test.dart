@@ -69,7 +69,7 @@ void main() {
 
   test('the line of the round reaches the Registro with the real activity list', () async {
     await open();
-    await c.read(enrichCompleterProvider.notifier).runNow();
+    await c.read(enrichCompleterProvider.notifier).start();
     final rows = await r.db.select(r.db.activityLogRows).get();
     expect(rows.single.kind, 'enrichBackground');
   });
@@ -81,7 +81,7 @@ void main() {
     await r.db.customStatement(
       "CREATE TRIGGER boom BEFORE UPDATE ON tracks BEGIN SELECT RAISE(ABORT,'boom'); END",
     );
-    await c.read(enrichCompleterProvider.notifier).runNow();
+    await c.read(enrichCompleterProvider.notifier).start();
     final rows = await r.db.select(r.db.activityLogRows).get();
     expect(rows.single.kind, 'enrichBackground');
     expect(rows.single.failed, isNot(0));

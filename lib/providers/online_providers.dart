@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
 
@@ -9,6 +8,7 @@ import '../data/settings/settings_store.dart' show AppSettings;
 import '../services/online/cover_fetcher.dart';
 import '../services/online/credits_enricher.dart';
 import '../services/online/enrich_engine.dart';
+import '../services/online/enrich_runner.dart';
 import '../services/online/enrichment_service.dart';
 import '../services/online/metadata_resolver.dart';
 import '../services/online/http_client.dart';
@@ -26,7 +26,6 @@ import '../core/app_log.dart';
 import '../services/online/musicbrainz_client.dart';
 import '../services/online/youtube_service.dart' show YtException, YtErrorKind;
 import '../services/online/quiet_enricher.dart';
-import '../services/share/track_meta.dart';
 import '../services/library/download_tagger.dart';
 import '../services/library/track_file_sync.dart';
 import '../services/tags/tag_writer.dart';
@@ -191,83 +190,153 @@ final enrichEngineProvider = Provider<EnrichEngine>((ref) {
   );
 });
 
-class EnrichJobState {
-  const EnrichJobState({
-    this.running = false,
-    this.progress,
-    this.result,
+/// What a manual enrichment job came to (or, while it runs, how far it is).
+/// The one place the Registro line and the final message are made from.
+class EnrichJobResult {
+  const EnrichJobResult({
+    this.done = 0,
+    this.total = 0,
+    this.updated = 0,
+    this.notFound = 0,
     this.failed = false,
+    this.cancelled = false,
+    this.rateLimited = false,
   });
 
-  final bool running;
-  final BatchProgress? progress;
+  final int done, total, updated, notFound;
 
-  /// Last finished job (shown once by the shell as a snackbar).
-  final BatchProgress? result;
-
-  /// The job stopped on an error: [result] holds the counts up to there.
+  /// The job stopped on an error, or because no source answered.
   final bool failed;
+  final bool cancelled, rateLimited;
+
+  /// The job left before its work was done.
+  bool get stopped => cancelled || rateLimited;
+
+  /// The `detail` of the Registro line; `updated` and `notFound` are always counts (int).
+  Map<String, Object?>? get logDetail => failed
+      ? {'updated': updated, 'notFound': notFound}
+      : stopped
+      ? const {'stopped': true}
+      : null;
 }
 
+class EnrichJobState {
+  const EnrichJobState({this.running = false, this.progress, this.result});
+
+  final bool running;
+  final EnrichJobResult? progress;
+
+  /// Last finished job (shown once by the shell as a snackbar).
+  final EnrichJobResult? result;
+}
+
+/// The parts a manual enrichment asks for (D-278): everything allowed, the
+/// credits only with «Credits and details». The automatic switches do not apply.
+Set<EnrichPart> manualParts(AppSettings s) => {
+  EnrichPart.meta,
+  EnrichPart.lyrics,
+  EnrichPart.synced,
+  EnrichPart.curio,
+  if (s.creditsDetails) EnrichPart.credits,
+};
+
+/// Minutes the limiter alone needs for [tracks] (about 3 s each); a rough guess.
+int enrichMinutes(int tracks) => (tracks * 3 / 60).ceil();
+
+/// Tracks with something due for a manual job, and how many are all (live).
+final manualDueCountProvider = StreamProvider.autoDispose<int>((ref) {
+  ref.watch(settingsProvider.select((s) => s.creditsDetails));
+  return ref
+      .watch(creditsRepositoryProvider)
+      .watchEnrichCounts(
+        manualParts(ref.read(settingsProvider)),
+        DateTime.now(),
+        mode: AskMode.retryNone,
+      )
+      .map((c) => c.total - c.complete);
+});
+
+enum EnrichStart { started, busy, nothing }
+
 class EnrichJobNotifier extends Notifier<EnrichJobState> {
-  CancelToken? _cancel;
+  EnrichRunner? _runner;
 
   @override
   EnrichJobState build() => const EnrichJobState();
 
-  /// Returns false when another job is already running.
-  bool start(
-    List<int> ids, {
-    bool includeLyrics = true,
-    bool includeCuriosities = false,
-    bool includeMetadata = true,
-    bool force = false,
-    void Function()? onFinished,
-  }) {
+  /// Asks the manual parts of [ids] again, «nothing» marks included. Returns
+  /// false when another job is already running.
+  bool start(List<int> ids, {void Function()? onFinished}) {
     if (state.running || ids.isEmpty) return false;
-    _cancel = CancelToken();
-    state = const EnrichJobState(running: true);
-    _run(ids, includeLyrics, includeCuriosities, includeMetadata, force, onFinished);
+    state = EnrichJobState(running: true, progress: EnrichJobResult(total: ids.length));
+    unawaited(_run(ids, onFinished));
     return true;
   }
 
-  Future<void> _run(
-    List<int> ids,
-    bool lyrics,
-    bool curiosities,
-    bool metadata,
-    bool force,
-    void Function()? onFinished,
-  ) async {
-    BatchProgress? last;
-    var failed = false;
-    try {
-      await for (final p
-          in ref
-              .read(enrichmentServiceProvider)
-              .enrichMany(
-                ids,
-                cancel: _cancel,
-                includeLyrics: lyrics,
-                includeCuriosities: curiosities,
-                includeMetadata: metadata,
-                force: force,
-              )) {
-        last = p;
-        state = EnrichJobState(running: !p.finished, progress: p);
-      }
-    } on Object catch (e, st) {
-      AppLog.e('enrichment job stopped by an error', e, st);
-      failed = true;
-    }
-    state = EnrichJobState(
-      result: last ?? const BatchProgress(finished: true),
-      failed: failed,
-    );
-    if (!failed && last?.cancelled != true) onFinished?.call();
+  /// [start] on the tracks with a manual part due: the whole library, or only
+  /// those [among] the given ids («Arricchisci album»).
+  Future<EnrichStart> startDue({Iterable<int>? among}) async {
+    if (state.running) return EnrichStart.busy;
+    final ids = await ref
+        .read(creditsRepositoryProvider)
+        .dueTrackIds(
+          manualParts(ref.read(settingsProvider)),
+          DateTime.now(),
+          limit: 0x7fffffff,
+          mode: AskMode.retryNone,
+          among: among,
+        );
+    if (ids.isEmpty) return EnrichStart.nothing;
+    return start(ids) ? EnrichStart.started : EnrichStart.busy;
   }
 
-  void cancel() => _cancel?.cancel();
+  Future<void> _run(List<int> ids, void Function()? onFinished) async {
+    EnrichRunner? runner;
+    EnrichRound? round;
+    var failed = false;
+    try {
+      runner = _runner = EnrichRunner(
+        engine: ref.read(enrichEngineProvider),
+        ids: FixedIds(ids),
+        parts: () => manualParts(ref.read(settingsProvider)),
+        waitIdle: () async {}, // a manual job never waits for the user
+        mode: AskMode.retryNone,
+        onProgress: (done, total) {
+          if (ref.mounted) state = EnrichJobState(running: true, progress: EnrichJobResult(done: done, total: total));
+        },
+      );
+      round = await runner.run();
+      // Offline: nothing answered, even if fewer than the 5 tracks of a stop.
+      failed = round.failed || (round.worked == 0 && round.endedSilent);
+    } on Object catch (e, st) {
+      if (e is Error) {
+        AppLog.e('enrichment job stopped by an error', e, st);
+      } else {
+        AppLog.w('enrichment job stopped by an error', e, st);
+      }
+      failed = true;
+    } finally {
+      _runner = null;
+      if (ref.mounted) {
+        final cancelled = runner?.cancelled ?? false;
+        final refused = round?.allRefused ?? false;
+        state = EnrichJobState(
+          result: EnrichJobResult(
+            done: round?.processed ?? 0,
+            total: ids.length,
+            updated: round?.updatedTracks ?? 0,
+            notFound: round?.notFoundTracks ?? 0,
+            failed: failed,
+            cancelled: cancelled,
+            rateLimited: refused || ((round?.limited ?? false) && round!.worked == 0),
+          ),
+        );
+        if (!failed && !cancelled) onFinished?.call();
+      }
+    }
+  }
+
+  void cancel() => _runner?.cancel();
 
   void clearResult() => state = const EnrichJobState();
 }
@@ -349,17 +418,12 @@ void afterDownload(Ref ref, int trackId) {
   }
 }
 
-/// A received song is ready. With an ISRC and Deezer metadata on, it joins the
-/// download enricher (whose `onDone` writes the tags); otherwise tags go now.
+/// A received song is ready: like a download, it is enriched when a part is
+/// on (its `onDone` writes the tags), otherwise tags go now.
 /// [read] is `ref.read` of a Ref or a WidgetRef.
-void afterReceive(
-  T Function<T>(ProviderListenable<T>) read,
-  int trackId,
-  TrackMeta? meta,
-) {
+void afterReceive(T Function<T>(ProviderListenable<T>) read, int trackId) {
   try {
-    final s = read(settingsProvider);
-    if (meta?.isrc != null && s.deezerMeta && s.autoEnrich) {
+    if (autoParts(read(settingsProvider)).isNotEmpty) {
       read(downloadEnricherProvider).add(trackId);
     } else {
       unawaited(read(downloadTaggerProvider).tag(trackId));

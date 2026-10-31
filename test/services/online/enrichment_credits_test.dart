@@ -194,9 +194,8 @@ void main() {
     return (await db.select(db.tracks).getSingle()).id;
   }
 
-  Future<void> run(int id, {bool force = false}) => svc
-      .enrichMany([id], includeLyrics: false, force: force)
-      .toList();
+  Future<Map<EnrichPart, PartOutcome>> run(int id) =>
+      engine.completeOne(id, {EnrichPart.meta, EnrichPart.credits});
 
   test('option off: neither credit client is called, Deezer is asked as before',
       () async {
@@ -207,7 +206,8 @@ void main() {
     expect(gw.calls, 0);
     expect(web.count('musicbrainz'), 0);
     expect(web.count('/track/1'), 0);
-    expect(await creditsRepo.enrichOf(id), isNull);
+    final e = await creditsRepo.enrichOf(id); // a row may exist for the marks
+    expect([e?.details, e?.deezerId, e?.mbid, e?.creditsNoneAt], [null, null, null, null]);
     expect(await engine.completeOne(id, {EnrichPart.credits}), _only(PartOutcome.skipped));
     expect(gw.calls, 0);
   });
@@ -235,7 +235,7 @@ void main() {
 
   test('propose then apply, as the preview does, saves the credits', () async {
     final id = await add();
-    final prop = await svc.propose((await repo.getById(id))!, lyrics: false, curiosity: false);
+    final prop = await svc.propose((await repo.getById(id))!);
     expect(prop.credits!.credits, hasLength(2));
     await svc.apply(prop, {EnrichField.year});
     expect(await creditsRepo.creditsOf(id), hasLength(2));
@@ -270,9 +270,8 @@ void main() {
       () async {
     gw.error = const RateLimitedException(429);
     final id = await add();
-    final last = (await svc.enrichMany([id], includeLyrics: false).toList()).last;
-    expect(last.rateLimited, isFalse);
-    expect(last.finished, isTrue);
+    final out = await run(id);
+    expect(out[EnrichPart.credits], PartOutcome.found, reason: 'MusicBrainz still answered');
     expect([for (final c in await creditsRepo.creditsOf(id)) c.source],
         ['musicbrainz']);
     expect((await creditsRepo.enrichOf(id))!.creditsNoneAt, isNull);
@@ -366,7 +365,7 @@ void main() {
     final id = await add();
     await engine.completeOne(id, {EnrichPart.credits});
     final calls = gw.calls;
-    final prop = await svc.propose((await repo.getById(id))!, lyrics: false, curiosity: false);
+    final prop = await svc.propose((await repo.getById(id))!);
     expect(prop.credits, isNull);
     expect(gw.calls, calls);
   });
@@ -417,21 +416,11 @@ void main() {
 
   test('propose with credits on saves the track credits without apply', () async {
     final id = await add();
-    final prop = await svc.propose((await repo.getById(id))!, lyrics: false, curiosity: false);
+    final prop = await svc.propose((await repo.getById(id))!);
     expect(prop.credits!.credits, isNotEmpty);
     final saved = await creditsRepo.creditsOf(id);
     expect(saved, hasLength(2));
     await svc.apply(prop, {EnrichField.album});
     expect(await creditsRepo.creditsOf(id), hasLength(2));
-  });
-
-  test('enrichMany force re-asks credits of a track that has them', () async {
-    final id = await add();
-    await run(id);
-    final c = gw.calls;
-    await run(id);
-    expect(gw.calls, c, reason: 'not forced: not asked again');
-    await run(id, force: true);
-    expect(gw.calls, c + 1);
   });
 }

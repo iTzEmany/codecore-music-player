@@ -12,7 +12,6 @@ import 'credits.dart';
 import 'deezer_client.dart';
 import 'deezer_gw_client.dart';
 import 'deezer_models.dart';
-import 'enrich_parts.dart' as enrich_parts;
 import 'http_client.dart' show RateLimitedException;
 import 'metadata_resolver.dart';
 import 'musicbrainz_client.dart';
@@ -191,18 +190,6 @@ class CreditsEnricher {
       mbid: mbid,
       failed: failed,
       limited: limited,
-    );
-  }
-
-  /// Whether [t]'s credits are worth asking for now (see [isDue]).
-  Future<bool> isDue(Track t, {bool force = false}) async {
-    if (force) return true;
-    return enrich_parts.isDue(
-      enrich_parts.EnrichPart.credits,
-      t,
-      await repo.enrichOf(t.id),
-      DateTime.fromMillisecondsSinceEpoch(nowMs()),
-      hasCredits: (await repo.creditsOf(t.id)).isNotEmpty,
     );
   }
 

@@ -52,7 +52,7 @@ void main() {
       mode: AskMode.retryNone,
       onProgress: (d, t) => seen.add((d, t)),
     ).run();
-    expect(seen, [(3, 3)]);
+    expect(seen, [(1, 3), (2, 3), (3, 3), (3, 3)]); // each track, then the block
     expect(round.worked, 3);
     expect(round.updated[EnrichPart.lyrics], ids);
     expect(round.failed, isFalse);

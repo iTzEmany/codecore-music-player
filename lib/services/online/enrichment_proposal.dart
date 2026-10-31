@@ -14,6 +14,7 @@ class EnrichmentProposal {
     this.disc,
     this.isrc,
     this.source,
+    this.limited = false,
   });
 
   final Track track;
@@ -32,6 +33,9 @@ class EnrichmentProposal {
   /// saved them for a stored track (a shadow row saves them via [EnrichmentService.saveCredits]).
   /// Not part of [isEmpty]: credits never change the enrich status (K-AR-01).
   final CreditsPart? credits;
+
+  /// A source refused («too many requests») while it was read: the proposal may lack its part.
+  final bool limited;
 
   String? get coverUrl => meta?.artworkUrl;
   bool get isEmpty =>

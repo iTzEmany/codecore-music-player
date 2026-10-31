@@ -213,8 +213,6 @@
   "fieldCuriosity": "Curiosidades",
   "enrichAlbum": "Enriquecer álbum",
   "enrichLibrary": "Enriquecer toda la biblioteca",
-  "enrichConfirmTitle": "¿Enriquecer la biblioteca?",
-  "enrichConfirmBody": "{count} canciones, unos {minutes} minutos. Solo se rellenan los campos vacíos.",
   "enrichRunning": "Enriqueciendo {done}/{total}",
   "enrichResult": "{updated} actualizados, {notFound} no encontrados",
   "enrichBusy": "Ya hay un enriquecimiento en curso",
@@ -2989,20 +2987,6 @@
   },
   "activityStopped": "Detenida",
   "activityScanEnded": "Escaneo",
-  "enrichCompleteTitle": "Completar el enriquecimiento",
-  "enrichCompleteHint": "Busca ahora lo que falta a las canciones, incluso mientras usas la app",
-  "enrichCompleteProgress": "{done} de {total} canciones completas",
-  "@enrichCompleteProgress": {
-    "placeholders": {
-      "done": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "enrichCompleteStop": "Detener",
   "enrichRoundTitle": "Ronda de enriquecimiento",
   "enrichRoundUpdated": "Actualizados",
   "enrichRoundNone": "Sin resultado",
@@ -3142,5 +3126,19 @@
     }
   },
   "logEnrichStopped": "Completado detenido: ninguna fuente responde",
-  "logEnrichFailed": "Completado fallido: un error lo detuvo"
+  "logEnrichFailed": "Completado fallido: un error lo detuvo",
+  "enrichLibraryDue": "{count} canciones por completar, unos {minutes} minutos",
+  "@enrichLibraryDue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichLibraryComplete": "Biblioteca completa",
+  "enrichLibraryStop": "Detener",
+  "activityEnrichWaiting": "Completando: en espera"
 }

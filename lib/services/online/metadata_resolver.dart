@@ -38,8 +38,6 @@ class MetadataResolver {
   /// The Deezer album already fetched for [id], if any.
   DeezerAlbum? albumOf(int? id) => _albums[id];
 
-  void clearAlbums() => _albums.clear();
-
   /// Deezer first (when on); iTunes only if Deezer did not confirm, gave no
   /// cover, or a genre is wanted. Deezer fields win, iTunes fills the gaps
   /// (genre goes the other way: Deezer's is a last resort).
