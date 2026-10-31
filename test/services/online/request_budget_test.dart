@@ -1,3 +1,4 @@
+import 'package:codecore/core/app_info.dart';
 import 'package:codecore/services/online/http_client.dart';
 import 'package:codecore/services/online/request_budget.dart';
 import 'package:dio/dio.dart';
@@ -30,11 +31,14 @@ class _Ok implements HttpClientAdapter {
 
 void main() {
   group('the documented tiers', () {
-    test('without a contact the app is anonymous, says so in a plain User-Agent '
-        'and stays under the 10 a minute allowed (200 once identified)', () {
-      expect(apiIdentified, isFalse);
-      expect(apiUserAgent, 'Codecore/1.0 (uso personale)');
-      expect(wikimediaLimiter().perMinute, kWikimediaAnonymousPerMinute);
+    test('with a contact the app is identified, sends it in the User-Agent '
+        'and uses the identified Wikimedia limit', () {
+      expect(apiIdentified, isTrue);
+      expect(
+        apiUserAgent,
+        'Codecore/$kAppVersion (https://github.com/iTzEmany/codecore-music-player)',
+      );
+      expect(wikimediaLimiter().perMinute, kWikimediaIdentifiedPerMinute);
       expect(kWikimediaAnonymousPerMinute, lessThan(10));
       expect(kWikimediaIdentifiedPerMinute, lessThan(200));
     });

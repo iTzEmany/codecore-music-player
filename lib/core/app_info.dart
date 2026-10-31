@@ -10,4 +10,4 @@ const kReleaseRepo = 'iTzEmany/codecore-music-player';
 /// which is what Wikimedia and MusicBrainz ask of automated clients; with it
 /// Wikimedia allows 200 requests a minute instead of 10. Empty = not sent.
 /// It is public: put in it only what you are happy to show those services.
-const kApiContact = '';
+const kApiContact = 'https://github.com/iTzEmany/codecore-music-player';
