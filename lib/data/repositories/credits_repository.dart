@@ -23,36 +23,34 @@ class CreditsRepository {
     _db.trackEnrich,
   )..where((e) => e.trackId.equals(trackId))).getSingleOrNull();
 
-  /// Ids of tracks with a part of [parts] due at [now], by id, without the
-  /// [exclude] ones, at most [limit]. The same rule as `isDue` (an empty part
+  /// Ids of tracks with a part of [parts] due at [now], by id, at most
+  /// [limit]. The same rule as `isDue` (an empty part
   /// not marked «nothing» in the last 30 days), in SQL and on light columns.
-  /// [after]: only ids above it. [mode]: see [AskMode]. Tracks of kind
-  /// music or stream, not missing or hidden.
+  /// [after]: only ids above it; [upTo]: and up to this one.
+  /// [mode]: see [AskMode]. Tracks of kind music or stream, not missing or hidden.
   Future<List<int>> dueTrackIds(
     Set<EnrichPart> parts,
     DateTime now, {
     int limit = 20,
-    Set<int> exclude = const {},
     AskMode mode = AskMode.due,
     int after = 0,
+    int? upTo,
   }) async {
     if (parts.isEmpty) return const [];
     final rows = await _db
         .customSelect(
-          'SELECT t.id FROM $eligibleSql AND t.id > ?3 AND (${dueSql(parts, mode)}) '
-          'ORDER BY t.id LIMIT ?2',
+          'SELECT t.id FROM $eligibleSql AND t.id > ?3 AND t.id <= ?4 '
+          'AND (${dueSql(parts, mode)}) ORDER BY t.id LIMIT ?2',
           variables: [
             _retryBefore(now),
-            Variable<int>(limit + exclude.length),
+            Variable<int>(limit),
             Variable<int>(after),
+            Variable<int>(upTo ?? 0x7fffffffffffffff),
           ],
           readsFrom: {_db.tracks, _db.trackEnrich, _db.trackCredits},
         )
         .get();
-    return [
-      for (final r in rows)
-        if (!exclude.contains(r.read<int>('id'))) r.read<int>('id'),
-    ].take(limit).toList();
+    return [for (final r in rows) r.read<int>('id')];
   }
 
   /// How many eligible tracks have nothing due among [parts] (`complete`) out

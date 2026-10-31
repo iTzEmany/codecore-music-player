@@ -95,7 +95,7 @@ ProviderContainer _container(EnrichRig r, SettingsStore store, AppSettings? sett
         scanStateProvider.overrideWith(_Scan.new),
         settingsStoreProvider.overrideWithValue(store),
         databaseProvider.overrideWithValue(r.db),
-        enrichmentServiceProvider.overrideWithValue(r.svc),
+        enrichEngineProvider.overrideWithValue(r.engine),
         creditsRepositoryProvider.overrideWithValue(r.credits),
         settingsProvider.overrideWith(
           () => _Settings(settings ?? AppSettings(autoLyrics: true)),

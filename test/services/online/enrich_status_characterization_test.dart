@@ -117,7 +117,7 @@ void main() {
 
   group('commit', () {
     Future<int> viaCommit(int id, Set<EnrichPart> parts) async {
-      await r.svc.completeOne(id, parts);
+      await r.engine.completeOne(id, parts);
       return statusOf(id);
     }
 
@@ -158,18 +158,20 @@ void main() {
       expect(await viaCommit(id, {EnrichPart.meta}), 1);
     });
 
-    test('selects in one commit of one track (today; target <= 3 in 69b.2)', () async {
+    test('selects in one commit of one track: <= 3 (row, track_enrich, credits)', () async {
       final id = await r.add();
-      final g = await r.svc.gather(id, {
+      final g = await r.engine.gather(id, {
         EnrichPart.meta,
         EnrichPart.lyrics,
         EnrichPart.synced,
         EnrichPart.curio,
         EnrichPart.credits,
       });
+      expect(g.credits, isNotNull); // credits really gathered: 3 reads, not 2
       reads.selects = 0;
-      await r.svc.commit([g]);
-      expect(reads.selects, 4, reason: '(DEFECT F-21, flips with 69b.2: <= 3)');
+      await r.engine.commit([g]);
+      // A hand-picked cover with a changed album key (settleMovedCover) reads more, as before.
+      expect(reads.selects, lessThanOrEqualTo(3));
     });
   });
 

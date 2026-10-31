@@ -68,9 +68,9 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
 
   EnrichCompleter? _built;
 
-  // Built on the first run: it needs the whole enrichment service.
+  // Built on the first run: it needs the whole enrichment engine.
   EnrichCompleter get _completer => _built ??= EnrichCompleter(
-    service: ref.read(enrichmentServiceProvider),
+    engine: ref.read(enrichEngineProvider),
     repo: ref.read(creditsRepositoryProvider),
     parts: () => autoParts(ref.read(settingsProvider)),
     waitIdle: _waitIdle,

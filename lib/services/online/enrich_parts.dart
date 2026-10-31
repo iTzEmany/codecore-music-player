@@ -8,7 +8,16 @@ enum EnrichPart { meta, lyrics, synced, curio, credits }
 /// did not answer; [limited]: a source refused (too many requests). Neither
 /// writes a «searched, nothing» mark. [skipped]: off, not due, or no source
 /// reachable (no call made).
-enum PartOutcome { found, none, failed, limited, skipped }
+enum PartOutcome {
+  found,
+  none,
+  failed,
+  limited,
+  skipped;
+
+  /// The sources gave an answer, empty or not.
+  bool get answered => this == found || this == none;
+}
 
 /// The `tracks` fields online enrichment can write.
 enum EnrichField {

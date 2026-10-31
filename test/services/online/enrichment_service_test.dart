@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/covers/cover_store.dart';
+import 'package:codecore/services/online/cover_fetcher.dart';
 import 'package:codecore/services/online/enrichment_service.dart';
 import 'package:codecore/services/online/http_client.dart';
 import 'package:codecore/services/online/itunes_client.dart';
@@ -13,6 +14,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
+import '../../support/enrich_fakes.dart';
 
 class _Web implements WebClient {
   @override
@@ -47,13 +49,14 @@ void main() {
   late TrackRepository repo;
   late Directory tmp;
   late EnrichmentService svc;
+  late CoverFetcher fetcher;
 
   setUp(() {
     tmp = Directory.systemTemp.createTempSync('enr');
     db = AppDatabase(NativeDatabase.memory());
     repo = TrackRepository(db);
     final web = _Web();
-    svc = EnrichmentService(
+    final svcStack = enrichStack(
       db: db,
       tracks: repo,
       covers: CoverStore(Directory(p.join(tmp.path, 'c'))),
@@ -64,6 +67,8 @@ void main() {
       language: () => 'it',
       limiter: RateLimiter(minGap: Duration.zero),
     );
+    svc = svcStack.svc;
+    fetcher = svcStack.fetcher;
   });
   tearDown(() async {
     await db.close();
@@ -123,15 +128,15 @@ void main() {
   test('coverForAlbum saves the album cover once and then leaves it alone',
       () async {
     final t = await add('/a.mp3', 'Song');
-    expect(await svc.coverForAlbum(t, 'New Album', 'Band'), isTrue);
+    expect(await fetcher.coverForAlbum(t, 'New Album', 'Band'), isTrue);
     expect((await repo.getById(t.id))!.hasCover, isTrue);
-    expect(await svc.coverForAlbum(t, 'New Album', 'Band'), isFalse,
+    expect(await fetcher.coverForAlbum(t, 'New Album', 'Band'), isFalse,
         reason: 'the album already has its cover');
   });
 
   test('coverForAlbum finds nothing for an unknown artist', () async {
     final t = await add('/b.mp3', 'Song');
-    expect(await svc.coverForAlbum(t, 'New Album', 'Somebody Else'), isFalse);
+    expect(await fetcher.coverForAlbum(t, 'New Album', 'Somebody Else'), isFalse);
     expect((await repo.getById(t.id))!.hasCover, isFalse);
   });
 

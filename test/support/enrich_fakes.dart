@@ -10,7 +10,11 @@ import 'package:codecore/services/online/curiosity_finder.dart';
 import 'package:codecore/services/online/curiosity_service.dart';
 import 'package:codecore/services/online/deezer_client.dart';
 import 'package:codecore/services/online/deezer_gw_client.dart';
+import 'package:codecore/services/online/cover_fetcher.dart';
+import 'package:codecore/services/online/credits_enricher.dart';
+import 'package:codecore/services/online/enrich_engine.dart';
 import 'package:codecore/services/online/enrichment_service.dart';
+import 'package:codecore/services/online/metadata_resolver.dart';
 import 'package:codecore/services/online/http_client.dart';
 import 'package:codecore/services/online/itunes_client.dart';
 import 'package:codecore/services/online/lrclib_client.dart';
@@ -245,6 +249,82 @@ class FakeFinder implements CuriosityFinder {
   dynamic noSuchMethod(Invocation i) => throw UnimplementedError();
 }
 
+/// The service and the engine over the same resolver, covers and credits,
+/// built from the raw sources like the providers do.
+({EnrichmentService svc, EnrichEngine engine, CoverFetcher fetcher}) enrichStack({
+  required AppDatabase db,
+  required TrackRepository tracks,
+  required CoverStore covers,
+  required ItunesClient itunes,
+  DeezerClient? deezer,
+  bool Function()? useDeezer,
+  DeezerGwClient? gw,
+  MusicBrainzClient? musicBrainz,
+  CreditsRepository? creditsRepo,
+  bool Function()? useCredits,
+  required LrclibClient lrclib,
+  LyricsChain? lyricsChain,
+  CuriosityService? curiosities,
+  required WikipediaClient wikipedia,
+  required WebClient web,
+  required String Function() language,
+  required RateLimiter limiter,
+}) {
+  final resolver = MetadataResolver(
+    itunes: itunes,
+    deezer: deezer,
+    useDeezer: useDeezer ?? () => false,
+  );
+  final fetcher = CoverFetcher(
+    covers: covers,
+    web: web,
+    tracks: tracks,
+    itunes: itunes,
+    deezer: deezer,
+    useDeezer: useDeezer ?? () => false,
+    limiter: limiter,
+  );
+  final credits = creditsRepo == null
+      ? null
+      : CreditsEnricher(
+          tracks: tracks,
+          repo: creditsRepo,
+          deezer: deezer,
+          gw: gw,
+          musicBrainz: musicBrainz,
+          resolver: resolver,
+        );
+  final chain = lyricsChain ?? LyricsChain(lrclib: lrclib);
+  return (
+    svc: EnrichmentService(
+      db: db,
+      tracks: tracks,
+      resolver: resolver,
+      covers: fetcher,
+      creditsEnricher: credits,
+      useCredits: useCredits ?? () => false,
+      lrclib: lrclib,
+      lyricsChain: chain,
+      wikipedia: wikipedia,
+      language: language,
+      limiter: limiter,
+    ),
+    engine: EnrichEngine(
+      db: db,
+      tracks: tracks,
+      resolver: resolver,
+      covers: fetcher,
+      chain: chain,
+      credits: credits,
+      curiosities: curiosities,
+      language: language,
+      useCredits: useCredits ?? () => false,
+      limiter: limiter,
+    ),
+    fetcher: fetcher,
+  );
+}
+
 /// An [EnrichmentService] over an in-memory DB with every source faked.
 class EnrichRig {
   EnrichRig._(this.tmp);
@@ -261,7 +341,7 @@ class EnrichRig {
     r.web = EnrichWeb();
     r.chain = FakeChain(r.web);
     r.finder = FakeFinder();
-    r.svc = EnrichmentService(
+    final stack = enrichStack(
       db: r.db,
       tracks: r.repo,
       covers: CoverStore(Directory(p.join(r.tmp.path, 'c'))),
@@ -284,6 +364,8 @@ class EnrichRig {
       language: () => 'it',
       limiter: RateLimiter(minGap: Duration.zero),
     );
+    r.svc = stack.svc;
+    r.engine = stack.engine;
     return r;
   }
 
@@ -296,6 +378,7 @@ class EnrichRig {
   late final FakeChain chain;
   late final FakeFinder finder;
   late final EnrichmentService svc;
+  late final EnrichEngine engine;
 
   Future<void> dispose() async {
     await db.close();

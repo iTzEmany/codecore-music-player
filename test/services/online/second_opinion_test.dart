@@ -20,6 +20,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
+import '../../support/enrich_fakes.dart';
 
 Object _fixture(String name) => jsonDecode(File('test/fixtures/musicbrainz/$name.json').readAsStringSync()) as Object;
 
@@ -98,7 +99,7 @@ void main() {
     db = AppDatabase(NativeDatabase.memory());
     repo = TrackRepository(db);
     web = _Web();
-    enrichment = EnrichmentService(
+    final enrichmentStack = enrichStack(
       db: db,
       tracks: repo,
       covers: CoverStore(Directory(p.join(tmp.path, 'c'))),
@@ -109,6 +110,7 @@ void main() {
       language: () => 'it',
       limiter: RateLimiter(minGap: Duration.zero),
     );
+    enrichment = enrichmentStack.svc;
   });
   tearDown(() async {
     await db.close();

@@ -42,7 +42,7 @@ void main() {
     final c = ProviderContainer(
       overrides: [
         settingsProvider.overrideWith(() => _Settings(s)),
-        enrichmentServiceProvider.overrideWithValue(r.svc),
+        enrichEngineProvider.overrideWithValue(r.engine),
         downloadTaggerProvider.overrideWithValue(tagger),
       ],
     );

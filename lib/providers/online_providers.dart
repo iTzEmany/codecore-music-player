@@ -6,7 +6,11 @@ import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
 
 import '../data/repositories/credits_repository.dart';
 import '../data/settings/settings_store.dart' show AppSettings;
+import '../services/online/cover_fetcher.dart';
+import '../services/online/credits_enricher.dart';
+import '../services/online/enrich_engine.dart';
 import '../services/online/enrichment_service.dart';
+import '../services/online/metadata_resolver.dart';
 import '../services/online/http_client.dart';
 import '../services/online/itunes_client.dart';
 import '../services/online/lrclib_client.dart';
@@ -122,25 +126,68 @@ final curiosityServiceProvider = Provider(
   ),
 );
 
-final enrichmentServiceProvider = Provider<EnrichmentService>((ref) {
-  final web = ref.watch(webClientProvider);
-  return EnrichmentService(
-    db: ref.watch(databaseProvider),
-    tracks: ref.watch(trackRepositoryProvider),
-    covers: ref.watch(coverStoreProvider),
+/// One pause between online lookups for the whole enrichment.
+final enrichLimiterProvider = Provider((ref) => RateLimiter());
+
+final metadataResolverProvider = Provider(
+  (ref) => MetadataResolver(
     itunes: ref.watch(itunesClientProvider),
     deezer: ref.watch(deezerClientProvider),
     useDeezer: () => ref.read(settingsProvider).deezerMeta,
+  ),
+);
+
+final coverFetcherProvider = Provider(
+  (ref) => CoverFetcher(
+    covers: ref.watch(coverStoreProvider),
+    web: ref.watch(webClientProvider),
+    tracks: ref.watch(trackRepositoryProvider),
+    itunes: ref.watch(itunesClientProvider),
+    deezer: ref.watch(deezerClientProvider),
+    useDeezer: () => ref.read(settingsProvider).deezerMeta,
+    limiter: ref.watch(enrichLimiterProvider),
+  ),
+);
+
+final creditsEnricherProvider = Provider(
+  (ref) => CreditsEnricher(
+    tracks: ref.watch(trackRepositoryProvider),
+    repo: ref.watch(creditsRepositoryProvider),
+    deezer: ref.watch(deezerClientProvider),
     gw: ref.watch(deezerGwClientProvider),
     musicBrainz: ref.watch(musicBrainzClientProvider),
-    creditsRepo: ref.watch(creditsRepositoryProvider),
+    resolver: ref.watch(metadataResolverProvider),
+  ),
+);
+
+final enrichmentServiceProvider = Provider<EnrichmentService>((ref) {
+  return EnrichmentService(
+    db: ref.watch(databaseProvider),
+    tracks: ref.watch(trackRepositoryProvider),
+    resolver: ref.watch(metadataResolverProvider),
+    covers: ref.watch(coverFetcherProvider),
+    creditsEnricher: ref.watch(creditsEnricherProvider),
     useCredits: () => ref.read(settingsProvider).creditsDetails,
     lrclib: ref.watch(lrclibClientProvider),
     lyricsChain: ref.watch(lyricsChainProvider),
-    curiosities: ref.watch(curiosityServiceProvider),
     wikipedia: ref.watch(wikipediaClientProvider),
-    web: web,
     language: () => ref.read(settingsProvider).language,
+    limiter: ref.watch(enrichLimiterProvider),
+  );
+});
+
+final enrichEngineProvider = Provider<EnrichEngine>((ref) {
+  return EnrichEngine(
+    db: ref.watch(databaseProvider),
+    tracks: ref.watch(trackRepositoryProvider),
+    resolver: ref.watch(metadataResolverProvider),
+    covers: ref.watch(coverFetcherProvider),
+    chain: ref.watch(lyricsChainProvider),
+    credits: ref.watch(creditsEnricherProvider),
+    curiosities: ref.watch(curiosityServiceProvider),
+    language: () => ref.read(settingsProvider).language,
+    useCredits: () => ref.read(settingsProvider).creditsDetails,
+    limiter: ref.watch(enrichLimiterProvider),
   );
 });
 
@@ -245,9 +292,9 @@ final downloadEnricherProvider = Provider<QuietEnricher>((ref) {
     onDone: (id) => ref.read(downloadTaggerProvider).tag(id),
     enabled: () => autoParts(ref.read(settingsProvider)).isNotEmpty,
     enrich: (id) async {
-      final service = ref.read(enrichmentServiceProvider);
-      await service.limiter.wait();
-      await service.completeOne(id, autoParts(ref.read(settingsProvider)));
+      final engine = ref.read(enrichEngineProvider);
+      await engine.limiter.wait();
+      await engine.completeOne(id, autoParts(ref.read(settingsProvider)));
     },
   );
   ref.onDispose(enricher.dispose);

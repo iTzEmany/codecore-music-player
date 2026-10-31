@@ -5,7 +5,6 @@ import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/covers/cover_store.dart';
 import 'package:codecore/services/online/deezer_client.dart';
-import 'package:codecore/services/online/enrichment_service.dart';
 import 'package:codecore/services/online/http_client.dart';
 import 'package:codecore/services/online/itunes_client.dart';
 import 'package:codecore/services/online/lrclib_client.dart';
@@ -15,6 +14,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
+import '../../support/enrich_fakes.dart';
 
 Object _fx(String n) =>
     jsonDecode(File('test/fixtures/deezer/$n.json').readAsStringSync())
@@ -79,7 +79,7 @@ void main() {
       tmp.deleteSync(recursive: true);
     });
     final web = _Web()..usableEdition = usable;
-    final svc = EnrichmentService(
+    final svcStack = enrichStack(
       db: db,
       tracks: TrackRepository(db),
       covers: CoverStore(Directory(p.join(tmp.path, 'c'))),
@@ -92,6 +92,7 @@ void main() {
       language: () => 'it',
       limiter: RateLimiter(minGap: Duration.zero),
     );
+    final svc = svcStack.fetcher;
     await db.into(db.tracks).insert(TracksCompanion.insert(
           path: '/i.mp3',
           title: 'Imagine',
@@ -131,7 +132,7 @@ void main() {
     });
     final web = _Web();
     final repo = TrackRepository(db);
-    final svc = EnrichmentService(
+    final svcStack = enrichStack(
       db: db,
       tracks: repo,
       covers: CoverStore(Directory(p.join(tmp.path, 'c'))),
@@ -144,6 +145,7 @@ void main() {
       language: () => 'it',
       limiter: RateLimiter(minGap: Duration.zero),
     );
+    final svc = svcStack.fetcher;
     for (final n in ['a', 'b']) {
       await db.into(db.tracks).insert(TracksCompanion.insert(
           path: '/$n.mp3', title: 'Imagine', albumKey: 'k', format: 'mp3', sizeBytes: 1, mtimeMs: 1, addedAt: 1));

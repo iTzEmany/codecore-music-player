@@ -95,7 +95,7 @@ void main() {
         ...extra,
         settingsStoreProvider.overrideWithValue(store),
         databaseProvider.overrideWithValue(r.db),
-        enrichmentServiceProvider.overrideWithValue(r.svc),
+        enrichEngineProvider.overrideWithValue(r.engine),
         creditsRepositoryProvider.overrideWithValue(r.credits),
         settingsProvider.overrideWith(
           () => _Settings(settings ?? AppSettings(autoLyrics: true)),
@@ -333,7 +333,7 @@ void main() {
       overrides: [
         settingsStoreProvider.overrideWithValue(store),
         databaseProvider.overrideWithValue(r.db),
-        enrichmentServiceProvider.overrideWithValue(r.svc),
+        enrichEngineProvider.overrideWithValue(r.engine),
         creditsRepositoryProvider.overrideWithValue(r.credits),
         settingsProvider.overrideWith(
           () => _Settings(AppSettings(autoLyrics: true)),

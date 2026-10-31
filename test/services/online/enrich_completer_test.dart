@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/services/online/enrich_completer.dart';
 import 'package:codecore/services/online/enrich_parts.dart' as parts_lib;
+import 'package:codecore/services/online/enrich_engine.dart';
 import 'package:codecore/services/online/enrichment_service.dart';
 import 'package:codecore/services/online/lrclib_client.dart';
 import 'package:codecore/services/online/http_client.dart' show RateLimiter;
@@ -16,11 +17,11 @@ const _lyrics = {EnrichPart.lyrics};
 const _lyricsAndSynced = {EnrichPart.lyrics, EnrichPart.synced};
 const _day = 24 * 3600 * 1000;
 
-/// A service whose first [failCommits] commits throw as a whole.
-class _Flaky implements EnrichmentService {
+/// An engine whose first [failCommits] commits throw as a whole.
+class _Flaky implements EnrichEngine {
   _Flaky(this.s, this.failCommits);
 
-  final EnrichmentService s;
+  final EnrichEngine s;
   int failCommits;
 
   @override
@@ -35,8 +36,14 @@ class _Flaky implements EnrichmentService {
   }) => s.gather(trackId, parts, mode: mode);
 
   @override
-  Future<List<Map<EnrichPart, PartOutcome>>> commit(List<EnrichGather> items) {
-    if (failCommits-- > 0) throw StateError('disk full');
+  Future<List<CommitResult>> commit(List<EnrichGather> items) {
+    if (failCommits-- > 0) {
+      // The real commit releases the claims; with the rows dropped it writes nothing.
+      for (final g in items) {
+        g.track = null;
+      }
+      return s.commit(items).then((_) => throw StateError('disk full'));
+    }
     return s.commit(items);
   }
 
@@ -44,9 +51,9 @@ class _Flaky implements EnrichmentService {
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }
 
-/// A service whose first [failGathers] gathers throw.
+/// An engine whose first [failGathers] gathers throw.
 class _Throwing extends _Flaky {
-  _Throwing(EnrichmentService s, this.failGathers) : super(s, 0);
+  _Throwing(EnrichEngine s, this.failGathers) : super(s, 0);
 
   int failGathers;
 
@@ -115,7 +122,7 @@ void main() {
     Future<void> Function()? idle,
     void Function(int, int)? progress,
   }) => EnrichCompleter(
-    service: r.svc,
+    engine: r.engine,
     repo: r.credits,
     parts: () => parts,
     waitIdle: idle ?? () async {},
@@ -165,7 +172,7 @@ void main() {
       var on = _lyrics;
       r.chain.during = () async => on = const {};
       final round = await EnrichCompleter(
-        service: r.svc,
+        engine: r.engine,
         repo: r.credits,
         parts: () => on,
         waitIdle: () async {},
@@ -324,7 +331,7 @@ void main() {
       final ids = [for (var n = 0; n < 8; n++) await track()];
       var mark = 0;
       final c = EnrichCompleter(
-        service: _Throwing(r.svc, 5),
+        engine: _Throwing(r.engine, 5),
         repo: r.credits,
         parts: () => _lyrics,
         waitIdle: () async {},
@@ -376,16 +383,16 @@ void main() {
         'CREATE TRIGGER boom BEFORE UPDATE ON tracks WHEN NEW.id = ${ids[4]} '
         "BEGIN SELECT RAISE(ABORT, 'boom'); END",
       );
-      final items = [for (final id in ids) await r.svc.gather(id, _lyrics)];
-      final outs = await r.svc.commit(items);
+      final items = [for (final id in ids) await r.engine.gather(id, _lyrics)];
+      final outs = await r.engine.commit(items);
       for (var n = 0; n < 10; n++) {
         final t = (await r.repo.getById(ids[n]))!;
         if (n == 4) {
-          expect(outs[n][EnrichPart.lyrics], PartOutcome.failed);
+          expect(outs[n].out[EnrichPart.lyrics], PartOutcome.failed);
           expect(t.lyricsPlain, isNull);
           expect((await r.enrichOf(ids[n]))?.lyricsNoneAt, isNull);
         } else {
-          expect(outs[n][EnrichPart.lyrics], PartOutcome.found);
+          expect(outs[n].out[EnrichPart.lyrics], PartOutcome.found);
           expect(t.lyricsPlain, 'la la');
         }
       }
@@ -402,12 +409,12 @@ void main() {
       );
       final a = await half(), b = await half();
       final items = [
-        await r.svc.gather(a, {EnrichPart.meta}),
-        await r.svc.gather(b, {EnrichPart.meta}),
+        await r.engine.gather(a, {EnrichPart.meta}),
+        await r.engine.gather(b, {EnrichPart.meta}),
       ];
-      final outs = await r.svc.commit(items);
-      expect(outs[0][EnrichPart.meta], PartOutcome.found);
-      expect(outs[1][EnrichPart.meta], PartOutcome.skipped);
+      final outs = await r.engine.commit(items);
+      expect(outs[0].out[EnrichPart.meta], PartOutcome.found);
+      expect(outs[1].out[EnrichPart.meta], PartOutcome.skipped);
       expect((await r.repo.getById(b))!.hasCover, isTrue);
       expect((await r.enrichOf(b))?.metaNoneAt, isNull);
       expect((await r.repo.getById(b))!.enrichStatus, isNot(2));
@@ -415,10 +422,10 @@ void main() {
 
     test('curiosities written meanwhile are not replaced without force', () async {
       final id = await track();
-      final g = await r.svc.gather(id, {EnrichPart.curio});
+      final g = await r.engine.gather(id, {EnrichPart.curio});
       await r.repo.setCuriosities(id, 'mine\nsrc');
-      final outs = await r.svc.commit([g]);
-      expect(outs.single[EnrichPart.curio], PartOutcome.skipped);
+      final outs = await r.engine.commit([g]);
+      expect(outs.single.out[EnrichPart.curio], PartOutcome.skipped);
       expect((await r.repo.getById(id))!.curiosities, 'mine\nsrc');
       expect((await r.enrichOf(id))?.curioNoneAt, isNull);
     });
@@ -457,6 +464,38 @@ void main() {
       expect(round.failed, isFalse);
       expect(round.updated[EnrichPart.meta], [meta]);
       expect(r.chain.calls, 1);
+    });
+
+    test('a track gathered by a run that waits for the user can be completed meanwhile', () async {
+      final ids = [await track(), await track()];
+      final gate = Completer<void>();
+      var idles = 0;
+      final c = completer(idle: () => ++idles == 1 ? Future.value() : gate.future);
+      final run = c.run();
+      await pumpEventQueue();
+      expect(r.chain.calls, 1); // the first is gathered, the run waits
+      await r.engine
+          .completeOne(ids[0], {EnrichPart.lyrics})
+          .timeout(const Duration(seconds: 2));
+      c.cancel();
+      await run;
+    });
+
+    test('now promotes: the stretch already passed in plain mode is asked again', () async {
+      final ids = [for (var n = 0; n < 4; n++) await track()];
+      await mark(ids[1], lyrics: clock - _day); // recent «nothing»
+      final gate = Completer<void>();
+      var idles = 0;
+      final c = completer(
+        loadMark: () => ids[0],
+        idle: () => ++idles == 2 ? gate.future : Future.value(),
+      );
+      final plan = c.run();
+      await pumpEventQueue();
+      expect(r.chain.calls, 1); // ids[2] read; ids[1] skipped as «nothing»
+      c.run(mode: AskMode.retryNone);
+      final round = await plan;
+      expect(round.updated[EnrichPart.lyrics], contains(ids[1]));
     });
 
     test('stop ends a wait for the user', () async {
@@ -537,7 +576,7 @@ void main() {
       }
       final progress = <(int, int)>[];
       final round = await EnrichCompleter(
-        service: _Flaky(r.svc, 1),
+        engine: _Flaky(r.engine, 1),
         repo: r.credits,
         parts: () => _lyrics,
         waitIdle: () async {},
@@ -643,17 +682,17 @@ void main() {
       );
     });
 
-    test('limit and exclude', () async {
+    test('limit and upTo', () async {
       final ids = [for (var n = 0; n < 5; n++) await track()];
-      expect(
-        await r.credits.dueTrackIds(
-          _lyrics,
-          DateTime.now(),
-          limit: 2,
-          exclude: {ids[0]},
-        ),
-        [ids[1], ids[2]],
+      Future<List<int>> due(int limit) => r.credits.dueTrackIds(
+        _lyrics,
+        DateTime.now(),
+        limit: limit,
+        after: ids[0],
+        upTo: ids[3],
       );
+      expect(await due(2), [ids[1], ids[2]]);
+      expect(await due(20), [ids[1], ids[2], ids[3]]);
     });
 
     test(

@@ -8,7 +8,8 @@ import 'package:codecore/providers/ytm_catalog_providers.dart';
 import 'package:codecore/services/online/artist_link_resolver.dart';
 import 'package:codecore/services/online/credits.dart';
 import 'package:codecore/services/online/curiosity_finder.dart';
-import 'package:codecore/services/online/enrichment_service.dart';
+import 'package:codecore/services/online/enrich_engine.dart';
+import 'package:codecore/services/online/enrich_parts.dart';
 import 'package:codecore/services/online/ytm_artist.dart';
 import 'package:codecore/ui/screens/library/artist_screen.dart';
 import 'package:codecore/ui/screens/now_playing/credits_card.dart';
@@ -34,7 +35,7 @@ class _Finder extends Fake implements CuriosityFinder {
 }
 
 /// Stands for the network: counts the requests and saves [onAsk]'s credits.
-class _Service extends Fake implements EnrichmentService {
+class _Service extends Fake implements EnrichEngine {
   _Service(this.repo, this.onAsk);
 
   final CreditsRepository repo;
@@ -117,7 +118,7 @@ void main() {
         body: SingleChildScrollView(child: CreditsCard(track: track)),
       ),
       extraOverrides: [
-        enrichmentServiceProvider.overrideWithValue(_service),
+        enrichEngineProvider.overrideWithValue(_service),
         curiosityFinderProvider.overrideWithValue(_Finder()),
       ],
     );

@@ -13,6 +13,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
+import '../../support/enrich_fakes.dart';
 
 /// Counts what is asked and answers nothing.
 class _Web implements WebClient {
@@ -41,7 +42,7 @@ void main() {
     tmp = Directory.systemTemp.createTempSync('needs');
     db = AppDatabase(NativeDatabase.memory());
     web = _Web();
-    svc = EnrichmentService(
+    final svcStack = enrichStack(
       db: db,
       tracks: TrackRepository(db),
       covers: CoverStore(Directory(p.join(tmp.path, 'c'))),
@@ -52,6 +53,7 @@ void main() {
       language: () => 'it',
       limiter: RateLimiter(minGap: Duration.zero),
     );
+    svc = svcStack.svc;
   });
   tearDown(() async {
     await db.close();
