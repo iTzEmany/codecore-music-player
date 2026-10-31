@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:codecore/data/db/app_database.dart';
@@ -10,7 +11,12 @@ import 'package:codecore/services/online/curiosity_finder.dart';
 import 'package:codecore/services/online/curiosity_service.dart';
 import 'package:codecore/services/online/deezer_client.dart';
 import 'package:codecore/services/online/deezer_gw_client.dart';
+import 'package:codecore/services/online/cover_fetcher.dart';
+import 'package:codecore/services/online/credits_enricher.dart';
+import 'package:codecore/services/online/enrich_engine.dart';
+import 'package:codecore/services/online/enrich_runner.dart';
 import 'package:codecore/services/online/enrichment_service.dart';
+import 'package:codecore/services/online/metadata_resolver.dart';
 import 'package:codecore/services/online/http_client.dart';
 import 'package:codecore/services/online/itunes_client.dart';
 import 'package:codecore/services/online/lrclib_client.dart';
@@ -18,7 +24,7 @@ import 'package:codecore/services/online/lyrics_chain.dart';
 import 'package:codecore/services/online/musicbrainz_client.dart';
 import 'package:codecore/services/online/wikipedia_client.dart';
 import 'package:dio/dio.dart';
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' show ApplyInterceptor, QueryInterceptor, Value;
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 
@@ -30,6 +36,7 @@ class EnrichWeb implements WebClient {
   bool deezerDown = false;
   bool deezerLimited = false;
   bool musicBrainzLimited = false;
+  bool itunesGenre = true; // false: the iTunes hit has no genre
   bool coverDown = false; // network error
   bool coverMissing = false; // 404
 
@@ -70,7 +77,7 @@ class EnrichWeb implements WebClient {
             'artistName': 'Band',
             'collectionName': 'New Album',
             'releaseDate': '2019-01-01',
-            'primaryGenreName': 'Rock',
+            if (itunesGenre) 'primaryGenreName': 'Rock',
             'trackNumber': 2,
             'artworkUrl100': 'https://x/100x100bb.jpg',
           },
@@ -186,6 +193,9 @@ class FakeChain extends LyricsChain {
   /// Runs while the search is «on the network», before it answers.
   Future<void> Function()? during;
 
+  /// While set, the search never answers by itself; only a cancel ends it.
+  Completer<void>? hold;
+
   @override
   Future<LyricsChainResult> find(
     Track t, {
@@ -195,6 +205,14 @@ class FakeChain extends LyricsChain {
     calls++;
     wantSyncedSeen = wantSynced;
     await during?.call();
+    final h = hold;
+    if (h != null) {
+      await Future.any([
+        h.future,
+        if (cancel != null)
+          cancel.whenCancel.then<void>((_) => throw DioException.requestCancelled(requestOptions: RequestOptions(), reason: 'cancel')),
+      ]);
+    }
     if (limited) {
       return const LyricsChainResult(
         failed: true,
@@ -214,6 +232,9 @@ class FakeChain extends LyricsChain {
 
 class FakeFinder implements CuriosityFinder {
   int calls = 0;
+
+  /// Thrown by every search, when set (offline).
+  Object? error;
   CuriosityPair pair = CuriosityPair(
     song: Curiosity(
       'A story',
@@ -237,6 +258,7 @@ class FakeFinder implements CuriosityFinder {
     cancel,
   }) async {
     calls++;
+    if (error != null) throw error!;
     return pair;
   }
 
@@ -244,19 +266,99 @@ class FakeFinder implements CuriosityFinder {
   dynamic noSuchMethod(Invocation i) => throw UnimplementedError();
 }
 
+/// The service and the engine over the same resolver, covers and credits,
+/// built from the raw sources like the providers do.
+({EnrichmentService svc, EnrichEngine engine, CoverFetcher fetcher}) enrichStack({
+  required AppDatabase db,
+  required TrackRepository tracks,
+  required CoverStore covers,
+  required ItunesClient itunes,
+  DeezerClient? deezer,
+  bool Function()? useDeezer,
+  DeezerGwClient? gw,
+  MusicBrainzClient? musicBrainz,
+  CreditsRepository? creditsRepo,
+  bool Function()? useCredits,
+  required LrclibClient lrclib,
+  LyricsChain? lyricsChain,
+  CuriosityService? curiosities,
+  required WikipediaClient wikipedia,
+  required WebClient web,
+  required String Function() language,
+  required RateLimiter limiter,
+}) {
+  final resolver = MetadataResolver(
+    itunes: itunes,
+    deezer: deezer,
+    useDeezer: useDeezer ?? () => false,
+  );
+  final fetcher = CoverFetcher(
+    covers: covers,
+    web: web,
+    tracks: tracks,
+    itunes: itunes,
+    deezer: deezer,
+    useDeezer: useDeezer ?? () => false,
+    limiter: limiter,
+  );
+  final credits = creditsRepo == null
+      ? null
+      : CreditsEnricher(
+          tracks: tracks,
+          repo: creditsRepo,
+          deezer: deezer,
+          gw: gw,
+          musicBrainz: musicBrainz,
+          resolver: resolver,
+        );
+  final chain = lyricsChain ?? LyricsChain(lrclib: lrclib);
+  return (
+    svc: EnrichmentService(
+      db: db,
+      tracks: tracks,
+      resolver: resolver,
+      covers: fetcher,
+      creditsEnricher: credits,
+      useCredits: useCredits ?? () => false,
+      lrclib: lrclib,
+      lyricsChain: chain,
+      wikipedia: wikipedia,
+      language: language,
+      limiter: limiter,
+    ),
+    engine: EnrichEngine(
+      db: db,
+      tracks: tracks,
+      resolver: resolver,
+      covers: fetcher,
+      chain: chain,
+      credits: credits,
+      curiosities: curiosities,
+      language: language,
+      useCredits: useCredits ?? () => false,
+      limiter: limiter,
+    ),
+    fetcher: fetcher,
+  );
+}
+
 /// An [EnrichmentService] over an in-memory DB with every source faked.
 class EnrichRig {
   EnrichRig._(this.tmp);
 
-  factory EnrichRig() {
+  /// [interceptor] sees every query of the database (e.g. to count reads).
+  factory EnrichRig({QueryInterceptor? interceptor}) {
     final r = EnrichRig._(Directory.systemTemp.createTempSync('enrich_rig'));
-    r.db = AppDatabase(NativeDatabase.memory());
+    final executor = NativeDatabase.memory();
+    r.db = AppDatabase(
+      interceptor == null ? executor : executor.interceptWith(interceptor),
+    );
     r.repo = TrackRepository(r.db);
     r.credits = CreditsRepository(r.db);
     r.web = EnrichWeb();
     r.chain = FakeChain(r.web);
     r.finder = FakeFinder();
-    r.svc = EnrichmentService(
+    final stack = enrichStack(
       db: r.db,
       tracks: r.repo,
       covers: CoverStore(Directory(p.join(r.tmp.path, 'c'))),
@@ -279,6 +381,8 @@ class EnrichRig {
       language: () => 'it',
       limiter: RateLimiter(minGap: Duration.zero),
     );
+    r.svc = stack.svc;
+    r.engine = stack.engine;
     return r;
   }
 
@@ -291,6 +395,21 @@ class EnrichRig {
   late final FakeChain chain;
   late final FakeFinder finder;
   late final EnrichmentService svc;
+  late final EnrichEngine engine;
+
+  /// A manual job: the runner over a fixed list, every part «nothing» marks included.
+  Future<EnrichRound> runManual(
+    List<int> ids, {
+    Set<EnrichPart> parts = const {EnrichPart.meta},
+    void Function(int done, int total)? onProgress,
+  }) => EnrichRunner(
+    engine: engine,
+    ids: FixedIds(ids),
+    parts: () => parts,
+    waitIdle: () async {},
+    mode: AskMode.retryNone,
+    onProgress: onProgress,
+  ).run();
 
   Future<void> dispose() async {
     await db.close();

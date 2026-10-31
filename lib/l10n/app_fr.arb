@@ -258,18 +258,6 @@
   "fieldCuriosity": "Anecdotes",
   "enrichAlbum": "Enrichir l’album",
   "enrichLibrary": "Enrichir toute la bibliothèque",
-  "enrichConfirmTitle": "Enrichir la bibliothèque ?",
-  "enrichConfirmBody": "{count} titres, environ {minutes} minutes. Seuls les champs vides sont remplis.",
-  "@enrichConfirmBody": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
   "enrichRunning": "Enrichissement {done}/{total}",
   "@enrichRunning": {
     "placeholders": {
@@ -3233,20 +3221,6 @@
   },
   "activityStopped": "Arrêtée",
   "activityScanEnded": "Analyse",
-  "enrichCompleteTitle": "Compléter l’enrichissement",
-  "enrichCompleteHint": "Cherche tout de suite ce qui manque aux morceaux, même pendant que tu utilises l’appli",
-  "enrichCompleteProgress": "{done} morceaux complets sur {total}",
-  "@enrichCompleteProgress": {
-    "placeholders": {
-      "done": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "enrichCompleteStop": "Interrompre",
   "enrichRoundTitle": "Passage d’enrichissement",
   "enrichRoundUpdated": "Mis à jour",
   "enrichRoundNone": "Sans résultat",
@@ -3386,5 +3360,19 @@
     }
   },
   "logEnrichStopped": "Complétion arrêtée : aucune source ne répond",
-  "logEnrichFailed": "Complétion échouée : arrêtée par une erreur"
+  "logEnrichFailed": "Complétion échouée : arrêtée par une erreur",
+  "enrichLibraryDue": "{count} morceaux à compléter, environ {minutes} minutes",
+  "@enrichLibraryDue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichLibraryComplete": "Bibliothèque complète",
+  "enrichLibraryStop": "Interrompre",
+  "activityEnrichWaiting": "Complétion : en attente"
 }

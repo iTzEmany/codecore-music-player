@@ -579,7 +579,7 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
           );
           final row =
               await ref.read(trackRepositoryProvider).byPath(entry.key);
-          if (row != null) afterReceive(ref.read, row.id, item.meta);
+          if (row != null) afterReceive(ref.read, row.id);
         }
       }
       o.status = o.received == o.items.length

@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/covers/cover_store.dart';
+import 'package:codecore/services/online/cover_fetcher.dart';
+import 'package:codecore/services/online/enrich_engine.dart';
 import 'package:codecore/services/online/enrichment_service.dart';
 import 'package:codecore/services/online/http_client.dart';
 import 'package:codecore/services/online/itunes_client.dart';
@@ -13,6 +15,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
+import '../../support/enrich_fakes.dart';
 
 class _Web implements WebClient {
   @override
@@ -47,13 +50,15 @@ void main() {
   late TrackRepository repo;
   late Directory tmp;
   late EnrichmentService svc;
+  late EnrichEngine engine;
+  late CoverFetcher fetcher;
 
   setUp(() {
     tmp = Directory.systemTemp.createTempSync('enr');
     db = AppDatabase(NativeDatabase.memory());
     repo = TrackRepository(db);
     final web = _Web();
-    svc = EnrichmentService(
+    final svcStack = enrichStack(
       db: db,
       tracks: repo,
       covers: CoverStore(Directory(p.join(tmp.path, 'c'))),
@@ -64,6 +69,9 @@ void main() {
       language: () => 'it',
       limiter: RateLimiter(minGap: Duration.zero),
     );
+    svc = svcStack.svc;
+    engine = svcStack.engine;
+    fetcher = svcStack.fetcher;
   });
   tearDown(() async {
     await db.close();
@@ -91,7 +99,7 @@ void main() {
 
   test('propose writes nothing', () async {
     final t = await add('/a.mp3', 'Song');
-    final prop = await svc.propose(t, lyrics: false, curiosity: false);
+    final prop = await svc.propose(t);
     expect(prop.meta, isNotNull);
     final again = await repo.getById(t.id);
     expect(again!.album, isNull);
@@ -100,7 +108,7 @@ void main() {
 
   test('apply respects userEdited', () async {
     final t = await add('/a.mp3', 'Song', album: 'Mine', edited: true);
-    final prop = await svc.propose(t, lyrics: false, curiosity: false);
+    final prop = await svc.propose(t);
     await svc.apply(prop, {EnrichField.title, EnrichField.album, EnrichField.year});
     final r = (await repo.getById(t.id))!;
     expect(r.title, 'Song');
@@ -110,8 +118,7 @@ void main() {
 
   test('batch fills only empty fields and never touches title', () async {
     final t = await add('/a.mp3', 'Song', album: 'Mine', year: 1999);
-    final events = await svc.enrichMany([t.id], includeLyrics: false).toList();
-    expect(events.last.finished, true);
+    await engine.completeOne(t.id, {EnrichPart.meta});
     final r = (await repo.getById(t.id))!;
     expect(r.album, 'Mine');
     expect(r.year, 1999);
@@ -123,15 +130,15 @@ void main() {
   test('coverForAlbum saves the album cover once and then leaves it alone',
       () async {
     final t = await add('/a.mp3', 'Song');
-    expect(await svc.coverForAlbum(t, 'New Album', 'Band'), isTrue);
+    expect(await fetcher.coverForAlbum(t, 'New Album', 'Band'), isTrue);
     expect((await repo.getById(t.id))!.hasCover, isTrue);
-    expect(await svc.coverForAlbum(t, 'New Album', 'Band'), isFalse,
+    expect(await fetcher.coverForAlbum(t, 'New Album', 'Band'), isFalse,
         reason: 'the album already has its cover');
   });
 
   test('coverForAlbum finds nothing for an unknown artist', () async {
     final t = await add('/b.mp3', 'Song');
-    expect(await svc.coverForAlbum(t, 'New Album', 'Somebody Else'), isFalse);
+    expect(await fetcher.coverForAlbum(t, 'New Album', 'Somebody Else'), isFalse);
     expect((await repo.getById(t.id))!.hasCover, isFalse);
   });
 
@@ -139,7 +146,7 @@ void main() {
     final t = await add('stream:youtube:x', 'Song');
     await (db.update(db.tracks)..where((r) => r.id.equals(t.id)))
         .write(const TracksCompanion(kind: Value(2), albumKey: Value('stream|youtube:x')));
-    final prop = await svc.propose((await repo.getById(t.id))!, lyrics: false, curiosity: false);
+    final prop = await svc.propose((await repo.getById(t.id))!);
     await svc.apply(prop, {EnrichField.album, EnrichField.artist});
     final r = (await repo.getById(t.id))!;
     expect(r.album, 'New Album');

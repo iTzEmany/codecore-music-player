@@ -68,7 +68,7 @@ final playlistImportServiceProvider = Provider<PlaylistImportService>((ref) {
       final t = await tracks.getById(trackId);
       if (t == null) return;
       await ref
-          .read(enrichmentServiceProvider)
+          .read(coverFetcherProvider)
           .coverForAlbum(t, row.album!, row.primaryArtist, isrc: row.isrc);
     },
     enrichLater: (id) => afterDownload(ref, id),

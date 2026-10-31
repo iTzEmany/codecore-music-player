@@ -4,7 +4,8 @@ import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/covers/cover_store.dart';
 import 'package:codecore/services/online/deezer_client.dart';
-import 'package:codecore/services/online/enrichment_service.dart';
+import 'package:codecore/services/online/enrich_engine.dart';
+import 'package:codecore/services/online/enrich_parts.dart';
 import 'package:codecore/services/online/http_client.dart';
 import 'package:codecore/services/online/itunes_client.dart';
 import 'package:codecore/services/online/lrclib_client.dart';
@@ -14,6 +15,7 @@ import 'package:dio/dio.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
+import '../../support/enrich_fakes.dart';
 
 /// Fake Deezer (by ISRC) and a silent iTunes; remembers the Deezer calls.
 class _Web implements WebClient {
@@ -65,7 +67,7 @@ void main() {
   late TrackRepository repo;
   late Directory tmp;
   late _Web web;
-  late EnrichmentService svc;
+  late EnrichEngine engine;
   var deezerOn = true;
 
   setUp(() async {
@@ -74,7 +76,7 @@ void main() {
     repo = TrackRepository(db);
     web = _Web();
     deezerOn = true;
-    svc = EnrichmentService(
+    final svcStack = enrichStack(
       db: db,
       tracks: repo,
       covers: CoverStore(Directory(p.join(tmp.path, 'c'))),
@@ -87,6 +89,7 @@ void main() {
       language: () => 'it',
       limiter: RateLimiter(minGap: Duration.zero),
     );
+    engine = svcStack.engine;
     await db.into(db.tracks).insert(TracksCompanion.insert(
           path: '/a/x.mp3',
           title: 'file name',
@@ -106,7 +109,7 @@ void main() {
   Future<Track> receiveAndEnrich(TrackMeta meta) async {
     final id = (await repo.byPath('/a/x.mp3'))!.id;
     await repo.applyReceivedMeta(id, meta);
-    await svc.enrichMany([id], includeLyrics: false).drain<void>();
+    await engine.completeOne(id, {EnrichPart.meta});
     return (await repo.getById(id))!;
   }
 

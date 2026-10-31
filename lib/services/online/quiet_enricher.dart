@@ -5,7 +5,8 @@ import '../../core/app_log.dart';
 
 /// Enriches downloaded songs one at a time, out of sight: no line in the
 /// Activity centre and no snackbar for each song. A song added while another
-/// waits is never lost (the batch job refuses a second start).
+/// waits is never lost; one the background run is reading too is asked once
+/// (the engine holds the track in flight).
 class QuietEnricher {
   QuietEnricher({required this.enrich, this.enabled, this.onDone});
 

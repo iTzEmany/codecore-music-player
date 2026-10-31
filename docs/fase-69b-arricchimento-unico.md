@@ -149,7 +149,7 @@ Riceve `mode` e `parts`, e la pausa per inattività (D-104) vale solo con `AskMo
 
 Passano al runner anche:
 - «Arricchisci album» (`album_detail_screen.dart:250`);
-- «Riprova» (`review_providers.dart:56`). Rimette lo stato a 0 come oggi, poi `retryNone`; `onFinished` lancia la seconda opinione come oggi.
+- «Riprova» (`review_providers.dart:56`). Non rimette lo stato a 0 (non lo faceva nemmeno prima): avvia `start(ids)` in `retryNone`, poi la seconda opinione, che si salta se il lavoro è fallito.
 
 `BatchProgress` diventa `EnrichJobResult` (aggiornati, non trovati, totale, errore). Si aggiornano `enrich_result_listener.dart` e `activity_log_providers.dart:200`. La barra resta «Arricchimento: N di M» (D-282). `ActivityKind.enrich` resta, anche per le righe vecchie del Registro.
 
@@ -209,3 +209,30 @@ Si tolgono `enrichMany`, `BatchProgress`, `needsEnrichment` e `CreditsEnricher.i
    - `docs/02-architettura.md` §«Arricchimento», righe circa 335–342: `EnrichEngine`, `EnrichRunner`, regola unica, «Riprova» sul runner;
    - `docs/feature-arricchimento.md`, dove descrive i due comandi o `_autoEnrich`;
    - le guide in `docs/guida` che citano «Completa l'arricchimento», controllate con `scripts/check_docs_links.py`.
+
+## Esiti di 69b.4 (2026-10-31)
+
+- **Metriche** (D-290):
+  - `wc -l lib/services/online/enrich*.dart …`: `enrichment_service.dart` 163 righe; il file nuovo più lungo è `enrich_runner.dart` con 388. ✔
+  - `grep enrichStatus: Value lib`: una sola scrittura di `enrich_status`, `enrich_writer.dart:21`. ✔
+  - `grep -nE 'on Object|catch \('` nel perimetro: 18 righe controllate una per una. Ognuna logga (`Error` in `AppLog.e`, il resto in `AppLog.w`) o rilancia; `enrich_engine.dart:120` libera la prenotazione e rilancia. ✔
+  - `grep -rnw enrichMany|enrichConfirm…|widen|clearAlbums lib test`: nessun riferimento. I `promote` rimasti sono quelli dello stream, che non c'entra. ✔
+  - ≤ 3 letture per brano: il test in `enrich_status_characterization_test.dart:157`. ✔
+- **Review:** di architettura con Opus e `/code-review high` sul diff della fase, poi la scheggia; i rilievi sono corretti in 9ef5db0.
+- **Motorola** (D-289; musica in pausa, D-296). APK con 69b.1–69b.4 installato con `install -r` alle 16:57; copia di prima in `.backup-motorola/codecore-2026-10-31-1656/`.
+  - Brani con una parte dovuta: 1328 prima, 1324 dopo 15 minuti di background, **1317** dopo la prova manuale; solo musica 1242 → 1231. «Da revisionare» (stato 2) fermo a 68. Segnalibro 1182 → 1206.
+  - Background: i blocchi di 10 brani si salvano interi (commit alle 17:06:41 e alle 17:16:45). Nel log nessun `[E]`; gli avvisi sono 2 «LRCLIB answered 503» e 3 crediti MusicBrainz falliti, e il giro va avanti.
+  - **Ritmo:** circa 1 brano al minuto. Non è il motore: le curiosità usano diverse richieste Wikimedia a brano, e da anonima (`kApiContact` vuoto) l'app ne ha 8 al minuto (`request_budget.dart:17`). In 69a meno brani chiedevano le curiosità.
+  - **«Arricchisci tutta la libreria»** (17:19–17:25): mentre lavora il comando dice «Interrompi». Nel pannello c'è una sola barra, «Arricchimento: 10 di 1871», e il background dice «Completamento: in attesa». Fermato da «Annulla», il Registro scrive «Arricchimento: 10 di 1871 · Fermata». ✔
+  - **Stima:** il comando prometteva «1871 brani, circa 94 minuti» (3 s a brano). Il ritmo misurato è di 10 brani in 6,5 minuti, circa 40 s a brano, quindi la stima era sbagliata di 13 volte. Ora `enrichMinutes` conta 40 s a brano da anonima e 3 s da identificata (non misurato).
+
+## Rimandati dalla 69b
+- Ritmo: con un contatto in `kApiContact` Wikimedia concede 150 richieste al minuto invece di 8, e le curiosità smettono di frenare tutto. È una scelta dell'utente, perché il contatto finisce nello User-Agent di ogni richiesta.
+- `test/jam/jam_gate_test.dart` «concurrent writes» fallisce su Windows anche su master: confronta percorsi interi con nomi di file. Il check non è obbligatorio.
+- `propose` chiede ancora testi, Wikipedia e crediti fuori dal motore, con la regola «crediti dovuti» duplicata: va costruito su una lettura del motore che non prenota.
+- Un lavoro manuale salta in silenzio un brano che il background tiene in lavorazione (finestra di un solo brano): contarlo a parte o riprovarlo alla fine.
+- Il provider del completer tiene in cache il motore (`_built`) e non segue un rebuild di `enrichEngineProvider` (cambio o ripristino del DB).
+- `gather`/`commit` sono pubblici ed `EnrichGather` è mutabile, quindi un gather senza commit lascia la prenotazione: `completeOne(bool force)` dovrebbe prendere un `AskMode`.
+- `allRefused` è vero anche se l'utente spegne le parti dopo un rifiuto.
+- Il conteggio di «Arricchisci tutta la libreria» in `retryNone` arriva di rado a «Libreria completa»: scelta di prodotto, la decide l'utente.
+- Fondere `EnrichCompleter` nel suo provider.

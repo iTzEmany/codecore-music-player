@@ -4,6 +4,8 @@ import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/covers/cover_store.dart';
 import 'package:codecore/services/online/deezer_client.dart';
+import 'package:codecore/services/online/cover_fetcher.dart';
+import 'package:codecore/services/online/enrich_engine.dart';
 import 'package:codecore/services/online/enrichment_service.dart';
 import 'package:codecore/services/online/http_client.dart';
 import 'package:codecore/services/online/itunes_client.dart';
@@ -14,6 +16,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
+import '../../support/enrich_fakes.dart';
 
 /// Answers Deezer and iTunes from memory and remembers what was asked.
 class _Web implements WebClient {
@@ -106,6 +109,8 @@ void main() {
   late Directory tmp;
   late _Web web;
   late EnrichmentService svc;
+  late EnrichEngine engine;
+  late CoverFetcher fetcher;
   var deezerOn = true;
 
   setUp(() {
@@ -114,7 +119,7 @@ void main() {
     repo = TrackRepository(db);
     web = _Web();
     deezerOn = true;
-    svc = EnrichmentService(
+    final svcStack = enrichStack(
       db: db,
       tracks: repo,
       covers: CoverStore(Directory(p.join(tmp.path, 'c'))),
@@ -127,6 +132,9 @@ void main() {
       language: () => 'it',
       limiter: RateLimiter(minGap: Duration.zero),
     );
+    svc = svcStack.svc;
+    engine = svcStack.engine;
+    fetcher = svcStack.fetcher;
   });
   tearDown(() async {
     await db.close();
@@ -150,18 +158,17 @@ void main() {
     return (await db.select(db.tracks).getSingle());
   }
 
-  Future<EnrichmentProposal> propose(Track t, {bool needGenre = true}) =>
-      svc.propose(t, lyrics: false, curiosity: false, needGenre: needGenre);
+  Future<EnrichmentProposal> propose(Track t) => svc.propose(t);
 
-  test('Deezer confirms with a cover and no genre is wanted: iTunes is not asked',
+  test('Deezer confirms with a cover and the track has a genre: iTunes is not asked',
       () async {
-    final prop = await propose(await add(), needGenre: false);
+    final t = await add();
+    await (db.update(db.tracks)..where((r) => r.id.equals(t.id)))
+        .write(const TracksCompanion(genre: Value('Pop')));
+    await engine.completeOne(t.id, {EnrichPart.meta});
     expect(web.count('itunes'), 0);
-    expect(prop.source, 'deezer');
-    expect(prop.meta!.album, 'Deezer Album');
-    expect(prop.disc, 2);
-    expect(prop.isrc, 'ITABC2400001');
-    expect(prop.coverUrl, 'https://d/cover.jpg');
+    final r = (await repo.getById(t.id))!;
+    expect([r.album, r.discNumber, r.isrc, r.hasCover], ['Deezer Album', 2, 'ITABC2400001', true]);
   });
 
   test('Deezer confirmed with a cover: the iTunes genre wins, Deezer is the fallback',
@@ -200,13 +207,13 @@ void main() {
     web.itunesEmpty = true;
     for (final code in [100, 700]) {
       web.deezerError = code;
-      expect(await svc.completeOne(id, {EnrichPart.meta}), {
+      expect(await engine.completeOne(id, {EnrichPart.meta}), {
         EnrichPart.meta: PartOutcome.failed,
       }, reason: 'code $code is transient');
     }
     expect(await db.select(db.trackEnrich).get(), isEmpty);
     web.deezerError = 600; // an invalid query is an answer
-    expect(await svc.completeOne(id, {EnrichPart.meta}), {
+    expect(await engine.completeOne(id, {EnrichPart.meta}), {
       EnrichPart.meta: PartOutcome.none,
     });
     expect((await db.select(db.trackEnrich).getSingle()).metaNoneAt, isNotNull);
@@ -217,7 +224,7 @@ void main() {
       ..deezerCoverDown = true
       ..itunesAlbum = 'Deezer Album';
     final t = await add();
-    expect(await svc.coverForAlbum(t, 'Deezer Album', 'Band', isrc: 'ITABC2400001'),
+    expect(await fetcher.coverForAlbum(t, 'Deezer Album', 'Band', isrc: 'ITABC2400001'),
         isTrue);
     expect(web.fetched.last, contains('600x600'));
   });

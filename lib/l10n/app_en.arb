@@ -213,8 +213,6 @@
   "fieldCuriosity": "Trivia",
   "enrichAlbum": "Enrich album",
   "enrichLibrary": "Enrich whole library",
-  "enrichConfirmTitle": "Enrich the library?",
-  "enrichConfirmBody": "{count} tracks, about {minutes} minutes. Only empty fields are filled.",
   "enrichRunning": "Enriching {done}/{total}",
   "enrichResult": "{updated} updated, {notFound} not found",
   "enrichBusy": "An enrichment is already running",
@@ -2989,20 +2987,6 @@
   },
   "activityStopped": "Stopped",
   "activityScanEnded": "Scan",
-  "enrichCompleteTitle": "Complete the enrichment",
-  "enrichCompleteHint": "Look up what the songs are missing right now, even while you use the app",
-  "enrichCompleteProgress": "{done} of {total} songs complete",
-  "@enrichCompleteProgress": {
-    "placeholders": {
-      "done": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "enrichCompleteStop": "Stop",
   "enrichRoundTitle": "Enrichment round",
   "enrichRoundUpdated": "Updated",
   "enrichRoundNone": "No result",
@@ -3142,5 +3126,19 @@
     }
   },
   "logEnrichStopped": "Completion stopped: no source is answering",
-  "logEnrichFailed": "Completion failed: an error stopped it"
+  "logEnrichFailed": "Completion failed: an error stopped it",
+  "enrichLibraryDue": "{count} tracks to complete, about {minutes} minutes",
+  "@enrichLibraryDue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichLibraryComplete": "Library complete",
+  "enrichLibraryStop": "Stop",
+  "activityEnrichWaiting": "Completing: waiting"
 }

@@ -42,6 +42,7 @@ class ActivityItem {
     this.running = true,
     this.failed = false,
     this.paused = false,
+    this.waiting = false,
     this.ref,
     this.retryDelaySec,
     this.eta,
@@ -58,6 +59,9 @@ class ActivityItem {
 
   /// A CSV import waiting for the user (still listed among the running ones).
   final bool paused;
+
+  /// The background completion waiting for the user to leave the app alone.
+  final bool waiting;
 
   /// The download id, the [OutgoingOffer] or the import id, used to cancel.
   final Object? ref;
@@ -88,15 +92,15 @@ class CleanupProgress {
 
 /// The background completion, while it runs or is paused by hand.
 class EnrichBackgroundProgress extends CleanupProgress {
-  const EnrichBackgroundProgress(super.done, super.total, {this.paused = false});
+  const EnrichBackgroundProgress(super.done, super.total, {this.paused = false, this.waiting = false});
 
-  final bool paused;
+  final bool paused, waiting;
 }
 
 /// The completion as a line of the Activity centre (null: not shown).
 EnrichBackgroundProgress? enrichBackgroundOf(EnrichCompleterState c) =>
     c.visible
-        ? EnrichBackgroundProgress(c.complete, c.total, paused: c.paused)
+        ? EnrichBackgroundProgress(c.complete, c.total, paused: c.paused, waiting: c.waiting)
         : null;
 
 class ActivityState {
@@ -194,8 +198,11 @@ ActivityState buildActivity({
         name: null,
         done: enrichBackground.done,
         total: enrichBackground.total,
-        progress: enrichBackground.total == 0 ? null : enrichBackground.done / enrichBackground.total,
+        progress: enrichBackground.total == 0 || enrichBackground.waiting
+            ? null
+            : enrichBackground.done / enrichBackground.total,
         paused: enrichBackground.paused,
+        waiting: enrichBackground.waiting,
       ),
     );
   }

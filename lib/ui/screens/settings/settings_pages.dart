@@ -8,11 +8,8 @@ import '../../../core/platform.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/cover_ops.dart';
-import '../../../providers/track_ops.dart';
 import '../../../providers/equalizer_providers.dart';
 import '../../../providers/library_providers.dart';
-import '../../../providers/online_providers.dart';
-import '../../../services/online/enrichment_service.dart' show needsEnrichment;
 import '../../../providers/settings_providers.dart';
 import '../../widgets/cc_sheet.dart';
 import '../../widgets/confirm.dart';
@@ -31,7 +28,7 @@ import 'cleanup_tiles.dart';
 import 'advanced_section.dart';
 import 'backup_section.dart';
 import 'download_settings_tiles.dart';
-import 'enrich_complete_tile.dart';
+import 'enrich_library_tile.dart';
 import 'equalizer_screen.dart';
 import 'log_export_tile.dart';
 import 'report_issue_tile.dart';
@@ -294,12 +291,7 @@ List<SettingsGroup> _online(BuildContext context, WidgetRef ref) {
     SettingsGroup(
       title: l.settingsOnline,
       children: [
-        ListTile(
-          leading: const Icon(Icons.travel_explore),
-          title: Text(l.enrichLibrary),
-          onTap: () => _enrichLibrary(context, ref),
-        ),
-        const EnrichCompleteTile(),
+        const EnrichLibraryTile(),
         SwitchListTile(
           title: Text(l.autoEnrich),
           subtitle: Text(l.autoEnrichHint),
@@ -501,44 +493,6 @@ Future<void> _editDeviceName(BuildContext context, WidgetRef ref) async {
   ref
       .read(settingsProvider.notifier)
       .update((s) => s.copyWith(deviceName: name));
-}
-
-Future<void> _enrichLibrary(BuildContext context, WidgetRef ref) async {
-  final l = context.l10n;
-  // Only what still has something missing: the estimate is honest and
-  // tracks already complete are not asked about again.
-  final ids = (await ref.read(trackOpsProvider).all())
-      .where((t) => needsEnrichment(t))
-      .map((t) => t.id)
-      .toList();
-  if (!context.mounted) return;
-  if (ids.isEmpty) {
-    showMsg(context, l.enrichNothingToDo);
-    return;
-  }
-  final minutes = (ids.length * 3 / 60).ceil();
-  final ok = await showDialog<bool>(
-    context: context,
-    builder: (c) => AlertDialog(
-      title: Text(l.enrichConfirmTitle),
-      content: Text(l.enrichConfirmBody(ids.length, minutes)),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(c).pop(false),
-          child: Text(l.cancel),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.of(c).pop(true),
-          child: Text(l.apply),
-        ),
-      ],
-    ),
-  );
-  if (ok != true) return;
-  final started = ref.read(enrichJobProvider.notifier).start(ids);
-  if (!started && context.mounted) {
-    showMsg(context, l.enrichBusy);
-  }
 }
 
 Future<void> _clearCovers(BuildContext context, WidgetRef ref) async {

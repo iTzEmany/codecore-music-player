@@ -8,7 +8,6 @@ import 'package:codecore/providers/database_providers.dart';
 import 'package:codecore/providers/import_providers.dart';
 import 'package:codecore/providers/library_providers.dart';
 import 'package:codecore/providers/online_providers.dart';
-import 'package:codecore/services/online/enrichment_service.dart';
 import 'package:codecore/providers/second_opinion_providers.dart';
 import 'package:codecore/services/online/download_queue.dart';
 import 'package:codecore/providers/youtube_providers.dart';
@@ -180,7 +179,7 @@ void main() {
     c.read(_activity.notifier).set(const ActivityState([last], []));
     await pumpEventQueue();
     (c.read(enrichJobProvider.notifier) as _Job).set(const EnrichJobState(
-      result: BatchProgress(done: 3000, total: 3000, finished: true),
+      result: EnrichJobResult(done: 3000, total: 3000),
     ));
     c.read(_activity.notifier).set(const ActivityState([], []));
     await pumpEventQueue();
@@ -190,7 +189,7 @@ void main() {
     c.read(_activity.notifier).set(const ActivityState([last], []));
     await pumpEventQueue();
     (c.read(enrichJobProvider.notifier) as _Job).set(const EnrichJobState(
-      result: BatchProgress(done: 40, total: 3000, finished: true, cancelled: true),
+      result: EnrichJobResult(done: 40, total: 3000, cancelled: true),
     ));
     c.read(_activity.notifier).set(const ActivityState([], []));
     await pumpEventQueue();
@@ -212,13 +211,34 @@ void main() {
     c.read(_activity.notifier).set(const ActivityState([item], []));
     await pumpEventQueue();
     (c.read(enrichJobProvider.notifier) as _Job).set(const EnrichJobState(
-      result: BatchProgress(done: 2, total: 5, updated: 1, notFound: 1, finished: true),
-      failed: true,
+      result: EnrichJobResult(done: 2, total: 5, updated: 1, notFound: 1, failed: true),
     ));
     c.read(_activity.notifier).set(const ActivityState([], []));
     await pumpEventQueue();
     final line = c.read(activityLogProvider).entries.single;
     expect([line.failed, line.detail?['updated'], line.detail?['notFound']], [true, 1, 1]);
+  });
+
+  test('a batch refused by every source leaves a stopped line with the real count', () async {
+    final c = ProviderContainer(
+      overrides: [
+        databaseProvider.overrideWithValue(db),
+        activityProvider.overrideWith((ref) => ref.watch(_activity)),
+        enrichJobProvider.overrideWith(_Job.new),
+      ],
+    );
+    addTearDown(c.dispose);
+    c.listen(activityLogProvider, (_, _) {});
+    const item = ActivityItem(kind: ActivityKind.enrich, key: 'enrich', name: null, done: 1, total: 4);
+    c.read(_activity.notifier).set(const ActivityState([item], []));
+    await pumpEventQueue();
+    (c.read(enrichJobProvider.notifier) as _Job).set(const EnrichJobState(
+      result: EnrichJobResult(done: 1, total: 4, rateLimited: true),
+    ));
+    c.read(_activity.notifier).set(const ActivityState([], []));
+    await pumpEventQueue();
+    final line = c.read(activityLogProvider).entries.single;
+    expect([line.stopped, line.failed, line.item!.done, line.item!.total], [true, false, 1, 4]);
   });
 
   test('a scan that ends with an error leaves its line as failed', () async {

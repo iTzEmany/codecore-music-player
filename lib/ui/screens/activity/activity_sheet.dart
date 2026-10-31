@@ -208,8 +208,10 @@ class _ActivityRow extends ConsumerWidget {
                       style: theme.bodyLarge,
                     ),
                   if (a.running) ...[
-                    const SizedBox(height: 6),
-                    LinearProgressIndicator(value: a.progress),
+                    if (!a.waiting) ...[
+                      const SizedBox(height: 6),
+                      LinearProgressIndicator(value: a.progress),
+                    ],
                   ] else
                     Text(
                       a.failed ? l.offerFailed : l.offerDone,
@@ -276,7 +278,10 @@ String activityTitle(AppLocalizations l, ActivityItem a) => switch (a.kind) {
   ActivityKind.secondOpinion => l.activitySecondOpinion(a.done, a.total),
   ActivityKind.podcastRefresh => l.activityPodcastRefresh,
   ActivityKind.radio => l.activityRadio,
-  ActivityKind.enrichBackground => l.activityEnrichBackground(a.done, a.total),
+  ActivityKind.enrichBackground =>
+    a.waiting
+        ? l.activityEnrichWaiting
+        : l.activityEnrichBackground(a.done, a.total),
   ActivityKind.import =>
     a.paused
         ? l.activityImportPaused(a.name ?? '', a.done, a.total)

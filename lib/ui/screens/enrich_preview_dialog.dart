@@ -8,7 +8,6 @@ import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/online_providers.dart';
 import '../../services/online/enrichment_service.dart';
-import '../../services/online/http_client.dart';
 import '../widgets/credits_section.dart';
 import '../widgets/net_thumbnail.dart';
 
@@ -49,21 +48,14 @@ class _State extends ConsumerState<_EnrichPreviewDialog> {
   }
 
   Future<void> _load() async {
-    try {
-      final p = await ref.read(enrichmentServiceProvider).propose(widget.track);
-      if (!mounted) return;
-      setState(() {
-        _proposal = p;
-        _loading = false;
-        _preselect();
-      });
-    } on RateLimitedException {
-      if (!mounted) return;
-      setState(() {
-        _rateLimited = true;
-        _loading = false;
-      });
-    }
+    final p = await ref.read(enrichmentServiceProvider).propose(widget.track);
+    if (!mounted) return;
+    setState(() {
+      _rateLimited = p.limited;
+      _proposal = p;
+      _loading = false;
+      if (!p.limited) _preselect();
+    });
   }
 
   List<_Row> _rows(BuildContext context) {

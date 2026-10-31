@@ -21,19 +21,19 @@ class EnrichCompleterState {
   const EnrichCompleterState({
     this.running = false,
     this.paused = false,
-    this.manual = false,
+    this.waiting = false,
     this.complete = 0,
     this.total = 0,
   });
 
-  /// A run is going (also while it finishes the track in hand after a pause).
+  /// A run is going (also while it ends after a pause: the track in hand is aborted).
   final bool running;
 
   /// Stopped by hand until «Riprendi» (or the next start of the app).
   final bool paused;
 
-  /// Started with «Completa l'arricchimento» (no waiting for the user).
-  final bool manual;
+  /// The run waits for the user to leave the app alone, or for another activity.
+  final bool waiting;
 
   /// Tracks with nothing left to ask, and all of them; moves every 10 tracks.
   final int complete, total;
@@ -44,13 +44,13 @@ class EnrichCompleterState {
   EnrichCompleterState copyWith({
     bool? running,
     bool? paused,
-    bool? manual,
+    bool? waiting,
     int? complete,
     int? total,
   }) => EnrichCompleterState(
     running: running ?? this.running,
     paused: paused ?? this.paused,
-    manual: manual ?? this.manual,
+    waiting: waiting ?? this.waiting,
     complete: complete ?? this.complete,
     total: total ?? this.total,
   );
@@ -68,9 +68,9 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
 
   EnrichCompleter? _built;
 
-  // Built on the first run: it needs the whole enrichment service.
+  // Built on the first run: it needs the whole enrichment engine.
   EnrichCompleter get _completer => _built ??= EnrichCompleter(
-    service: ref.read(enrichmentServiceProvider),
+    engine: ref.read(enrichEngineProvider),
     repo: ref.read(creditsRepositoryProvider),
     parts: () => autoParts(ref.read(settingsProvider)),
     waitIdle: _waitIdle,
@@ -85,6 +85,9 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
     ),
     onProgress: (c, t) {
       if (ref.mounted) state = state.copyWith(complete: c, total: t);
+    },
+    onWaiting: (w) {
+      if (ref.mounted) state = state.copyWith(waiting: w);
     },
   );
 
@@ -123,14 +126,14 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
   /// A run until nothing is due. Does nothing while paused by hand or when
   /// everything is complete. Called during a run (a switch changed, a scan
   /// ended) it asks for another one when this ends.
-  Future<void> start({bool now = false}) {
-    if (state.paused && !now) return Future.value();
+  Future<void> start() {
+    if (state.paused) return Future.value();
     final current = _current;
     if (current != null) {
       _again = true;
       return current;
     }
-    return _current = _go(now).whenComplete(() {
+    return _current = _go().whenComplete(() {
       _current = null;
       if (_again && ref.mounted) {
         _again = false;
@@ -139,7 +142,7 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
     });
   }
 
-  Future<void> _go(bool now) async {
+  Future<void> _go() async {
     _halt = false;
     try {
       final c = await ref
@@ -149,14 +152,13 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
             DateTime.fromMillisecondsSinceEpoch(nowMs()),
           );
       if (_halt || !ref.mounted) return; // stopped while counting
-      if (!now && c.complete >= c.total) return;
+      if (c.complete >= c.total) return;
       state = EnrichCompleterState(
         running: true,
-        manual: now,
         complete: c.complete,
         total: c.total,
       );
-      final round = await _completer.run(now: now);
+      final round = await _completer.run();
       if (round.worked > 0 || round.failed) {
         await _log(round, stopped: _halt, failed: round.failed);
       }
@@ -168,28 +170,12 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
         AppLog.w('completion failed', e, st);
       }
     } finally {
-      if (ref.mounted) state = state.copyWith(running: false);
+      if (ref.mounted) state = state.copyWith(running: false, waiting: false);
     }
   }
 
-  /// «Completa l'arricchimento»: now, whatever the user is doing. A run in
-  /// progress turns into this one (its line goes to the Registro as one).
-  Future<void> runNow() async {
-    state = state.copyWith(paused: false);
-    if (state.running && !_halt && _completer.running) {
-      state = state.copyWith(manual: true);
-      _completer.run(now: true).ignore(); // joins the run; _go logs its errors
-      await _current;
-      return;
-    }
-    _halt = true; // a run still counting stops at its next look
-    await _current; // a stopped run is still ending
-    _again = false; // a queued restart would turn this into a plain run
-    await start(now: true);
-  }
-
-  /// Stops after the track in hand until [resume]. The Registro gets the
-  /// line of the round so far.
+  /// Stops the run until [resume]: the track in hand is aborted and the
+  /// bookmark stays before it. The Registro gets the line of the round so far.
   void pause() {
     if (!state.running) return;
     state = state.copyWith(paused: true);
@@ -200,12 +186,12 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
   Future<void> resume() async {
     if (!state.paused) return;
     await _current; // the run that was paused may still be ending
-    if (!state.paused) return; // «Interrompi» or «Completa» came first
+    if (!state.paused) return; // «Interrompi» came first
     state = state.copyWith(paused: false);
     unawaited(start());
   }
 
-  /// «Interrompi»: no track after the one in hand; the next start of the app
+  /// «Interrompi»: the track in hand is aborted; the next start of the app
   /// (or a change of the switches) carries on.
   void cancel() {
     state = state.copyWith(paused: false);
@@ -219,9 +205,6 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
     required bool stopped,
     required bool failed,
   }) {
-    Set<int> ids(Map<EnrichPart, List<int>> m) => {
-      for (final l in m.values) ...l,
-    };
     Map<String, List<int>> byPart(Map<EnrichPart, List<int>> m) => {
       for (final e in m.entries) e.key.name: e.value,
     };
@@ -237,10 +220,8 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
           kind: ActivityKind.enrichBackground,
           key: 'enrichBackground-${DateTime.now().microsecondsSinceEpoch}',
           name: null,
-          // Distinct tracks that got something, and tracks asked in vain
-          // for every part (one that got a part is not counted twice).
-          done: ids(round.updated).length,
-          total: ids(round.none).difference(ids(round.updated)).length,
+          done: round.updatedTracks,
+          total: round.notFoundTracks,
           running: false,
           failed: failed,
         ),

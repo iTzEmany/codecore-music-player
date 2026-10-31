@@ -7,7 +7,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/credits_providers.dart';
 import '../../../providers/online_providers.dart';
 import '../../../providers/settings_providers.dart';
-import '../../../services/online/enrichment_service.dart';
+import '../../../services/online/enrich_parts.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/credits_section.dart';
 import '../../widgets/show_msg.dart';
@@ -32,7 +32,7 @@ class _CreditsCardState extends ConsumerState<CreditsCard> {
     setState(() => _busy = true);
     var failed = false;
     try {
-      final out = await ref.read(enrichmentServiceProvider).completeOne(t.id, {
+      final out = await ref.read(enrichEngineProvider).completeOne(t.id, {
         EnrichPart.credits,
         EnrichPart.curio, // the switch is for the automatic search only
       }, force: true);

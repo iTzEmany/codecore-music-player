@@ -1166,10 +1166,10 @@ mobile_scanner — fase 24 — 2026-10-19
 - [x] 69a.4 Controlli di fase (misura sul Motorola, D-289) (e28cd28, 8aee0bb; misura: 1787 dovuti, giro con 35 brani nel Registro)
 
 ## Fase 69b — Un solo motore di arricchimento (`fase-69b-arricchimento-unico.md`)
-- [ ] 69b.1 Rete, regola unica e stato
-- [ ] 69b.2 Motore unico: resolver, copertine, engine, runner, commit per parte
-- [ ] 69b.3 Il manuale sul motore unico e via il vecchio
-- [ ] 69b.4 Controlli di fase (metriche, review Opus, misura sul Motorola)
+- [x] 69b.1 Rete, regola unica e stato
+- [x] 69b.2 Motore unico: resolver, copertine, engine, runner, commit per parte
+- [x] 69b.3 Il manuale sul motore unico e via il vecchio
+- [x] 69b.4 Controlli di fase (metriche, review Opus, misura sul Motorola: 1 brano al minuto per il limite Wikimedia da anonima; stima dei minuti rifatta a 40 s a brano)
 
 ## Fase 70 — Ponte e protocollo (`fase-70-ponte-jam-distanza.md`)
 - [ ] 70.1 `JamProtocol`

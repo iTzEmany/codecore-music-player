@@ -12,8 +12,8 @@ import 'credits.dart';
 import 'deezer_client.dart';
 import 'deezer_gw_client.dart';
 import 'deezer_models.dart';
-import 'enrich_parts.dart' as enrich_parts;
 import 'http_client.dart' show RateLimitedException;
+import 'metadata_resolver.dart';
 import 'musicbrainz_client.dart';
 
 /// What the credits sources said about one track. Never touches `tracks`.
@@ -52,8 +52,7 @@ class CreditsEnricher {
     required this.deezer,
     required this.gw,
     required this.musicBrainz,
-    required this.deezerHit,
-    required this.albumOf,
+    required this.resolver,
   });
 
   final TrackRepository tracks;
@@ -62,11 +61,11 @@ class CreditsEnricher {
   final DeezerGwClient? gw;
   final MusicBrainzClient? musicBrainz;
 
-  /// The Deezer track a track is (shared with the metadata part).
-  final Future<DeezerTrack?> Function(Track t, CancelToken? cancel) deezerHit;
+  /// The Deezer track and album of the metadata part, shared with this one.
+  final MetadataResolver resolver;
 
-  /// The Deezer album already fetched by the metadata part, if any.
-  final DeezerAlbum? Function(int? id) albumOf;
+  /// Some credit source can be asked now.
+  bool get canAsk => musicBrainz != null || (gw != null && !gw!.isPaused);
 
   /// Deezer id (given [known] by the metadata part, else looked up even with
   /// «Metadata from Deezer» off, and then nothing but credits comes of it:
@@ -110,7 +109,7 @@ class CreditsEnricher {
         hit = await source(
           'deezer',
           'deezer lookup',
-          () => deezerHit(t, cancel),
+          () => resolver.deezerHit(t, cancel),
         );
       }
     }
@@ -125,7 +124,7 @@ class CreditsEnricher {
         'deezer details',
         () => dz.trackDetails(
           found.id,
-          album: albumOf(found.album?.id),
+          album: resolver.albumOf(found.album?.id),
           cancel: cancel,
         ),
       );
@@ -194,24 +193,15 @@ class CreditsEnricher {
     );
   }
 
-  /// Whether [t]'s credits are worth asking for now (see [isDue]).
-  Future<bool> isDue(Track t, {bool force = false}) async {
-    if (force) return true;
-    return enrich_parts.isDue(
-      enrich_parts.EnrichPart.credits,
-      t,
-      await repo.enrichOf(t.id),
-      DateTime.fromMillisecondsSinceEpoch(nowMs()),
-      hasCredits: (await repo.creditsOf(t.id)).isNotEmpty,
-    );
-  }
-
   /// Writes `track_credits` and `track_enrich` only. Found → the none mark is
   /// cleared; valid and empty → marked now; any failure → left as it was.
-  Future<void> save(int trackId, CreditsPart? part) async {
+  /// [trackKnown]: the caller has just read the track row. [stored]: the
+  /// credits it has just read.
+  Future<void> save(int trackId, CreditsPart? part,
+      {bool trackKnown = false, List<TrackCreditRow>? stored}) async {
     if (part == null) return;
     // The track may have been deleted while the sources were asked (FK).
-    if (await tracks.getById(trackId) == null) {
+    if (!trackKnown && await tracks.getById(trackId) == null) {
       AppLog.i('credits: track $trackId is gone, nothing saved');
       return;
     }
@@ -219,7 +209,7 @@ class CreditsEnricher {
     if (list.isNotEmpty && !part.complete) {
       // A source was down: keep only what it gave in an earlier run.
       list = mergeCredits(list, [
-        for (final c in await repo.creditsOf(trackId))
+        for (final c in stored ?? await repo.creditsOf(trackId))
           if (part.failed.contains(c.source))
             TrackCredit(c.name, c.role, c.source),
       ]);

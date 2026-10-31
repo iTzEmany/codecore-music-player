@@ -1,12 +1,16 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
 
 import '../data/repositories/credits_repository.dart';
 import '../data/settings/settings_store.dart' show AppSettings;
+import '../services/online/cover_fetcher.dart';
+import '../services/online/credits_enricher.dart';
+import '../services/online/enrich_engine.dart';
+import '../services/online/enrich_runner.dart';
 import '../services/online/enrichment_service.dart';
+import '../services/online/metadata_resolver.dart';
 import '../services/online/http_client.dart';
 import '../services/online/itunes_client.dart';
 import '../services/online/lrclib_client.dart';
@@ -20,9 +24,9 @@ import '../services/online/deezer_gw_client.dart';
 import '../services/online/discogs_client.dart';
 import '../core/app_log.dart';
 import '../services/online/musicbrainz_client.dart';
+import '../services/online/request_budget.dart' show apiIdentified;
 import '../services/online/youtube_service.dart' show YtException, YtErrorKind;
 import '../services/online/quiet_enricher.dart';
-import '../services/share/track_meta.dart';
 import '../services/library/download_tagger.dart';
 import '../services/library/track_file_sync.dart';
 import '../services/tags/tag_writer.dart';
@@ -122,105 +126,229 @@ final curiosityServiceProvider = Provider(
   ),
 );
 
-final enrichmentServiceProvider = Provider<EnrichmentService>((ref) {
-  final web = ref.watch(webClientProvider);
-  return EnrichmentService(
-    db: ref.watch(databaseProvider),
-    tracks: ref.watch(trackRepositoryProvider),
-    covers: ref.watch(coverStoreProvider),
+/// One pause between online lookups for the whole enrichment.
+final enrichLimiterProvider = Provider((ref) => RateLimiter());
+
+final metadataResolverProvider = Provider(
+  (ref) => MetadataResolver(
     itunes: ref.watch(itunesClientProvider),
     deezer: ref.watch(deezerClientProvider),
     useDeezer: () => ref.read(settingsProvider).deezerMeta,
+  ),
+);
+
+final coverFetcherProvider = Provider(
+  (ref) => CoverFetcher(
+    covers: ref.watch(coverStoreProvider),
+    web: ref.watch(webClientProvider),
+    tracks: ref.watch(trackRepositoryProvider),
+    itunes: ref.watch(itunesClientProvider),
+    deezer: ref.watch(deezerClientProvider),
+    useDeezer: () => ref.read(settingsProvider).deezerMeta,
+    limiter: ref.watch(enrichLimiterProvider),
+  ),
+);
+
+final creditsEnricherProvider = Provider(
+  (ref) => CreditsEnricher(
+    tracks: ref.watch(trackRepositoryProvider),
+    repo: ref.watch(creditsRepositoryProvider),
+    deezer: ref.watch(deezerClientProvider),
     gw: ref.watch(deezerGwClientProvider),
     musicBrainz: ref.watch(musicBrainzClientProvider),
-    creditsRepo: ref.watch(creditsRepositoryProvider),
+    resolver: ref.watch(metadataResolverProvider),
+  ),
+);
+
+final enrichmentServiceProvider = Provider<EnrichmentService>((ref) {
+  return EnrichmentService(
+    db: ref.watch(databaseProvider),
+    tracks: ref.watch(trackRepositoryProvider),
+    resolver: ref.watch(metadataResolverProvider),
+    covers: ref.watch(coverFetcherProvider),
+    creditsEnricher: ref.watch(creditsEnricherProvider),
     useCredits: () => ref.read(settingsProvider).creditsDetails,
     lrclib: ref.watch(lrclibClientProvider),
     lyricsChain: ref.watch(lyricsChainProvider),
-    curiosities: ref.watch(curiosityServiceProvider),
     wikipedia: ref.watch(wikipediaClientProvider),
-    web: web,
     language: () => ref.read(settingsProvider).language,
+    limiter: ref.watch(enrichLimiterProvider),
   );
 });
 
-class EnrichJobState {
-  const EnrichJobState({
-    this.running = false,
-    this.progress,
-    this.result,
+final enrichEngineProvider = Provider<EnrichEngine>((ref) {
+  return EnrichEngine(
+    db: ref.watch(databaseProvider),
+    tracks: ref.watch(trackRepositoryProvider),
+    resolver: ref.watch(metadataResolverProvider),
+    covers: ref.watch(coverFetcherProvider),
+    chain: ref.watch(lyricsChainProvider),
+    credits: ref.watch(creditsEnricherProvider),
+    curiosities: ref.watch(curiosityServiceProvider),
+    language: () => ref.read(settingsProvider).language,
+    useCredits: () => ref.read(settingsProvider).creditsDetails,
+    limiter: ref.watch(enrichLimiterProvider),
+  );
+});
+
+/// What a manual enrichment job came to (or, while it runs, how far it is).
+/// The one place the Registro line and the final message are made from.
+class EnrichJobResult {
+  const EnrichJobResult({
+    this.done = 0,
+    this.total = 0,
+    this.updated = 0,
+    this.notFound = 0,
     this.failed = false,
+    this.cancelled = false,
+    this.rateLimited = false,
   });
 
-  final bool running;
-  final BatchProgress? progress;
+  final int done, total, updated, notFound;
 
-  /// Last finished job (shown once by the shell as a snackbar).
-  final BatchProgress? result;
-
-  /// The job stopped on an error: [result] holds the counts up to there.
+  /// The job stopped on an error, or because no source answered.
   final bool failed;
+  final bool cancelled, rateLimited;
+
+  /// The job left before its work was done.
+  bool get stopped => cancelled || rateLimited;
+
+  /// The `detail` of the Registro line; `updated` and `notFound` are always counts (int).
+  Map<String, Object?>? get logDetail => failed
+      ? {'updated': updated, 'notFound': notFound}
+      : stopped
+      ? const {'stopped': true}
+      : null;
 }
 
+class EnrichJobState {
+  const EnrichJobState({this.running = false, this.progress, this.result});
+
+  final bool running;
+  final EnrichJobResult? progress;
+
+  /// Last finished job (shown once by the shell as a snackbar).
+  final EnrichJobResult? result;
+}
+
+/// The parts a manual enrichment asks for (D-278): everything allowed, the
+/// credits only with «Credits and details». The automatic switches do not apply.
+Set<EnrichPart> manualParts(AppSettings s) => {
+  EnrichPart.meta,
+  EnrichPart.lyrics,
+  EnrichPart.synced,
+  EnrichPart.curio,
+  if (s.creditsDetails) EnrichPart.credits,
+};
+
+/// Rough minutes for [tracks]: 3 s each when identified (unmeasured, limiter only).
+// 40 s: measured on the phone (phase 69b.4), Wikimedia anonymous tier.
+int enrichMinutes(int tracks) => (tracks * (apiIdentified ? 3 : 40) / 60).ceil();
+
+/// Tracks with something due for a manual job, and how many are all (live).
+final manualDueCountProvider = StreamProvider.autoDispose<int>((ref) {
+  ref.watch(settingsProvider.select((s) => s.creditsDetails));
+  return ref
+      .watch(creditsRepositoryProvider)
+      .watchEnrichCounts(
+        manualParts(ref.read(settingsProvider)),
+        DateTime.now(),
+        mode: AskMode.retryNone,
+      )
+      .map((c) => c.total - c.complete);
+});
+
+enum EnrichStart { started, busy, nothing }
+
 class EnrichJobNotifier extends Notifier<EnrichJobState> {
-  CancelToken? _cancel;
+  EnrichRunner? _runner;
 
   @override
   EnrichJobState build() => const EnrichJobState();
 
-  /// Returns false when another job is already running.
-  bool start(
-    List<int> ids, {
-    bool includeLyrics = true,
-    bool includeCuriosities = false,
-    bool includeMetadata = true,
-    bool force = false,
-    void Function()? onFinished,
-  }) {
+  /// Asks the manual parts of [ids] again, «nothing» marks included. Returns
+  /// false when another job is already running.
+  bool start(List<int> ids, {void Function()? onFinished}) {
     if (state.running || ids.isEmpty) return false;
-    _cancel = CancelToken();
-    state = const EnrichJobState(running: true);
-    _run(ids, includeLyrics, includeCuriosities, includeMetadata, force, onFinished);
+    state = EnrichJobState(running: true, progress: EnrichJobResult(total: ids.length));
+    unawaited(_run(ids, onFinished));
     return true;
   }
 
-  Future<void> _run(
-    List<int> ids,
-    bool lyrics,
-    bool curiosities,
-    bool metadata,
-    bool force,
-    void Function()? onFinished,
-  ) async {
-    BatchProgress? last;
-    var failed = false;
-    try {
-      await for (final p
-          in ref
-              .read(enrichmentServiceProvider)
-              .enrichMany(
-                ids,
-                cancel: _cancel,
-                includeLyrics: lyrics,
-                includeCuriosities: curiosities,
-                includeMetadata: metadata,
-                force: force,
-              )) {
-        last = p;
-        state = EnrichJobState(running: !p.finished, progress: p);
-      }
-    } on Object catch (e, st) {
-      AppLog.e('enrichment job stopped by an error', e, st);
-      failed = true;
-    }
-    state = EnrichJobState(
-      result: last ?? const BatchProgress(finished: true),
-      failed: failed,
-    );
-    if (!failed && last?.cancelled != true) onFinished?.call();
+  /// [start] on the tracks with a manual part due: the whole library, or only
+  /// those [among] the given ids («Arricchisci album»).
+  Future<EnrichStart> startDue({Iterable<int>? among}) async {
+    if (state.running) return EnrichStart.busy;
+    final ids = await ref
+        .read(creditsRepositoryProvider)
+        .dueTrackIds(
+          manualParts(ref.read(settingsProvider)),
+          DateTime.now(),
+          limit: 0x7fffffff,
+          mode: AskMode.retryNone,
+          among: among,
+        );
+    if (ids.isEmpty) return EnrichStart.nothing;
+    return start(ids) ? EnrichStart.started : EnrichStart.busy;
   }
 
-  void cancel() => _cancel?.cancel();
+  Future<void> _run(List<int> ids, void Function()? onFinished) async {
+    EnrichRunner? runner;
+    EnrichRound? round;
+    var failed = false;
+    try {
+      runner = _runner = EnrichRunner(
+        engine: ref.read(enrichEngineProvider),
+        ids: FixedIds(ids),
+        parts: () => manualParts(ref.read(settingsProvider)),
+        waitIdle: () async {}, // a manual job never waits for the user
+        mode: AskMode.retryNone,
+        onProgress: (done, total) {
+          if (ref.mounted) state = EnrichJobState(running: true, progress: EnrichJobResult(done: done, total: total));
+        },
+      );
+      round = await runner.run();
+      // Offline: nothing answered, even if fewer than the 5 tracks of a stop.
+      failed = round.failed || (round.worked == 0 && round.endedSilent);
+    } on Object catch (e, st) {
+      if (e is Error) {
+        AppLog.e('enrichment job stopped by an error', e, st);
+      } else {
+        AppLog.w('enrichment job stopped by an error', e, st);
+      }
+      failed = true;
+    } finally {
+      _runner = null;
+      if (ref.mounted) {
+        final cancelled = runner?.cancelled ?? false;
+        final refused = round?.allRefused ?? false;
+        state = EnrichJobState(
+          result: EnrichJobResult(
+            done: round?.processed ?? 0,
+            total: ids.length,
+            updated: round?.updatedTracks ?? 0,
+            notFound: round?.notFoundTracks ?? 0,
+            failed: failed,
+            cancelled: cancelled,
+            rateLimited: refused || ((round?.limited ?? false) && round!.worked == 0),
+          ),
+        );
+        if (!failed && !cancelled) {
+          try {
+            onFinished?.call();
+          } on Object catch (e, st) {
+            if (e is Error) {
+              AppLog.e('enrichment job: onFinished failed', e, st);
+            } else {
+              AppLog.w('enrichment job: onFinished failed', e, st);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  void cancel() => _runner?.cancel();
 
   void clearResult() => state = const EnrichJobState();
 }
@@ -245,9 +373,9 @@ final downloadEnricherProvider = Provider<QuietEnricher>((ref) {
     onDone: (id) => ref.read(downloadTaggerProvider).tag(id),
     enabled: () => autoParts(ref.read(settingsProvider)).isNotEmpty,
     enrich: (id) async {
-      final service = ref.read(enrichmentServiceProvider);
-      await service.limiter.wait();
-      await service.completeOne(id, autoParts(ref.read(settingsProvider)));
+      final engine = ref.read(enrichEngineProvider);
+      await engine.limiter.wait();
+      await engine.completeOne(id, autoParts(ref.read(settingsProvider)));
     },
   );
   ref.onDispose(enricher.dispose);
@@ -298,26 +426,29 @@ void afterDownload(Ref ref, int trackId) {
       unawaited(ref.read(downloadTaggerProvider).tag(trackId));
     }
   } on Object catch (e, st) {
-    AppLog.w('afterDownload failed for track $trackId', e, st);
+    if (e is Error) {
+      AppLog.e('afterDownload failed for track $trackId', e, st);
+    } else {
+      AppLog.w('afterDownload failed for track $trackId', e, st);
+    }
   }
 }
 
-/// A received song is ready. With an ISRC and Deezer metadata on, it joins the
-/// download enricher (whose `onDone` writes the tags); otherwise tags go now.
+/// A received song is ready: like a download, it is enriched when a part is
+/// on (its `onDone` writes the tags), otherwise tags go now.
 /// [read] is `ref.read` of a Ref or a WidgetRef.
-void afterReceive(
-  T Function<T>(ProviderListenable<T>) read,
-  int trackId,
-  TrackMeta? meta,
-) {
+void afterReceive(T Function<T>(ProviderListenable<T>) read, int trackId) {
   try {
-    final s = read(settingsProvider);
-    if (meta?.isrc != null && s.deezerMeta && s.autoEnrich) {
+    if (autoParts(read(settingsProvider)).isNotEmpty) {
       read(downloadEnricherProvider).add(trackId);
     } else {
       unawaited(read(downloadTaggerProvider).tag(trackId));
     }
   } on Object catch (e, st) {
-    AppLog.w('afterReceive failed for track $trackId', e, st);
+    if (e is Error) {
+      AppLog.e('afterReceive failed for track $trackId', e, st);
+    } else {
+      AppLog.w('afterReceive failed for track $trackId', e, st);
+    }
   }
 }

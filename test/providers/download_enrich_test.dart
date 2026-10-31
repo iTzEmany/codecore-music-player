@@ -42,7 +42,7 @@ void main() {
     final c = ProviderContainer(
       overrides: [
         settingsProvider.overrideWith(() => _Settings(s)),
-        enrichmentServiceProvider.overrideWithValue(r.svc),
+        enrichEngineProvider.overrideWithValue(r.engine),
         downloadTaggerProvider.overrideWithValue(tagger),
       ],
     );
@@ -98,5 +98,22 @@ void main() {
     expect(queued, isFalse);
     expect(r.web.urls, isEmpty);
     expect(r.chain.calls + r.finder.calls, 0);
+  });
+
+  test('a received song goes to the enricher when a part is on, else to the tagger', () async {
+    for (final (s, queued) in [(AppSettings(autoLyrics: true), true), (AppSettings(), false)]) {
+      final id = await r.add(path: '/r$queued.mp3');
+      final c = ProviderContainer(
+        overrides: [
+          settingsProvider.overrideWith(() => _Settings(s)),
+          enrichEngineProvider.overrideWithValue(r.engine),
+          downloadTaggerProvider.overrideWithValue(tagger),
+        ],
+      );
+      addTearDown(c.dispose);
+      afterReceive(c.read, id);
+      expect(c.read(downloadEnricherProvider).pending.isNotEmpty, queued);
+      expect(tagger.tagged.contains(id), !queued);
+    }
   });
 }

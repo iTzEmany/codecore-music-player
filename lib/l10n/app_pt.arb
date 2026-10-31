@@ -258,18 +258,6 @@
   "fieldCuriosity": "Curiosidades",
   "enrichAlbum": "Enriquecer álbum",
   "enrichLibrary": "Enriquecer toda a biblioteca",
-  "enrichConfirmTitle": "Enriquecer a biblioteca?",
-  "enrichConfirmBody": "{count} faixas, cerca de {minutes} minutos. Só os campos vazios são preenchidos.",
-  "@enrichConfirmBody": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
   "enrichRunning": "Enriquecimento {done}/{total}",
   "@enrichRunning": {
     "placeholders": {
@@ -3233,20 +3221,6 @@
   },
   "activityStopped": "Parada",
   "activityScanEnded": "Análise",
-  "enrichCompleteTitle": "Completar o enriquecimento",
-  "enrichCompleteHint": "Procura já o que falta nas músicas, mesmo enquanto usas a app",
-  "enrichCompleteProgress": "{done} de {total} músicas completas",
-  "@enrichCompleteProgress": {
-    "placeholders": {
-      "done": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "enrichCompleteStop": "Interromper",
   "enrichRoundTitle": "Ronda de enriquecimento",
   "enrichRoundUpdated": "Atualizados",
   "enrichRoundNone": "Sem resultado",
@@ -3386,5 +3360,19 @@
     }
   },
   "logEnrichStopped": "Conclusão parada: nenhuma fonte responde",
-  "logEnrichFailed": "Conclusão falhou: um erro a interrompeu"
+  "logEnrichFailed": "Conclusão falhou: um erro a interrompeu",
+  "enrichLibraryDue": "{count} faixas por completar, cerca de {minutes} minutos",
+  "@enrichLibraryDue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichLibraryComplete": "Biblioteca completa",
+  "enrichLibraryStop": "Interromper",
+  "activityEnrichWaiting": "A completar: em espera"
 }
