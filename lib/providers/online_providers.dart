@@ -24,6 +24,7 @@ import '../services/online/deezer_gw_client.dart';
 import '../services/online/discogs_client.dart';
 import '../core/app_log.dart';
 import '../services/online/musicbrainz_client.dart';
+import '../services/online/request_budget.dart' show apiIdentified;
 import '../services/online/youtube_service.dart' show YtException, YtErrorKind;
 import '../services/online/quiet_enricher.dart';
 import '../services/library/download_tagger.dart';
@@ -240,8 +241,9 @@ Set<EnrichPart> manualParts(AppSettings s) => {
   if (s.creditsDetails) EnrichPart.credits,
 };
 
-/// Minutes the limiter alone needs for [tracks] (about 3 s each); a rough guess.
-int enrichMinutes(int tracks) => (tracks * 3 / 60).ceil();
+/// Rough minutes for [tracks]: 3 s each when identified (unmeasured, limiter only).
+// 40 s: measured on the phone (phase 69b.4), Wikimedia anonymous tier.
+int enrichMinutes(int tracks) => (tracks * (apiIdentified ? 3 : 40) / 60).ceil();
 
 /// Tracks with something due for a manual job, and how many are all (live).
 final manualDueCountProvider = StreamProvider.autoDispose<int>((ref) {
