@@ -227,7 +227,7 @@ Si tolgono `enrichMany`, `BatchProgress`, `needsEnrichment` e `CreditsEnricher.i
   - **Stima:** il comando prometteva «1871 brani, circa 94 minuti» (3 s a brano). Il ritmo misurato è di 10 brani in 6,5 minuti, circa 40 s a brano, quindi la stima era sbagliata di 13 volte. Ora `enrichMinutes` conta 40 s a brano da anonima e 3 s da identificata (non misurato).
 
 ## Rimandati dalla 69b
-- Ritmo: con un contatto in `kApiContact` Wikimedia concede 150 richieste al minuto invece di 8, e le curiosità smettono di frenare tutto. È una scelta dell'utente, perché il contatto finisce nello User-Agent di ogni richiesta.
+- Ritmo: con un contatto in `kApiContact` Wikimedia concede 150 richieste al minuto invece di 8. **Fatto il 31/10 (D-298)**, con l'indirizzo del repo; il ritmo nuovo è da misurare.
 - `test/jam/jam_gate_test.dart` «concurrent writes» fallisce su Windows anche su master: confronta percorsi interi con nomi di file. Il check non è obbligatorio.
 - `propose` chiede ancora testi, Wikipedia e crediti fuori dal motore, con la regola «crediti dovuti» duplicata: va costruito su una lettura del motore che non prenota.
 - Un lavoro manuale salta in silenzio un brano che il background tiene in lavorazione (finestra di un solo brano): contarlo a parte o riprovarlo alla fine.

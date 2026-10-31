@@ -8,7 +8,8 @@ Il refactor «arricchimento-unico» è chiuso: 69a (PR #72) e 69b (PR #73). Si t
 - Manuale e background usano lo stesso runner. In Impostazioni c'è un solo comando, «Arricchisci tutta la libreria», e nel pannello una sola barra.
 - **Misura sul Motorola (31/10):** circa 1 brano al minuto, per il limite Wikimedia da anonima. La stima dei minuti ora conta 40 s a brano.
 - **Rimandati** (elenco in `docs/fase-69b-arricchimento-unico.md`): `propose` fuori dal motore, cache del motore nel completer, `completeOne(AskMode)`, il conteggio in `retryNone` che arriva di rado a «Libreria completa».
-- **Scelte tue:** un contatto in `kApiContact` (finisce nello User-Agent) porterebbe Wikimedia da 8 a 150 richieste al minuto; e se «Libreria completa» debba contare in `due` invece che in `retryNone`.
+- **Contatto nello User-Agent** (D-298): dal 31/10 è l'indirizzo del repo, e Wikimedia concede 150 richieste al minuto invece di 8. Il ritmo nuovo non è misurato: la stima ora usa 3 s a brano, la cifra di prima del 69b.4.
+- **Scelta tua:** se «Libreria completa» debba contare in `due` invece che in `retryNone`.
 
 ## Fase 69 (chiusa, PR #67)
 La fase 69 è nel codice (PR #67). Comprende i rilievi della prova 68.3 (69.1…69.3) e i mattoni della Jam a distanza:
