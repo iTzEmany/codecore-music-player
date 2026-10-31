@@ -414,7 +414,11 @@ void afterDownload(Ref ref, int trackId) {
       unawaited(ref.read(downloadTaggerProvider).tag(trackId));
     }
   } on Object catch (e, st) {
-    AppLog.w('afterDownload failed for track $trackId', e, st);
+    if (e is Error) {
+      AppLog.e('afterDownload failed for track $trackId', e, st);
+    } else {
+      AppLog.w('afterDownload failed for track $trackId', e, st);
+    }
   }
 }
 
@@ -429,6 +433,10 @@ void afterReceive(T Function<T>(ProviderListenable<T>) read, int trackId) {
       unawaited(read(downloadTaggerProvider).tag(trackId));
     }
   } on Object catch (e, st) {
-    AppLog.w('afterReceive failed for track $trackId', e, st);
+    if (e is Error) {
+      AppLog.e('afterReceive failed for track $trackId', e, st);
+    } else {
+      AppLog.w('afterReceive failed for track $trackId', e, st);
+    }
   }
 }
