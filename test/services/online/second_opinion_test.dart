@@ -182,6 +182,34 @@ void main() {
     expect(got.enrichStatus, 1);
   });
 
+  test('a confirmation that writes nothing leaves the status as it was', () async {
+    final t = await add(
+      album: 'Viva la Vida or Death and All His Friends',
+      year: 2008,
+      genre: 'Rock',
+      lyrics: 'la',
+      trackNumber: 4,
+      hasCover: true,
+    );
+    final out = await opinion(_Client([_hit()])).check(t);
+    expect(out.kind, SecondOpinionKind.confirmed);
+    expect(out.written, isEmpty);
+    expect((await repo.getById(t.id))!.enrichStatus, 2);
+  });
+
+  test('a cover alone written takes the status from 2 to 1', () async {
+    final t = await add(
+      album: 'Viva la Vida or Death and All His Friends',
+      year: 2008,
+      genre: 'Rock',
+      lyrics: 'la',
+      trackNumber: 4,
+    );
+    final out = await opinion(_Client([_hit()])).check(t);
+    expect(out.written, {EnrichField.cover});
+    expect((await repo.getById(t.id))!.enrichStatus, 1);
+  });
+
   test('a length 4 s away is not the same recording', () async {
     final t = await add();
     final out = await opinion(_Client([_hit(duration: const Duration(milliseconds: 248000))])).check(t);

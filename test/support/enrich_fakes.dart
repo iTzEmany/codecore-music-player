@@ -18,7 +18,7 @@ import 'package:codecore/services/online/lyrics_chain.dart';
 import 'package:codecore/services/online/musicbrainz_client.dart';
 import 'package:codecore/services/online/wikipedia_client.dart';
 import 'package:dio/dio.dart';
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' show ApplyInterceptor, QueryInterceptor, Value;
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 
@@ -30,6 +30,7 @@ class EnrichWeb implements WebClient {
   bool deezerDown = false;
   bool deezerLimited = false;
   bool musicBrainzLimited = false;
+  bool itunesGenre = true; // false: the iTunes hit has no genre
   bool coverDown = false; // network error
   bool coverMissing = false; // 404
 
@@ -70,7 +71,7 @@ class EnrichWeb implements WebClient {
             'artistName': 'Band',
             'collectionName': 'New Album',
             'releaseDate': '2019-01-01',
-            'primaryGenreName': 'Rock',
+            if (itunesGenre) 'primaryGenreName': 'Rock',
             'trackNumber': 2,
             'artworkUrl100': 'https://x/100x100bb.jpg',
           },
@@ -248,9 +249,13 @@ class FakeFinder implements CuriosityFinder {
 class EnrichRig {
   EnrichRig._(this.tmp);
 
-  factory EnrichRig() {
+  /// [interceptor] sees every query of the database (e.g. to count reads).
+  factory EnrichRig({QueryInterceptor? interceptor}) {
     final r = EnrichRig._(Directory.systemTemp.createTempSync('enrich_rig'));
-    r.db = AppDatabase(NativeDatabase.memory());
+    final executor = NativeDatabase.memory();
+    r.db = AppDatabase(
+      interceptor == null ? executor : executor.interceptWith(interceptor),
+    );
     r.repo = TrackRepository(r.db);
     r.credits = CreditsRepository(r.db);
     r.web = EnrichWeb();

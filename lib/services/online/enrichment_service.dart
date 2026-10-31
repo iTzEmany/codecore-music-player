@@ -17,6 +17,7 @@ import 'deezer_gw_client.dart';
 import 'deezer_match.dart';
 import 'deezer_models.dart';
 import 'enrich_parts.dart';
+import 'enrich_writer.dart';
 import 'http_client.dart';
 import 'itunes_client.dart';
 import 'lrclib_client.dart';
@@ -26,19 +27,7 @@ import 'query_cleaner.dart';
 import 'wikipedia_client.dart';
 
 export 'credits_enricher.dart' show CreditsPart;
-export 'enrich_parts.dart' show EnrichPart, PartOutcome;
-
-enum EnrichField {
-  title,
-  artist,
-  album,
-  year,
-  genre,
-  trackNumber,
-  cover,
-  lyrics,
-  curiosity
-}
+export 'enrich_parts.dart' show AskMode, EnrichField, EnrichPart, PartOutcome;
 
 class EnrichmentProposal {
   const EnrichmentProposal({
@@ -136,7 +125,7 @@ class EnrichGather {
   final _marks = <EnrichPart, int?>{}; // now = searched with nothing, null = found
   _Meta? _meta;
   bool _metaAsked = false;
-  bool _force = false;
+  AskMode _mode = AskMode.due;
   String? _plain, _synced;
   CreditsPart? _credits;
   CuriosityLookup? _curio;
@@ -216,6 +205,7 @@ class EnrichmentService {
   final WebClient web;
   final String Function() language;
   final RateLimiter _limiter;
+  late final _writer = EnrichWriter(db);
 
   /// The pause between online lookups, shared with the second opinion.
   RateLimiter get limiter => _limiter;
@@ -376,22 +366,24 @@ class EnrichmentService {
     bool force = false,
     CancelToken? cancel,
   }) async {
-    final g = await gather(trackId, parts, force: force, cancel: cancel);
+    final g = await gather(
+      trackId,
+      parts,
+      mode: force ? AskMode.force : AskMode.due,
+      cancel: cancel,
+    );
     return (await commit([g])).single;
   }
 
   /// The reading half of [completeOne]: asks the sources and writes nothing
   /// to the database (the cover file is the only thing saved). A part is asked
-  /// for only when empty and [isDue]; [force] also asks with a recent
-  /// «searched, nothing» mark. Metadata and lyrics are asked side by side,
-  /// then credits, then curiosities. [ignoreMarks] asks again for the parts
-  /// marked «nothing» recently, but only if they are still empty (unlike
-  /// [force]). The caller sets the pace.
+  /// for only when empty and [isDue] under [mode] (see [AskMode]). Metadata
+  /// and lyrics are asked side by side, then credits, then curiosities. The
+  /// caller sets the pace.
   Future<EnrichGather> gather(
     int trackId,
     Set<EnrichPart> parts, {
-    bool force = false,
-    bool ignoreMarks = false,
+    AskMode mode = AskMode.due,
     CancelToken? cancel,
   }) async {
     final g = EnrichGather._(trackId, {
@@ -401,23 +393,14 @@ class EnrichmentService {
     final t = await tracks.getById(trackId);
     if (t == null) return g;
     g._track = t;
-    g._force = force;
-    var enrich = await (db.select(
+    g._mode = mode;
+    final enrich = await (db.select(
       db.trackEnrich,
     )..where((e) => e.trackId.equals(trackId))).getSingleOrNull();
-    if (ignoreMarks) {
-      enrich = enrich?.copyWith(
-        metaNoneAt: const Value(null),
-        lyricsNoneAt: const Value(null),
-        syncedNoneAt: const Value(null),
-        curioNoneAt: const Value(null),
-        creditsNoneAt: const Value(null),
-      );
-    }
     final now = g._now = nowMs();
     final at = DateTime.fromMillisecondsSinceEpoch(now);
     bool due(EnrichPart p) =>
-        parts.contains(p) && isDue(p, t, enrich, at, force: force);
+        parts.contains(p) && isDue(p, t, enrich, at, mode: mode);
     final doMeta = due(EnrichPart.meta);
     final doLyrics = due(EnrichPart.lyrics);
     final doSynced = due(EnrichPart.synced);
@@ -426,12 +409,13 @@ class EnrichmentService {
         _creditsOn &&
         parts.contains(EnrichPart.credits) &&
         (musicBrainz != null || (gwc != null && !gwc.isPaused)) &&
-        (force ||
+        (mode == AskMode.force ||
             isDue(
               EnrichPart.credits,
               t,
               enrich,
               at,
+              mode: mode,
               hasCredits: (await creditsRepo!.creditsOf(trackId)).isNotEmpty,
             ));
     final doCurio = curiosities != null && due(EnrichPart.curio);
@@ -541,7 +525,7 @@ class EnrichmentService {
     final url = metaAsked ? meta?.match.artworkUrl : null;
     // Never over a hand-made cover (cover_source > 0) or an existing one.
     if (url != null && !t.hasCover && t.coverSource == 0) {
-      final album = _fillable(t).contains(EnrichField.album)
+      final album = fillableFields(t).contains(EnrichField.album)
           ? meta!.match.album
           : null;
       final key = _albumKeyOf(t, null, album);
@@ -600,7 +584,7 @@ class EnrichmentService {
       out.updateAll((_, _) => PartOutcome.skipped); // nothing was saved
       return;
     }
-    final fields = _fillable(f);
+    final fields = fillableFields(f);
     final at = DateTime.fromMillisecondsSinceEpoch(g._now);
     // A part the row no longer needs (filled meanwhile by another track of the
     // album, the download enricher or a refresh) is left alone: not «found»,
@@ -609,7 +593,7 @@ class EnrichmentService {
       db.trackEnrich,
     )..where((e) => e.trackId.equals(trackId))).getSingleOrNull();
     final byUser = enrichRow?.lyricsByUser ?? false;
-    final metaEmpty = isDue(EnrichPart.meta, f, enrichRow, at, force: true);
+    final metaEmpty = isDue(EnrichPart.meta, f, enrichRow, at, mode: AskMode.force);
     void leave(EnrichPart p) {
       if (out.containsKey(p)) out[p] = PartOutcome.skipped;
       marks.remove(p);
@@ -660,12 +644,7 @@ class EnrichmentService {
           lyrics: LyricsResult(plain: plain, synced: synced),
         ),
         fields,
-      )).$2;
-    } else if (g._metaAsked && !coverPending && !metaLeft) {
-      // Like enrichMany: nothing found for the track → status 2.
-      await (db.update(db.tracks)..where((r) => r.id.equals(trackId))).write(
-        const TracksCompanion(enrichStatus: Value(2)),
-      );
+      )).key;
     }
     // Only if the album is still the one the file was saved for.
     final coverKey = g._coverKey;
@@ -683,22 +662,17 @@ class EnrichmentService {
       } else {
         out[EnrichPart.meta] = saved ? PartOutcome.found : PartOutcome.failed;
       }
-      if (saved) {
-        marks[EnrichPart.meta] = null;
-        await (db.update(db.tracks)..where((r) => r.id.equals(trackId))).write(
-          const TracksCompanion(enrichStatus: Value(1)),
-        );
-      }
+      if (saved) marks[EnrichPart.meta] = null;
     }
     if (g._credits != null) {
-      if (!g._force && (await creditsRepo!.creditsOf(trackId)).isNotEmpty) {
+      if (g._mode != AskMode.force && (await creditsRepo!.creditsOf(trackId)).isNotEmpty) {
         leave(EnrichPart.credits);
       } else {
         await _credits!.save(trackId, g._credits);
       }
     }
     final lookup = g._curio;
-    if (lookup != null && !g._force && f.curiosities != null) {
+    if (lookup != null && g._mode != AskMode.force && f.curiosities != null) {
       leave(EnrichPart.curio);
     } else if (lookup != null &&
         (await curiosities!.save(trackId, lookup)).failed) {
@@ -719,16 +693,11 @@ class EnrichmentService {
           .into(db.trackEnrich)
           .insert(row, onConflict: DoUpdate((_) => row));
     }
+    final status = statusAfter(EnrichStatus.fromCode(f.enrichStatus), out);
+    if (status != null && status.code != f.enrichStatus) {
+      await _writer.writeStatus(trackId, status);
+    }
   }
-
-  /// The fields [completeOne] may fill on [t]: the empty ones.
-  Set<EnrichField> _fillable(Track t) => {
-    if (t.album == null && !t.userEdited) EnrichField.album,
-    if (t.year == null) EnrichField.year,
-    if (t.genre == null) EnrichField.genre,
-    if (t.trackNumber == null) EnrichField.trackNumber,
-    EnrichField.lyrics,
-  };
 
   /// One source of [completeOne]: its answer, or `failed` (logged) when it
   /// threw, timed out or was refused. A cancellation escapes.
@@ -772,29 +741,48 @@ class EnrichmentService {
   }
 
   /// Writes only [fields]; `userEdited` tracks keep title/artist/album.
+  /// True when the proposal had something (not that a field changed).
   Future<bool> apply(EnrichmentProposal p, Set<EnrichField> fields,
+          {CancelToken? cancel, bool replaceCover = false}) async =>
+      (await _apply(p, fields, cancel: cancel, replaceCover: replaceCover))
+          .found;
+
+  /// [apply] that also says what happened: `wrote`: a field or the cover was
+  /// written (status `found` written with it); `coverFailed`: the cover
+  /// download failed, so the answer is incomplete.
+  Future<({bool found, bool wrote, bool coverFailed})> _apply(
+      EnrichmentProposal p, Set<EnrichField> fields,
       {CancelToken? cancel, bool replaceCover = false}) async {
     final t = await tracks.getById(p.track.id) ?? p.track;
     final f = {...fields};
     if (t.userEdited) {
       f.removeAll({EnrichField.title, EnrichField.artist, EnrichField.album});
     }
-    var (found, key) = await _writeFields(t, p, f);
+    final w = await _writeFields(t, p, f);
+    var found = w.found, wrote = w.wrote, coverFailed = false;
+    if (w.wrote) await _writer.writeStatus(t.id, EnrichStatus.found);
     if (f.contains(EnrichField.cover) && p.coverUrl != null) {
       try {
-        found = await _applyCover(t.id, key, p.coverUrl!, replaceCover, cancel) ||
-            found;
+        final saved =
+            await _applyCover(t.id, w.key, p.coverUrl!, replaceCover, cancel);
+        found = saved || found;
+        if (saved && !w.wrote) {
+          wrote = true;
+          await _writer.writeStatus(t.id, EnrichStatus.found);
+        }
       } on DioException catch (e, st) {
         if (CancelToken.isCancel(e)) rethrow;
+        coverFailed = true;
         AppLog.w('apply: cover of track ${t.id} failed', e, st);
       }
     }
-    return found;
+    return (found: found, wrote: wrote, coverFailed: coverFailed);
   }
 
   /// The `tracks` row of [apply] (and of [completeOne]) for [f], without the
-  /// cover. Returns whether something was found and the album key.
-  Future<(bool, String)> _writeFields(
+  /// cover or the status. `found`: something was proposed; `wrote`: a field
+  /// was written. Also the album key.
+  Future<({bool found, bool wrote, String key})> _writeFields(
       Track t, EnrichmentProposal p, Set<EnrichField> f) async {
     final m = p.meta;
     final title = f.contains(EnrichField.title) ? m?.title : null;
@@ -803,44 +791,39 @@ class EnrichmentService {
     final key = _albumKeyOf(t, artist, album);
     final found = m != null || (p.lyrics != null && !p.lyrics!.isEmpty) ||
         p.curiosity != null;
+    final year = f.contains(EnrichField.year) ? m?.year : null;
+    final genre = f.contains(EnrichField.genre) ? m?.genre : null;
+    final disc = f.contains(EnrichField.trackNumber) && t.discNumber == null
+        ? p.disc
+        : null;
+    final isrc = t.isrc == null ? p.isrc : null;
+    final number = f.contains(EnrichField.trackNumber) ? m?.trackNumber : null;
+    final plain = f.contains(EnrichField.lyrics) ? p.lyrics?.plain : null;
+    final synced = f.contains(EnrichField.lyrics) ? p.lyrics?.synced : null;
+    final curiosity = f.contains(EnrichField.curiosity) && p.curiosity != null
+        ? '${p.curiosity!.text}\n${p.curiosity!.source}'
+        : null;
+    Value<T> opt<T>(T? v) => v == null ? const Value.absent() : Value(v);
     await (db.update(db.tracks)..where((r) => r.id.equals(t.id))).write(
       TracksCompanion(
-        title: title == null ? const Value.absent() : Value(title),
-        artist: artist == null ? const Value.absent() : Value(artist),
-        album: album == null ? const Value.absent() : Value(album),
+        title: opt(title),
+        artist: opt(artist),
+        album: opt(album),
         albumKey: Value(key),
-        year: f.contains(EnrichField.year) && m?.year != null
-            ? Value(m!.year)
-            : const Value.absent(),
-        genre: f.contains(EnrichField.genre) && m?.genre != null
-            ? Value(m!.genre)
-            : const Value.absent(),
-        discNumber: f.contains(EnrichField.trackNumber) &&
-                p.disc != null &&
-                t.discNumber == null
-            ? Value(p.disc)
-            : const Value.absent(),
-        isrc: p.isrc != null && t.isrc == null
-            ? Value(p.isrc)
-            : const Value.absent(),
-        trackNumber: f.contains(EnrichField.trackNumber) && m?.trackNumber != null
-            ? Value(m!.trackNumber)
-            : const Value.absent(),
-        lyricsPlain: f.contains(EnrichField.lyrics) && p.lyrics?.plain != null
-            ? Value(p.lyrics!.plain)
-            : const Value.absent(),
-        lyricsSynced: f.contains(EnrichField.lyrics) && p.lyrics?.synced != null
-            ? Value(p.lyrics!.synced)
-            : const Value.absent(),
-        curiosities:
-            f.contains(EnrichField.curiosity) && p.curiosity != null
-                ? Value('${p.curiosity!.text}\n${p.curiosity!.source}')
-                : const Value.absent(),
-        enrichStatus: Value(found ? 1 : 2),
+        year: opt(year),
+        genre: opt(genre),
+        discNumber: opt(disc),
+        isrc: opt(isrc),
+        trackNumber: opt(number),
+        lyricsPlain: opt(plain),
+        lyricsSynced: opt(synced),
+        curiosities: opt(curiosity),
       ),
     );
     await tracks.settleMovedCover(t, key);
-    return (found, key);
+    final wrote = [title, artist, album, year, genre, disc, isrc, number, plain, synced, curiosity]
+        .any((v) => v != null);
+    return (found: found, wrote: wrote, key: key);
   }
 
   /// The album key of [t] once [artist] and [album] (when not null) are written.
@@ -976,12 +959,18 @@ class EnrichmentService {
           if (t.lyricsPlain == null && t.lyricsSynced == null) EnrichField.lyrics,
           if (t.curiosities == null) EnrichField.curiosity,
         };
-        final found = prop.isEmpty ? false : await apply(prop, fields, cancel: cancel);
-        if (prop.isEmpty) {
-          await (db.update(db.tracks)..where((r) => r.id.equals(t.id)))
-              .write(const TracksCompanion(enrichStatus: Value(2)));
+        final r = prop.isEmpty
+            ? (found: false, wrote: false, coverFailed: false)
+            : await _apply(prop, fields, cancel: cancel);
+        // apply wrote `found` itself; otherwise the sources said nothing, unless a
+        // cover download failed (no answer: status unchanged).
+        if (!r.wrote && !r.coverFailed) {
+          final status = statusAfter(EnrichStatus.fromCode(t.enrichStatus), {
+            EnrichPart.meta: PartOutcome.none,
+          });
+          if (status != null) await _writer.writeStatus(t.id, status);
         }
-        if (found) {
+        if (r.wrote) {
           updated++;
         } else {
           notFound++;

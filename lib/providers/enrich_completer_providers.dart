@@ -156,7 +156,7 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
         complete: c.complete,
         total: c.total,
       );
-      final round = await _completer.run(now: now);
+      final round = await _completer.run(mode: now ? AskMode.retryNone : AskMode.due);
       if (round.worked > 0 || round.failed) {
         await _log(round, stopped: _halt, failed: round.failed);
       }
@@ -178,7 +178,7 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
     state = state.copyWith(paused: false);
     if (state.running && !_halt && _completer.running) {
       state = state.copyWith(manual: true);
-      _completer.run(now: true).ignore(); // joins the run; _go logs its errors
+      _completer.run(mode: AskMode.retryNone).ignore(); // joins the run; _go logs its errors
       await _current;
       return;
     }

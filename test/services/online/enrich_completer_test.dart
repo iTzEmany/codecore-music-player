@@ -30,10 +30,9 @@ class _Flaky implements EnrichmentService {
   Future<EnrichGather> gather(
     int trackId,
     Set<EnrichPart> parts, {
-    bool force = false,
-    bool ignoreMarks = false,
+    AskMode mode = AskMode.due,
     CancelToken? cancel,
-  }) => s.gather(trackId, parts, force: force, ignoreMarks: ignoreMarks);
+  }) => s.gather(trackId, parts, mode: mode);
 
   @override
   Future<List<Map<EnrichPart, PartOutcome>>> commit(List<EnrichGather> items) {
@@ -55,12 +54,11 @@ class _Throwing extends _Flaky {
   Future<EnrichGather> gather(
     int trackId,
     Set<EnrichPart> parts, {
-    bool force = false,
-    bool ignoreMarks = false,
+    AskMode mode = AskMode.due,
     CancelToken? cancel,
   }) {
     if (failGathers-- > 0) throw StateError('read failed');
-    return super.gather(trackId, parts, force: force, ignoreMarks: ignoreMarks);
+    return super.gather(trackId, parts, mode: mode);
   }
 }
 
@@ -273,7 +271,7 @@ void main() {
       await track();
       await track();
       final c = completer(idle: () => Completer<void>().future);
-      final run = c.run(now: false);
+      final run = c.run();
       await pumpEventQueue();
       c.cancel();
       expect((await run).worked, 0);
@@ -434,7 +432,7 @@ void main() {
       final plan = c.run();
       await pumpEventQueue();
       expect(r.chain.calls, 0); // waiting for the user
-      expect(identical(c.run(now: true), plan), isTrue);
+      expect(identical(c.run(mode: AskMode.retryNone), plan), isTrue);
       expect(identical(c.run(), plan), isTrue);
       final round = await plan;
       expect(round.worked, 3); // also the «nothing» of yesterday
@@ -584,7 +582,7 @@ void main() {
       final round = await completer(
         parts: _lyricsAndSynced,
         idle: () async => idles++,
-      ).run(now: true);
+      ).run(mode: AskMode.retryNone);
       expect(round.worked, 3);
       expect(idles, 0);
       expect((await r.repo.getById(ids[2]))!.lyricsPlain, 'la la');
@@ -609,7 +607,7 @@ void main() {
       r.chain.during = () async {
         if (r.chain.calls == 2) c.cancel();
       };
-      final round = await c.run(now: true);
+      final round = await c.run(mode: AskMode.retryNone);
       expect(round.worked, 2);
       expect(r.chain.calls, 2);
       expect(c.running, isFalse);
@@ -618,7 +616,7 @@ void main() {
     test('curiosities already there are not asked again', () async {
       await track(plain: 'a', curiosities: 'text\nsource');
       final c = completer(parts: {EnrichPart.curio});
-      await c.run(now: true);
+      await c.run(mode: AskMode.retryNone);
       // Only the 5 without a text: the sixth is complete.
       expect(r.finder.calls, 5);
     });
@@ -659,7 +657,7 @@ void main() {
     });
 
     test(
-      'a «nothing» mark holds for 30 days, unless the marks are ignored',
+      'a «nothing» mark holds for 30 days, unless the mode is retryNone',
       () async {
         final recent = await track();
         final old = await track();
@@ -667,7 +665,7 @@ void main() {
         await mark(old, lyrics: clock - 31 * _day);
         final now = DateTime.fromMillisecondsSinceEpoch(clock);
         expect(await r.credits.dueTrackIds(_lyrics, now), [old]);
-        expect(await r.credits.dueTrackIds(_lyrics, now, ignoreMarks: true), [
+        expect(await r.credits.dueTrackIds(_lyrics, now, mode: AskMode.retryNone), [
           recent,
           old,
         ]);
@@ -714,6 +712,51 @@ void main() {
         final got = await r.credits.dueTrackIds({part}, now, limit: 1000);
         expect(got, expected, reason: '$part');
       }
+    });
+
+    test('dueTrackIds and enrichCounts agree with isDue: every mode, lyricsByUser, userEdited', () async {
+      final now = DateTime.fromMillisecondsSinceEpoch(clock);
+      final byUser = await track(); // a hand-written text, nothing else marked
+      await mark(byUser, byUser: true);
+      Future<int> full({bool edited = false, String? album = 'A', int? year = 2000}) => r.add(
+        path: '/e${i++}.mp3',
+        album: album,
+        genre: 'G',
+        year: year,
+        trackNumber: 1,
+        hasCover: true,
+        plain: 'p',
+        synced: 's',
+        curiosities: 'c',
+        userEdited: edited,
+      );
+      final editedNoAlbum = await full(edited: true, album: null);
+      final editedNoYear = await full(edited: true, album: null, year: null);
+      final noAlbum = await full(album: null);
+      final plain = await full();
+      await mark(plain, lyrics: clock - _day, synced: clock - _day, curio: clock - _day);
+      for (final mode in AskMode.values) {
+        for (final part in [EnrichPart.lyrics, EnrichPart.synced, EnrichPart.curio, EnrichPart.meta]) {
+          final eligible = await r.db.select(r.db.tracks).get();
+          final expected = [
+            for (final t in eligible)
+              if (parts_lib.isDue(part, t, await r.enrichOf(t.id), now, mode: mode)) t.id,
+          ];
+          expect(
+            await r.credits.dueTrackIds({part}, now, mode: mode, limit: 1000),
+            expected,
+            reason: '$part $mode',
+          );
+          if (mode != AskMode.due) continue;
+          final c = await r.credits.enrichCounts({part}, now);
+          expect((c.complete, c.total), (eligible.length - expected.length, eligible.length), reason: '$part');
+        }
+      }
+      expect(await r.credits.dueTrackIds({EnrichPart.lyrics}, now), isNot(contains(byUser)));
+      final meta = await r.credits.dueTrackIds({EnrichPart.meta}, now);
+      // F-11a: a track the user edited keeps its empty album, so it is not due for it.
+      expect(meta, isNot(contains(editedNoAlbum)));
+      expect(meta, containsAll([editedNoYear, noAlbum]));
     });
 
     test('every part: a recent mark leaves out that part only, an old one lets it in', () async {

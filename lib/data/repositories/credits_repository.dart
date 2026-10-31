@@ -7,7 +7,6 @@ import '../../services/online/credits.dart';
 import '../../services/online/enrich_parts.dart';
 import '../db/app_database.dart';
 import 'light_tracks.dart';
-import 'track_kinds.dart';
 
 /// Credits and enrichment state of tracks. Writes only `track_credits` and
 /// `track_enrich`, never `tracks` (so the library list does not re-emit).
@@ -27,20 +26,20 @@ class CreditsRepository {
   /// Ids of tracks with a part of [parts] due at [now], by id, without the
   /// [exclude] ones, at most [limit]. The same rule as `isDue` (an empty part
   /// not marked «nothing» in the last 30 days), in SQL and on light columns.
-  /// [after]: only ids above it. [ignoreMarks]: a «nothing» mark of any age does not count. Tracks of kind
+  /// [after]: only ids above it. [mode]: see [AskMode]. Tracks of kind
   /// music or stream, not missing or hidden.
   Future<List<int>> dueTrackIds(
     Set<EnrichPart> parts,
     DateTime now, {
     int limit = 20,
     Set<int> exclude = const {},
-    bool ignoreMarks = false,
+    AskMode mode = AskMode.due,
     int after = 0,
   }) async {
     if (parts.isEmpty) return const [];
     final rows = await _db
         .customSelect(
-          'SELECT t.id FROM $_eligible AND t.id > ?3 AND (${_dueWhere(parts, ignoreMarks)}) '
+          'SELECT t.id FROM $eligibleSql AND t.id > ?3 AND (${dueSql(parts, mode)}) '
           'ORDER BY t.id LIMIT ?2',
           variables: [
             _retryBefore(now),
@@ -65,8 +64,8 @@ class CreditsRepository {
     final r = await _db
         .customSelect(
           'SELECT COUNT(*) AS total, '
-          '${parts.isEmpty ? '0' : 'COALESCE(SUM(${_dueWhere(parts)}), 0)'} AS due '
-          'FROM $_eligible',
+          '${parts.isEmpty ? '0' : 'COALESCE(SUM(${dueSql(parts, AskMode.due)}), 0)'} AS due '
+          'FROM $eligibleSql',
           variables: [if (parts.isNotEmpty) _retryBefore(now)],
           readsFrom: {_db.tracks, _db.trackEnrich, _db.trackCredits},
         )
@@ -75,43 +74,9 @@ class CreditsRepository {
     return (complete: total - r.read<int>('due'), total: total);
   }
 
-  static const _eligible =
-      'tracks t LEFT JOIN track_enrich e ON e.track_id = t.id '
-      'WHERE t.kind IN ($kMusicKind, $kStreamKind) AND t.missing = 0 AND t.ignored = 0';
-
   /// A «nothing» mark older than this (?1) no longer holds.
   static Variable<int> _retryBefore(DateTime now) =>
       Variable<int>(now.millisecondsSinceEpoch - retryNoneAfter.inMilliseconds);
-
-  static String _dueWhere(Set<EnrichPart> parts, [bool ignoreMarks = false]) {
-    String due(String empty, String mark) => ignoreMarks
-        ? '($empty)'
-        : '($empty AND (e.$mark IS NULL OR e.$mark < ?1))';
-    const byUser = 'COALESCE(e.lyrics_by_user, 0) = 0';
-    return [
-      for (final p in parts)
-        switch (p) {
-          EnrichPart.meta => due(
-            '(t.album IS NULL OR t.year IS NULL OR t.genre IS NULL '
-                'OR t.track_number IS NULL OR t.has_cover = 0)',
-            'meta_none_at',
-          ),
-          EnrichPart.lyrics => due(
-            '$byUser AND t.lyrics_plain IS NULL AND t.lyrics_synced IS NULL',
-            'lyrics_none_at',
-          ),
-          EnrichPart.synced => due(
-            '$byUser AND t.lyrics_plain IS NOT NULL AND t.lyrics_synced IS NULL',
-            'synced_none_at',
-          ),
-          EnrichPart.curio => due('t.curiosities IS NULL', 'curio_none_at'),
-          EnrichPart.credits => due(
-            'NOT EXISTS (SELECT 1 FROM track_credits c WHERE c.track_id = t.id)',
-            'credits_none_at',
-          ),
-        },
-    ].join(' OR ');
-  }
 
   /// Library tracks (`kind = 0`) credited to [nameKey] (a `creditNameKey`).
   /// Exact key: one entry per role (a track with two roles appears twice).

@@ -61,7 +61,8 @@ class EnrichCompleter {
   final int Function() _nowMs;
 
   Future<EnrichRound>? _current;
-  bool _cancelled = false, _now = false;
+  bool _cancelled = false;
+  AskMode _mode = AskMode.due;
   int _saved = 0; // last bookmark handed to saveMark in this round
   Completer<void>? _wake;
 
@@ -79,20 +80,21 @@ class EnrichCompleter {
     if (w != null && !w.isCompleted) w.complete();
   }
 
-  /// One run until nothing is due, [cancel] or an error. [now]: no waiting for
-  /// the user, and parts marked «nothing» recently are asked again (still only
-  /// if empty). Called during a run it joins it: the same future comes back,
-  /// and `now` turns that run into a «now» one from the next track.
-  Future<EnrichRound> run({bool now = false}) {
+  /// One run until nothing is due, [cancel] or an error. A [mode] other than
+  /// [AskMode.due]: no waiting for the user, and parts marked «nothing»
+  /// recently are asked again (still only if empty). Called during a run it
+  /// joins it: the same future comes back, and such a mode turns that run into
+  /// a «now» one from the next track.
+  Future<EnrichRound> run({AskMode mode = AskMode.due}) {
     final current = _current;
     if (current != null) {
-      if (now && !_now) {
-        _now = true;
+      if (mode != AskMode.due && _mode == AskMode.due) {
+        _mode = mode;
         _poke();
       }
       return current;
     }
-    _now = now;
+    _mode = mode;
     _cancelled = false;
     return _current = _run().whenComplete(() => _current = null);
   }
@@ -123,7 +125,7 @@ class EnrichCompleter {
             DateTime.fromMillisecondsSinceEpoch(_nowMs()),
             limit: _chunk,
             exclude: tried,
-            ignoreMarks: _now,
+            mode: _mode,
             after: after,
           );
           if (ids.isEmpty) {
@@ -134,7 +136,7 @@ class EnrichCompleter {
           }
           for (final id in ids) {
             if (_cancelled) break;
-            if (!_now) await _idle();
+            if (_mode == AskMode.due) await _idle();
             await service.limiter.wait();
             if (_cancelled) break;
             // The switches may have changed since the chunk was read.
@@ -142,7 +144,7 @@ class EnrichCompleter {
             tried.add(id);
             after = id;
             try {
-              final g = await service.gather(id, wanted, ignoreMarks: _now);
+              final g = await service.gather(id, wanted, mode: _mode);
               block.add(g);
               // A track whose parts were all refused meanwhile asked nothing: neither a sign of offline nor of life.
               final asked = g.out.values.any((o) => o != PartOutcome.skipped);

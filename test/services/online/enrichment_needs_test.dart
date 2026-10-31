@@ -132,7 +132,7 @@ void main() {
     }
     Future<int> status(Track t) async =>
         (await (db.select(db.tracks)..where((r) => r.id.equals(t.id))).getSingle()).enrichStatus;
-    expect(await status(first), 2, reason: 'tried, nothing found');
+    expect(await status(first), 1, reason: 'tried, nothing found: a status 1 stays (D-285)');
     expect(await status(second), 1, reason: 'never reached');
   });
 }

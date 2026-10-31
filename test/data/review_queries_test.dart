@@ -20,28 +20,46 @@ void main() {
     String? album = 'Album',
     int? year = 2000,
     String? genre = 'Rock',
-  }) => db
-      .into(db.tracks)
-      .insert(
-        TracksCompanion.insert(
-          path: '/m/$title.mp3',
-          title: title,
-          albumKey: 'a|$title',
-          format: 'mp3',
-          sizeBytes: 1,
-          mtimeMs: 1,
-          addedAt: 1,
-          enrichStatus: Value(status),
-          kind: Value(kind),
-          missing: Value(missing),
-          ignored: Value(ignored),
-          lyricsPlain: Value(lyrics),
-          hasCover: Value(cover),
-          album: Value(album),
-          year: Value(year),
-          genre: Value(genre),
-        ),
-      );
+    int? trackNumber = 1,
+    bool userEdited = false,
+    bool lyricsByUser = false,
+  }) async {
+    final id = await db
+        .into(db.tracks)
+        .insert(
+          TracksCompanion.insert(
+            path: '/m/$title.mp3',
+            title: title,
+            albumKey: 'a|$title',
+            format: 'mp3',
+            sizeBytes: 1,
+            mtimeMs: 1,
+            addedAt: 1,
+            enrichStatus: Value(status),
+            kind: Value(kind),
+            missing: Value(missing),
+            ignored: Value(ignored),
+            lyricsPlain: Value(lyrics),
+            hasCover: Value(cover),
+            album: Value(album),
+            year: Value(year),
+            genre: Value(genre),
+            trackNumber: Value(trackNumber),
+            userEdited: Value(userEdited),
+          ),
+        );
+    if (lyricsByUser) {
+      await db
+          .into(db.trackEnrich)
+          .insert(
+            TrackEnrichCompanion(
+              trackId: Value(id),
+              lyricsByUser: const Value(true),
+            ),
+          );
+    }
+    return id;
+  }
 
   Future<List<String>> titles({Set<int> dismissed = const {}}) async => [
     for (final t in await q.watch(dismissed: dismissed).first) t.title,
@@ -78,6 +96,39 @@ void main() {
     expect(reviewReasons(rows['lyrics']!), {ReviewReason.noLyrics});
     expect(reviewReasons(rows['cover']!), {ReviewReason.noCover});
     expect(reviewReasons(rows['genre']!), {ReviewReason.missingData});
+  });
+
+  test('fixed list: the reasons of each kind of row', () async {
+    final ids = {
+      'untried': await add('untried', status: 0, lyrics: null, cover: false),
+      'noCover': await add('noCover', cover: false),
+      'nothing': await add('nothing', status: 2),
+      'stream': await add('stream', status: 2, kind: 2),
+      'byUser': await add('byUser', lyrics: null, lyricsByUser: true),
+      'noNumber': await add('noNumber', trackNumber: null),
+      'editedNoAlbum': await add('editedNoAlbum', album: null, userEdited: true),
+    };
+    final rows = await q.watch().first;
+    final byReason = {
+      for (final reason in ReviewReason.values)
+        reason: {
+          for (final t in rows)
+            if (reviewReasons(t).contains(reason)) t.id,
+        },
+    };
+    // The stream row, the untried one and the missing track number are out.
+    expect(byReason[ReviewReason.nothingFound], {ids['nothing']});
+    expect(byReason[ReviewReason.noCover], {ids['noCover']});
+    expect(byReason[ReviewReason.missingData], {ids['editedNoAlbum']});
+    expect(byReason[ReviewReason.noLyrics], isEmpty, reason: 'D-286: a text by hand is not «no lyrics»');
+    expect({for (final t in rows) t.id}, {ids['nothing'], ids['noCover'], ids['editedNoAlbum']});
+  });
+
+  test('a hand-written text listed for another reason is not reported as «no lyrics»', () async {
+    final id = await add('byUser', lyrics: null, lyricsByUser: true, cover: false);
+    final rows = await q.watch().first;
+    expect(reviewReasons(rows.single), {ReviewReason.noCover});
+    expect(rows.single.id, id);
   });
 
   test('missing, hidden and episode rows are not listed', () async {

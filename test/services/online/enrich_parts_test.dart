@@ -115,4 +115,69 @@ void main() {
       isFalse,
     );
   });
+
+  test('retryNone asks again over a recent mark; force also over a full curiosity', () async {
+    final t = await track();
+    final e = _enrich(lyricsNone: _ms(0));
+    expect(isDue(EnrichPart.lyrics, t, e, _at(1), mode: AskMode.retryNone), isTrue);
+    expect(isDue(EnrichPart.lyrics, t, e, _at(1)), isFalse);
+    await db.delete(db.tracks).go();
+    final filled = await track(plain: 'la la');
+    expect(isDue(EnrichPart.lyrics, filled, e, _at(99), mode: AskMode.retryNone), isFalse);
+    expect(isDue(EnrichPart.lyrics, filled, e, _at(99), mode: AskMode.force), isFalse);
+  });
+
+  test('a userEdited track keeps its empty album: it is not fillable, nor does it make meta due', () async {
+    await db.into(db.tracks).insert(
+          TracksCompanion.insert(
+            path: '/e.mp3',
+            title: 'Song',
+            albumKey: 'k',
+            format: 'mp3',
+            sizeBytes: 1,
+            mtimeMs: 1,
+            addedAt: 1,
+            userEdited: const Value(true),
+            year: const Value(2000),
+            genre: const Value('G'),
+            trackNumber: const Value(1),
+            hasCover: const Value(true),
+          ),
+        );
+    final t = await db.select(db.tracks).getSingle();
+    expect(fillableFields(t), {EnrichField.lyrics});
+    expect(isDue(EnrichPart.meta, t, null, _at(0)), isFalse);
+    expect(fillableFields(t.copyWith(userEdited: false)), contains(EnrichField.album));
+  });
+
+  group('statusAfter', () {
+    const f = PartOutcome.found, n = PartOutcome.none;
+    const x = PartOutcome.failed, l = PartOutcome.limited, k = PartOutcome.skipped;
+    const u = EnrichStatus.untried, y = EnrichStatus.found, z = EnrichStatus.nothing;
+    final cases = <(String, EnrichStatus, Map<EnrichPart, PartOutcome>, EnrichStatus?)>[
+      ('one found', u, {EnrichPart.meta: n, EnrichPart.curio: f}, y),
+      ('found beats a failure', u, {EnrichPart.meta: x, EnrichPart.lyrics: f}, y),
+      ('found from nothing', z, {EnrichPart.lyrics: f}, y),
+      ('all none from untried', u, {EnrichPart.meta: n, EnrichPart.lyrics: n}, z),
+      ('skipped parts were not asked', u, {EnrichPart.meta: n, EnrichPart.lyrics: k}, z),
+      ('none and failed', u, {EnrichPart.meta: n, EnrichPart.lyrics: x}, null),
+      ('none and limited', u, {EnrichPart.meta: n, EnrichPart.lyrics: l}, null),
+      ('all none from found stays found (D-285)', y, {EnrichPart.meta: n}, null),
+      ('all none from nothing', z, {EnrichPart.meta: n}, null),
+      ('nothing asked', u, {EnrichPart.meta: k}, null),
+      ('no parts', u, <EnrichPart, PartOutcome>{}, null),
+      ('credits found do not count', u, {EnrichPart.credits: f}, null),
+      ('a credits failure does not block nothing', u, {EnrichPart.meta: n, EnrichPart.credits: x}, z),
+      ('credits none do not count', u, {EnrichPart.meta: n, EnrichPart.credits: n}, z),
+    ];
+    for (final (name, before, out, want) in cases) {
+      test(name, () => expect(statusAfter(before, out), want));
+    }
+
+    test('codes match the database', () {
+      expect([for (final s in EnrichStatus.values) s.code], [0, 1, 2]);
+      expect(EnrichStatus.fromCode(2), EnrichStatus.nothing);
+      expect(EnrichStatus.fromCode(7), EnrichStatus.untried);
+    });
+  });
 }
