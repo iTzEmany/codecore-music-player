@@ -198,6 +198,29 @@ void main() {
     expect([line.stopped, line.item!.done], [true, 40]);
   });
 
+  test('a batch enrichment stopped by an error leaves a failed line with its counts', () async {
+    final c = ProviderContainer(
+      overrides: [
+        databaseProvider.overrideWithValue(db),
+        activityProvider.overrideWith((ref) => ref.watch(_activity)),
+        enrichJobProvider.overrideWith(_Job.new),
+      ],
+    );
+    addTearDown(c.dispose);
+    c.listen(activityLogProvider, (_, _) {});
+    const item = ActivityItem(kind: ActivityKind.enrich, key: 'enrich', name: null, done: 2, total: 5);
+    c.read(_activity.notifier).set(const ActivityState([item], []));
+    await pumpEventQueue();
+    (c.read(enrichJobProvider.notifier) as _Job).set(const EnrichJobState(
+      result: BatchProgress(done: 2, total: 5, updated: 1, notFound: 1, finished: true),
+      failed: true,
+    ));
+    c.read(_activity.notifier).set(const ActivityState([], []));
+    await pumpEventQueue();
+    final line = c.read(activityLogProvider).entries.single;
+    expect([line.failed, line.detail?['updated'], line.detail?['notFound']], [true, 1, 1]);
+  });
+
   test('a scan that ends with an error leaves its line as failed', () async {
     final c = ProviderContainer(
       overrides: [

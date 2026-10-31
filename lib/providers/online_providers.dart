@@ -145,13 +145,21 @@ final enrichmentServiceProvider = Provider<EnrichmentService>((ref) {
 });
 
 class EnrichJobState {
-  const EnrichJobState({this.running = false, this.progress, this.result});
+  const EnrichJobState({
+    this.running = false,
+    this.progress,
+    this.result,
+    this.failed = false,
+  });
 
   final bool running;
   final BatchProgress? progress;
 
   /// Last finished job (shown once by the shell as a snackbar).
   final BatchProgress? result;
+
+  /// The job stopped on an error: [result] holds the counts up to there.
+  final bool failed;
 }
 
 class EnrichJobNotifier extends Notifier<EnrichJobState> {
@@ -185,6 +193,7 @@ class EnrichJobNotifier extends Notifier<EnrichJobState> {
     void Function()? onFinished,
   ) async {
     BatchProgress? last;
+    var failed = false;
     try {
       await for (final p
           in ref
@@ -200,11 +209,15 @@ class EnrichJobNotifier extends Notifier<EnrichJobState> {
         last = p;
         state = EnrichJobState(running: !p.finished, progress: p);
       }
-    } on Object {
-      last = const BatchProgress(finished: true);
+    } on Object catch (e, st) {
+      AppLog.e('enrichment job stopped by an error', e, st);
+      failed = true;
     }
-    state = EnrichJobState(result: last ?? const BatchProgress(finished: true));
-    if (last?.cancelled != true) onFinished?.call();
+    state = EnrichJobState(
+      result: last ?? const BatchProgress(finished: true),
+      failed: failed,
+    );
+    if (!failed && last?.cancelled != true) onFinished?.call();
   }
 
   void cancel() => _cancel?.cancel();

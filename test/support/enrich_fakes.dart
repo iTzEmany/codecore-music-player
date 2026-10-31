@@ -30,7 +30,8 @@ class EnrichWeb implements WebClient {
   bool deezerDown = false;
   bool deezerLimited = false;
   bool musicBrainzLimited = false;
-  bool coverDown = false;
+  bool coverDown = false; // network error
+  bool coverMissing = false; // 404
 
   /// Runs on every JSON request (e.g. to cancel a token «on the network»).
   void Function(String url)? onUrl;
@@ -143,7 +144,13 @@ class EnrichWeb implements WebClient {
     CancelToken? cancel,
   }) async {
     bytes++;
-    return coverDown ? null : [1, 2, 3];
+    if (coverDown) {
+      throw DioException.connectionError(
+        requestOptions: RequestOptions(path: url),
+        reason: 'down',
+      );
+    }
+    return coverMissing ? null : [1, 2, 3];
   }
 }
 
@@ -188,7 +195,13 @@ class FakeChain extends LyricsChain {
     calls++;
     wantSyncedSeen = wantSynced;
     await during?.call();
-    if (limited) throw const RateLimitedException(429);
+    if (limited) {
+      return const LyricsChainResult(
+        failed: true,
+        syncedFailed: true,
+        limited: true,
+      );
+    }
     return failed
         ? const LyricsChainResult(failed: true, syncedFailed: true)
         : LyricsChainResult(

@@ -291,6 +291,8 @@ class SavedPlayback {
   final PlayRepeat repeat;
 }
 
+const enrichMarkKey = 'enrichMark';
+
 class SettingsStore {
   SettingsStore(this._prefs);
 
@@ -471,6 +473,11 @@ class SettingsStore {
   int readLastUpdateCheckDay() => _prefs.getInt('lastUpdateCheckDay') ?? 0;
 
   Future<void> writeLastUpdateCheckDay(int day) => _prefs.setInt('lastUpdateCheckDay', day);
+
+  /// Background enrichment bookmark: id of the last track tried (0 = none).
+  /// Device-bound, never in a backup.
+  int get enrichMark => _prefs.getInt(enrichMarkKey) ?? 0;
+  Future<void> writeEnrichMark(int id) => _prefs.setInt(enrichMarkKey, id);
 
   // New releases of followed artists (phase 34).
 

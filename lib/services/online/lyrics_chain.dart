@@ -13,6 +13,7 @@ class LyricsChainResult {
     this.lyrics,
     this.failed = false,
     this.syncedFailed = false,
+    this.limited = false,
     this.source,
   });
 
@@ -23,6 +24,9 @@ class LyricsChainResult {
 
   /// LRCLIB or NetEase errored, so a missing synchronised text may only be unknown (even when plain text was found).
   final bool syncedFailed;
+
+  /// A source was resting or refused (429): what is missing is unknown, and asking again now is pointless.
+  final bool limited;
 
   /// Which source gave the text: 'lrclib', 'netease' or 'lyricsovh'.
   final String? source;
@@ -50,7 +54,7 @@ class LyricsChain {
 
   static bool _has(String? s) => s != null && s.isNotEmpty;
 
-  /// Rate limits and cancellation propagate; any other source error (LRCLIB included) is logged and reported as [LyricsChainResult.failed].
+  /// Cancellation propagates; a rate limit gives [LyricsChainResult.limited] (a text already found is kept) and any other source error (LRCLIB included) is logged and reported as [LyricsChainResult.failed].
   Future<LyricsChainResult> find(
     Track t, {
     bool wantSynced = true,
@@ -58,12 +62,14 @@ class LyricsChain {
   }) async {
     final c = cleanSearchQuery(t.title, t.artist ?? '');
     final sec = t.durationMs > 0 ? (t.durationMs / 1000).round() : null;
-    var failed = false;
+    var failed = false, limited = false;
     Future<LyricsResult?> fallback(Future<LyricsResult?> Function() f) async {
       try {
         return await f();
-      } on RateLimitedException {
-        rethrow;
+      } on RateLimitedException catch (e) {
+        AppLog.w('lyrics fallback refused', e);
+        failed = limited = true;
+        return null;
       } on DioException {
         rethrow;
       } catch (e, st) {
@@ -74,7 +80,7 @@ class LyricsChain {
     }
 
     final resting = _lrclibRestUntil?.isAfter(_now()) ?? false;
-    if (resting) failed = true;
+    if (resting) failed = limited = true;
     final lr = resting
         ? null
         : await fallback(() async {
@@ -131,10 +137,15 @@ class LyricsChain {
     }
     final out = LyricsResult(plain: plain, synced: synced);
     return out.isEmpty
-        ? LyricsChainResult(failed: failed, syncedFailed: syncedFailed)
+        ? LyricsChainResult(
+            failed: failed,
+            syncedFailed: syncedFailed,
+            limited: limited,
+          )
         : LyricsChainResult(
             lyrics: out,
             syncedFailed: syncedFailed,
+            limited: limited,
             source: source,
           );
   }

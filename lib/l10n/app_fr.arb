@@ -3373,5 +3373,18 @@
       }
     }
   },
-  "jamTooSoon": "Attends un instant avant de réessayer"
+  "jamTooSoon": "Attends un instant avant de réessayer",
+  "enrichInterrupted": "Enrichissement interrompu par une erreur : {updated} mis à jour, {notFound} introuvables",
+  "@enrichInterrupted": {
+    "placeholders": {
+      "updated": {
+        "type": "int"
+      },
+      "notFound": {
+        "type": "int"
+      }
+    }
+  },
+  "logEnrichStopped": "Complétion arrêtée : aucune source ne répond",
+  "logEnrichFailed": "Complétion échouée : arrêtée par une erreur"
 }

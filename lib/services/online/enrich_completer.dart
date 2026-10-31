@@ -10,9 +10,13 @@ import 'enrichment_service.dart';
 class EnrichRound {
   int worked = 0;
 
-  /// The run stopped on an error (logged): the rest of the library waits for
-  /// the next run; what was read before it is written and counted here.
+  /// The run stopped on an error (logged), lost a write (a track or a whole
+  /// block not saved) or stopped with [noAnswer]: the rest of the library waits
+  /// for the next run; what was read before it is written and counted here.
   bool failed = false;
+
+  /// The run stopped because the sources answered none of the last tracks.
+  bool noAnswer = false;
   final Map<EnrichPart, List<int>> updated = {};
   final Map<EnrichPart, List<int>> none = {};
 }
@@ -28,6 +32,8 @@ class EnrichCompleter {
     required this.parts,
     required this.waitIdle,
     this.onProgress,
+    this.loadMark,
+    this.saveMark,
     int Function()? nowMs,
   }) : _nowMs = nowMs ?? _clock;
 
@@ -48,10 +54,15 @@ class EnrichCompleter {
 
   /// After each committed block: tracks complete, tracks in all.
   final void Function(int complete, int total)? onProgress;
+  /// Bookmark: the last track tried, so a run starts after it. Without them
+  /// every run starts from the first track.
+  final int Function()? loadMark;
+  final void Function(int id)? saveMark;
   final int Function() _nowMs;
 
   Future<EnrichRound>? _current;
   bool _cancelled = false, _now = false;
+  int _saved = 0; // last bookmark handed to saveMark in this round
   Completer<void>? _wake;
 
   bool get running => _current != null;
@@ -99,7 +110,10 @@ class EnrichCompleter {
     final refused = <EnrichPart>{}; // a source that said «too many requests»: not again in this round
     final block = <EnrichGather>[];
     var wanted = parts();
-    var stuck = 0; // tracks in a row with no part found or answered «nothing» (offline)
+    var after = loadMark?.call() ?? 0;
+    _saved = after;
+    var canWrap = after > 0; // end of the queue: one pass from the start
+    var stuck = 0; // tracks in a row that asked a source and got no answer (offline); one that asked nothing doesn't count
     Set<EnrichPart> switchedOn() => wanted = parts().difference(refused);
     try {
       try {
@@ -110,8 +124,14 @@ class EnrichCompleter {
             limit: _chunk,
             exclude: tried,
             ignoreMarks: _now,
+            after: after,
           );
-          if (ids.isEmpty) break;
+          if (ids.isEmpty) {
+            if (!canWrap) break;
+            canWrap = false;
+            after = 0;
+            continue;
+          }
           for (final id in ids) {
             if (_cancelled) break;
             if (!_now) await _idle();
@@ -120,36 +140,48 @@ class EnrichCompleter {
             // The switches may have changed since the chunk was read.
             if (switchedOn().isEmpty) break;
             tried.add(id);
+            after = id;
             try {
               final g = await service.gather(id, wanted, ignoreMarks: _now);
               block.add(g);
-              final ok = g.out.values.any(
-                (o) => o == PartOutcome.found || o == PartOutcome.none,
-              );
-              stuck = ok ? 0 : stuck + 1;
+              // A track whose parts were all refused meanwhile asked nothing: neither a sign of offline nor of life.
+              final asked = g.out.values.any((o) => o != PartOutcome.skipped);
+              if (g.answered) {
+                stuck = 0;
+              } else if (asked) {
+                stuck++;
+              }
               refused.addAll([
                 for (final e in g.out.entries)
                   if (e.value == PartOutcome.limited) e.key,
               ]);
             } on Object catch (e, st) {
-              AppLog.w('completion: track $id not read', e, st);
+              if (e is Error) {
+                AppLog.e('completion: track $id not read', e, st);
+              } else {
+                AppLog.w('completion: track $id not read', e, st);
+              }
               stuck++;
             }
             if (stuck >= _maxStuck) {
               AppLog.w('completion: $_maxStuck tracks in a row got no answer, round stopped');
-              round.failed = true;
+              round.failed = round.noAnswer = true;
               break;
             }
-            if (block.length >= blockSize) await _commit(block, round);
+            if (block.length >= blockSize) await _commit(block, round, after);
           }
-          await _commit(block, round);
+          await _commit(block, round, after);
         }
       } finally {
         // Whatever was read is written, also after an error or a cancel.
-        await _commit(block, round);
+        await _commit(block, round, after);
       }
     } on Object catch (e, st) {
-      AppLog.w('completion: round stopped', e, st);
+      if (e is Error) {
+        AppLog.e('completion: round stopped', e, st);
+      } else {
+        AppLog.w('completion: round stopped', e, st);
+      }
       round.failed = true;
     }
     return round;
@@ -158,12 +190,20 @@ class EnrichCompleter {
   Future<void> _commit(
     List<EnrichGather> block,
     EnrichRound round,
+    int after,
   ) async {
+    // Saved before the write and also when it fails (or every read threw), so a
+    // bad block is not retried at each start; lost tracks come back after the wrap.
+    if (after > 0 && after != _saved) {
+      _saved = after;
+      saveMark?.call(after);
+    }
     if (block.isEmpty) return;
     final items = [...block];
     block.clear();
     try {
       final outs = await service.commit(items);
+      if (items.any((g) => g.lost)) round.failed = true;
       for (var i = 0; i < items.length; i++) {
         final out = outs[i];
         if (!out.values.any((o) => o == PartOutcome.found || o == PartOutcome.none)) {
@@ -180,7 +220,12 @@ class EnrichCompleter {
         }
       }
     } on Object catch (e, st) {
-      AppLog.w('completion: block of ${items.length} not saved', e, st);
+      if (e is Error) {
+        AppLog.e('completion: block of ${items.length} not saved', e, st);
+      } else {
+        AppLog.w('completion: block of ${items.length} not saved', e, st);
+      }
+      round.failed = true;
     }
     final c = await repo.enrichCounts(
       parts(),

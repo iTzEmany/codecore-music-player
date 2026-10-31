@@ -22,7 +22,7 @@ void main() {
     db = AppDatabase(NativeDatabase.memory());
     SharedPreferences.setMockInitialValues({
       'theme': 'oled', 'compactMode': true, 'playbackSpeed': 1.25, 'volume': 3,
-      'notDuplicates': ['a', 'b'], 'deviceId': 'dev-1', 'deviceName': 'Telefono', 'trustedDevices': '[]',
+      'notDuplicates': ['a', 'b'], 'deviceId': 'dev-1', 'deviceName': 'Telefono', 'trustedDevices': '[]', 'enrichMark': 42,
     });
     prefs = await SharedPreferences.getInstance();
     final folder = await db.into(db.folders).insert(FoldersCompanion.insert(path: '/music', addedAt: 1));
@@ -75,6 +75,7 @@ void main() {
 
     final settings = jsonDecode(text('settings.json')) as Map;
     expect(settings.containsKey('deviceId'), isFalse);
+    expect(settings.containsKey('enrichMark'), isFalse, reason: 'bound to this device');
     expect(settings.containsKey('deviceName'), isFalse);
     expect(settings.containsKey('trustedDevices'), isFalse, reason: 'bound to this device');
     expect(settings['compactMode'], {'t': 'bool', 'v': true});

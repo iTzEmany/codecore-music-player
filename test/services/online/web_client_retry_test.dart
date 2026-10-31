@@ -62,4 +62,29 @@ void main() {
     expect(adapter.calls, 1);
     expect(waits, isEmpty);
   });
+
+  test('getBytes: a 404 is «no such file», not an error', () async {
+    final (web, _, _) = _client([(404, null)]);
+    expect(await web.getBytes('https://x/f'), isNull);
+  });
+
+  test('getBytes: a 410 is «no such file», not an error', () async {
+    final (web, _, _) = _client([(410, null)]);
+    expect(await web.getBytes('https://x/f'), isNull);
+  });
+
+  test('getBytes: a body over maxBytes is dropped', () async {
+    final (web, _, _) = _client([(200, null)]);
+    expect(await web.getBytes('https://x/f', maxBytes: 5), isNull);
+  });
+
+  test('getBytes: a 200 gives the bytes', () async {
+    final (web, _, _) = _client([(200, null)]);
+    expect(await web.getBytes('https://x/f'), '{"ok":true}'.codeUnits);
+  });
+
+  test('getBytes: a 500 throws, the network trouble is not hidden', () async {
+    final (web, _, _) = _client([(500, null)]);
+    await expectLater(web.getBytes('https://x/f'), throwsA(isA<DioException>()));
+  });
 }

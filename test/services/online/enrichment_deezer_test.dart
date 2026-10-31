@@ -21,11 +21,19 @@ class _Web implements WebClient {
   bool deezerKnowsIsrc = true;
   bool deezerQuota = false;
   bool itunesGenre = true;
+  bool itunesEmpty = false;
+  String itunesAlbum = 'iTunes Album';
+  bool deezerCoverDown = false;
+  final fetched = <String>[];
+  int? deezerError; // any Deezer answer is this error code
 
   @override
   Future<Object?> getJson(String url,
       {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async {
     urls.add(url);
+    if (url.contains('deezer') && deezerError != null) {
+      return {'error': {'code': deezerError, 'message': 'err'}};
+    }
     if (url.contains('deezer') && deezerQuota) {
       return {'error': {'code': 4, 'message': 'Quota'}};
     }
@@ -60,12 +68,13 @@ class _Web implements WebClient {
       };
     }
     if (url.contains('itunes')) {
+      if (itunesEmpty) return {'results': <Object>[]};
       return {
         'results': [
           {
             'trackName': 'Song',
             'artistName': 'Band',
-            'collectionName': 'iTunes Album',
+            'collectionName': itunesAlbum,
             'releaseDate': '2019-01-01',
             if (itunesGenre) 'primaryGenreName': 'Rock',
             'trackNumber': 2,
@@ -79,8 +88,14 @@ class _Web implements WebClient {
 
   @override
   Future<List<int>?> getBytes(String url,
-          {int maxBytes = 0, CancelToken? cancel}) async =>
-      [1, 2, 3];
+          {int maxBytes = 0, CancelToken? cancel}) async {
+    fetched.add(url);
+    if (deezerCoverDown && url.contains('d/cover')) {
+      throw DioException.connectionError(
+          requestOptions: RequestOptions(path: url), reason: 'down');
+    }
+    return [1, 2, 3];
+  }
 
   int count(String part) => urls.where((u) => u.contains(part)).length;
 }
@@ -178,6 +193,33 @@ void main() {
     expect(prop.source, 'itunes');
     expect(prop.meta!.album, 'iTunes Album');
     expect(prop.disc, isNull);
+  });
+
+  test('Deezer error code 100: meta failed, no mark; code 800: nothing, mark', () async {
+    final id = (await add()).id;
+    web.itunesEmpty = true;
+    for (final code in [100, 700]) {
+      web.deezerError = code;
+      expect(await svc.completeOne(id, {EnrichPart.meta}), {
+        EnrichPart.meta: PartOutcome.failed,
+      }, reason: 'code $code is transient');
+    }
+    expect(await db.select(db.trackEnrich).get(), isEmpty);
+    web.deezerError = 600; // an invalid query is an answer
+    expect(await svc.completeOne(id, {EnrichPart.meta}), {
+      EnrichPart.meta: PartOutcome.none,
+    });
+    expect((await db.select(db.trackEnrich).getSingle()).metaNoneAt, isNotNull);
+  });
+
+  test('the Deezer cover download fails: coverForAlbum falls back on iTunes', () async {
+    web
+      ..deezerCoverDown = true
+      ..itunesAlbum = 'Deezer Album';
+    final t = await add();
+    expect(await svc.coverForAlbum(t, 'Deezer Album', 'Band', isrc: 'ITABC2400001'),
+        isTrue);
+    expect(web.fetched.last, contains('600x600'));
   });
 
   test('option off: no Deezer request', () async {

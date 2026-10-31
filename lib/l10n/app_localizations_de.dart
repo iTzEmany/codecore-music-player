@@ -5812,4 +5812,17 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get jamTooSoon => 'Warte einen Moment, bevor du es erneut versuchst';
+
+  @override
+  String enrichInterrupted(int updated, int notFound) {
+    return 'Anreicherung durch einen Fehler unterbrochen: $updated aktualisiert, $notFound nicht gefunden';
+  }
+
+  @override
+  String get logEnrichStopped =>
+      'Vervollständigung gestoppt: keine Quelle antwortet';
+
+  @override
+  String get logEnrichFailed =>
+      'Vervollständigung fehlgeschlagen: ein Fehler hat sie gestoppt';
 }

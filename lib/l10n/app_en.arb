@@ -3129,5 +3129,18 @@
       }
     }
   },
-  "jamTooSoon": "Wait a moment before trying again"
+  "jamTooSoon": "Wait a moment before trying again",
+  "enrichInterrupted": "Enrichment stopped by an error: {updated} updated, {notFound} not found",
+  "@enrichInterrupted": {
+    "placeholders": {
+      "updated": {
+        "type": "int"
+      },
+      "notFound": {
+        "type": "int"
+      }
+    }
+  },
+  "logEnrichStopped": "Completion stopped: no source is answering",
+  "logEnrichFailed": "Completion failed: an error stopped it"
 }
