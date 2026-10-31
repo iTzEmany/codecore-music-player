@@ -26,7 +26,7 @@ class EnrichCompleterState {
     this.total = 0,
   });
 
-  /// A run is going (also while it finishes the track in hand after a pause).
+  /// A run is going (also while it ends after a pause: the track in hand is aborted).
   final bool running;
 
   /// Stopped by hand until «Riprendi» (or the next start of the app).
@@ -174,8 +174,8 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
     }
   }
 
-  /// Stops after the track in hand until [resume]. The Registro gets the
-  /// line of the round so far.
+  /// Stops the run until [resume]: the track in hand is aborted and the
+  /// bookmark stays before it. The Registro gets the line of the round so far.
   void pause() {
     if (!state.running) return;
     state = state.copyWith(paused: true);
@@ -191,7 +191,7 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
     unawaited(start());
   }
 
-  /// «Interrompi»: no track after the one in hand; the next start of the app
+  /// «Interrompi»: the track in hand is aborted; the next start of the app
   /// (or a change of the switches) carries on.
   void cancel() {
     state = state.copyWith(paused: false);

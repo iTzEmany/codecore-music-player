@@ -141,10 +141,10 @@ void main() {
       expect(await viaCommit(id, {EnrichPart.meta, EnrichPart.lyrics}), 1);
     });
 
-    test('only lyrics asked and none: status 2', () async {
+    test('only lyrics asked and none: status unchanged (0), metadata was not asked', () async {
       r.chain.result = null;
       final id = await r.add();
-      expect(await viaCommit(id, {EnrichPart.lyrics}), 2);
+      expect(await viaCommit(id, {EnrichPart.lyrics}), 0);
     });
 
     test('a track at 1, then nothing: status stays 1 (D-285)', () async {

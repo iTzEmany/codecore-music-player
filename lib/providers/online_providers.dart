@@ -331,7 +331,17 @@ class EnrichJobNotifier extends Notifier<EnrichJobState> {
             rateLimited: refused || ((round?.limited ?? false) && round!.worked == 0),
           ),
         );
-        if (!failed && !cancelled) onFinished?.call();
+        if (!failed && !cancelled) {
+          try {
+            onFinished?.call();
+          } on Object catch (e, st) {
+            if (e is Error) {
+              AppLog.e('enrichment job: onFinished failed', e, st);
+            } else {
+              AppLog.w('enrichment job: onFinished failed', e, st);
+            }
+          }
+        }
       }
     }
   }

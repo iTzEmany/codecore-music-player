@@ -17,14 +17,24 @@ void main() {
     test('download and background on the same id ask the sources once', () async {
       final id = await r.add();
       final background = await r.engine.gather(id, lyrics);
-      final download = r.engine.completeOne(id, lyrics); // waits for the commit
+      var ended = false;
+      final download = r.engine.completeOne(id, lyrics).whenComplete(() => ended = true); // waits for the commit
       await Future<void>.delayed(Duration.zero);
-      expect(r.chain.calls, 1);
+      expect([r.chain.calls, ended], [1, false]);
       await r.engine.commit([background]);
       final out = await download;
       expect(r.chain.calls, 1, reason: 'the text is there: nothing is due');
       expect(out[EnrichPart.lyrics], PartOutcome.skipped);
       expect((await r.repo.getById(id))!.lyricsPlain, 'la la');
+    });
+
+    test('committing a gather that owns nothing does not free the track in flight', () async {
+      final id = await r.add();
+      final owner = await r.engine.gather(id, lyrics);
+      final second = await r.engine.gather(id, lyrics);
+      await r.engine.commit([second]);
+      expect((await r.engine.gather(id, lyrics)).signal, GatherSignal.askedNothing);
+      await r.engine.commit([owner]);
     });
 
     test('a gather of a track in flight asks nothing; once committed it is free again', () async {

@@ -52,8 +52,8 @@ class EnrichCompleter {
 
   bool get running => _current != null;
 
-  /// No track is started after the one in progress, and a wait for the user
-  /// ends at once.
+  /// The request in flight is aborted (that track is not tried, the bookmark
+  /// stays before it), no track is started, and a wait for the user ends at once.
   void cancel() => _runner?.cancel();
 
   /// One run until nothing is due, [cancel] or an error. Called during a run

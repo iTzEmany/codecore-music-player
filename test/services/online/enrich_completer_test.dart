@@ -339,8 +339,8 @@ void main() {
         saveMark: (id) => mark = id,
         nowMs: () => clock,
       );
-      await c.run();
-      expect(mark, greaterThanOrEqualTo(ids[4]));
+      final round = await c.run();
+      expect([round.noAnswer, round.failed, round.processed, mark], [true, true, 5, ids[4]]);
     });
 
     test('a failed cover download is not a lost write: the round is not failed', () async {

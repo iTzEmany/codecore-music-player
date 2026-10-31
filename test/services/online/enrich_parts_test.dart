@@ -160,6 +160,8 @@ void main() {
       ('found from nothing', z, {EnrichPart.lyrics: f}, y),
       ('all none from untried', u, {EnrichPart.meta: n, EnrichPart.lyrics: n}, z),
       ('skipped parts were not asked', u, {EnrichPart.meta: n, EnrichPart.lyrics: k}, z),
+      ('curiosity only, none: not nothing', u, {EnrichPart.curio: n}, null),
+      ('lyrics only, none: not nothing', u, {EnrichPart.lyrics: n, EnrichPart.synced: n}, null),
       ('none and failed', u, {EnrichPart.meta: n, EnrichPart.lyrics: x}, null),
       ('none and limited', u, {EnrichPart.meta: n, EnrichPart.lyrics: l}, null),
       ('all none from found stays found (D-285)', y, {EnrichPart.meta: n}, null),

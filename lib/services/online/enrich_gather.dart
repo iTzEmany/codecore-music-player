@@ -10,8 +10,8 @@ import 'http_client.dart';
 import 'metadata_resolver.dart';
 
 /// How a [EnrichGather] went, for the runner's «nobody answers» count: the
-/// sources [answered]; they were asked and gave nothing ([silent], offline or
-/// broken); or nothing was asked (every part skipped or refused meanwhile):
+/// sources [answered] (or refused: a source that says «too many requests» is
+/// alive); they were asked and gave nothing ([silent], offline or broken); or nothing was asked (every part skipped or refused meanwhile):
 /// neither a sign of offline nor of life.
 enum GatherSignal { answered, silent, askedNothing }
 
@@ -41,7 +41,7 @@ class EnrichGather {
   CoverResult? cover; // the file fetched, for the album key [coverAlbum]
   String? coverAlbum;
 
-  GatherSignal get signal => metaAsked || out.values.any((o) => o.answered)
+  GatherSignal get signal => metaAsked || out.values.any((o) => o.answered || o == PartOutcome.limited)
       ? GatherSignal.answered
       : out.values.any((o) => o != PartOutcome.skipped)
       ? GatherSignal.silent

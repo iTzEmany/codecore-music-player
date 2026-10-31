@@ -253,10 +253,14 @@ class EnrichRunner {
     if (!ready && block.isNotEmpty && !_cancelled) {
       await _commit(block, round);
     }
-    if (!ready) onWaiting?.call(true);
-    await Future.any([idle, wake.future]);
-    if (!ready) onWaiting?.call(false);
-    _wake = null;
+    final shown = !ready;
+    if (shown) onWaiting?.call(true);
+    try {
+      await Future.any([idle, wake.future]);
+    } finally {
+      if (shown) onWaiting?.call(false);
+      _wake = null;
+    }
   }
 
   /// One run until nothing is due, [cancel] or an error.

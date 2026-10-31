@@ -157,7 +157,8 @@ enum EnrichStatus {
 
 /// The status a track gets from what [out] says its parts came to (D-279,
 /// D-285), or null to leave it as it is. `found` if any part found something;
-/// `nothing` only from `untried` and when every part asked came out `none`.
+/// `nothing` only from `untried`, when metadata was asked and came out `none`
+/// and so did every other part asked.
 /// A part that failed or was refused, a `found` track and credits never lower it.
 EnrichStatus? statusAfter(
   EnrichStatus before,
@@ -169,7 +170,7 @@ EnrichStatus? statusAfter(
   ];
   if (asked.contains(PartOutcome.found)) return EnrichStatus.found;
   if (before == EnrichStatus.untried &&
-      asked.isNotEmpty &&
+      out[EnrichPart.meta] == PartOutcome.none &&
       asked.every((o) => o == PartOutcome.none)) {
     return EnrichStatus.nothing;
   }

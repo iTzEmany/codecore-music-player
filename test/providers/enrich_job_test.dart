@@ -85,6 +85,67 @@ void main() {
     expect([s.result!.failed, s.result!.done, s.result!.total, calls], [true, 2, 2, 0]);
   });
 
+  test('one offline track ends failed, with no second opinion', () async {
+    r.web.itunes = ItunesMode.down;
+    r.chain.failed = true;
+    r.finder.error = StateError('offline');
+    var calls = 0;
+    c.read(enrichJobProvider.notifier).start([await r.add()], onFinished: () => calls++);
+    final s = await finished();
+    expect([s.result!.failed, calls], [true, 0]);
+  });
+
+  test('one track while the only asked sources rest: rate limited, not failed', () async {
+    r.web.itunes = ItunesMode.limited;
+    r.chain.limited = true;
+    r.finder.error = StateError('offline');
+    c.read(enrichJobProvider.notifier).start([await r.add()]);
+    final s = await finished();
+    expect([s.result!.failed, s.result!.rateLimited], [false, true]);
+  });
+
+  /// [start] on 3 tracks; after the first one is done, [breakIt] runs.
+  Future<EnrichJobResult> afterFirst(void Function() breakIt) async {
+    final ids = [for (var i = 0; i < 3; i++) await r.add(path: '/$i.mp3')];
+    c.listen(enrichJobProvider, (_, s) {
+      if (s.progress?.done == 1) breakIt();
+    });
+    c.read(enrichJobProvider.notifier).start(ids);
+    return (await finished()).result!;
+  }
+
+  test('some tracks answer, then silence: the job is not failed', () async {
+    final res = await afterFirst(() {
+      r.web.itunes = ItunesMode.down;
+      r.chain.failed = true;
+      r.finder.error = StateError('offline');
+    });
+    expect([res.failed, res.updated], [false, 1]);
+  });
+
+  test('rate limited after some work: the job is not rateLimited', () async {
+    final res = await afterFirst(() {
+      r.web.itunes = ItunesMode.limited;
+      r.chain.limited = true;
+    });
+    expect([res.rateLimited, res.failed], [false, false]);
+  });
+
+  test('a second start while running is refused, and the first job still cancels', () async {
+    final ids = [for (var i = 0; i < 3; i++) await r.add(path: '/$i.mp3')];
+    r.chain.hold = Completer<void>();
+    final job = c.read(enrichJobProvider.notifier);
+    expect(job.start(ids), isTrue);
+    expect(job.start(ids), isFalse);
+    expect(await job.startDue(), EnrichStart.busy);
+    for (var i = 0; i < 300 && r.chain.calls < 1; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
+    job.cancel();
+    final s = await finished().timeout(const Duration(seconds: 5));
+    expect(s.result!.cancelled, isTrue);
+  });
+
   test('«Interrompi» aborts the request in flight, and done is the real count', () async {
     final ids = [for (var i = 0; i < 3; i++) await r.add(path: '/$i.mp3')];
     final job = c.read(enrichJobProvider.notifier);
